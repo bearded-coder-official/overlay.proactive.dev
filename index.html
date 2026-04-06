@@ -711,14 +711,19 @@ scaleOverlay();
 let bgConfig = {};
 let bgTween = null;
 
-function directionToXY(direction) {
+function directionToXY(direction, angle) {
+  const rad = (angle * Math.PI) / 180;
   const d = 300;
+  // Move along the angle of the text rotation
+  const dx = Math.cos(rad) * d;
+  const dy = Math.sin(rad) * d;
+
   switch (direction) {
-    case 'up-left':    return { x: -d, y: -d };
-    case 'up-right':   return { x: d, y: -d };
-    case 'down-left':  return { x: -d, y: d };
-    case 'down-right': return { x: d, y: d };
-    default:           return { x: -d, y: -d };
+    case 'up-left':    return { x: -dx, y: -dy };
+    case 'up-right':   return { x: dx, y: -dy };
+    case 'down-left':  return { x: -dx, y: dy };
+    case 'down-right': return { x: dx, y: dy };
+    default:           return { x: -dx, y: -dy };
   }
 }
 
@@ -741,7 +746,9 @@ function renderBackground(config) {
   const textColor = bgConfig.text_color || '#ffffff';
   const opacity = (bgConfig.text_opacity ?? 3) / 100;
   const fontSize = bgConfig.font_size || 48;
-  const speed = bgConfig.speed || 60;
+  // Convert 1-10 to seconds: 1=120s (slow), 5=60s, 10=10s
+  const speedLevel = bgConfig.speed || 5;
+  const speed = Math.round(132 - (speedLevel * 12));
   const direction = bgConfig.direction || 'up-left';
 
   const repeat = 16;
@@ -760,7 +767,7 @@ function renderBackground(config) {
 
   // GSAP drift animation
   if (bgTween) bgTween.kill();
-  const { x, y } = directionToXY(direction);
+  const { x, y } = directionToXY(direction, angle);
   gsap.set(container, { rotation: -angle, x: 0, y: 0 });
   bgTween = gsap.to(container, {
     x, y,
