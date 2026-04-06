@@ -1,1 +1,321 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><title>Proactive Wire Overlay</title></head><body><h1>Proactive Wire Overlay</h1></body></html>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Proactive Wire Overlay</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=Barlow:wght@300;400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #080d1a;
+    --accent: #e8a020;
+    --accent2: #1a6fd4;
+    --text: #f0f4ff;
+    --dim: #6a7a9a;
+    --panel: rgba(6, 10, 20, 0.97);
+    --border: rgba(232, 160, 32, 0.22);
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .overlay-root {
+    width: 1280px;
+    height: 720px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform-origin: center center;
+    background: var(--bg);
+    font-family: 'Barlow', sans-serif;
+    color: var(--text);
+  }
+
+  /* TOP BAR */
+  .top-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 48px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 16px;
+    z-index: 20;
+  }
+
+  .logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .logo span { color: var(--accent); }
+
+  .divider {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+  }
+
+  .scene-badge {
+    background: var(--accent2);
+    color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 4px 12px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .live-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #f04060;
+    white-space: nowrap;
+  }
+  .live-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #f04060;
+    animation: blink 1.2s ease-in-out infinite;
+    box-shadow: 0 0 6px rgba(240, 64, 96, 0.6);
+  }
+  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
+
+  /* CLOCKS */
+  .top-clocks {
+    margin-left: auto;
+    display: flex;
+    gap: 4px;
+    transition: opacity 0.4s ease;
+  }
+  .top-clocks.fading { opacity: 0; }
+
+  .clock-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    border-left: 1px solid var(--border);
+  }
+  .clock-item:first-child { border-left: none; }
+
+  .clock-city {
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 1.5px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .clock-time {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    display: flex;
+    gap: 0;
+  }
+
+  .clock-digit {
+    display: inline-block;
+    width: 0.6em;
+    text-align: center;
+    overflow: hidden;
+    height: 1.2em;
+    line-height: 1.2em;
+    position: relative;
+  }
+
+  .clock-digit-inner {
+    display: block;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  }
+
+  .clock-digit-inner.flip {
+    animation: digitFlip 0.7s ease-in-out;
+  }
+
+  @keyframes digitFlip {
+    0%   { transform: translateY(0); opacity: 1; }
+    30%  { transform: translateY(-60%); opacity: 0; }
+    50%  { transform: translateY(60%); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+
+  .clock-colon {
+    width: 0.3em;
+    text-align: center;
+    opacity: 0.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="overlay-root" id="overlayRoot">
+<div class="top-bar">
+  <div class="logo">PROACTIVE <span>WIRE</span></div>
+  <div class="divider"></div>
+  <div class="scene-badge" id="sceneBadge">LIVE</div>
+  <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+  <div class="top-clocks" id="clocks"></div>
+</div>
+
+</div><!-- /overlay-root -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pusher/8.4.0-rc2/pusher.min.js"></script>
+<script>
+const CONFIG = {
+  apiBase: 'https://wire.proactive.dev/api',
+  wsKey: 'proactive-wire-key',
+  wsHost: 'ws.proactive.dev',
+  wsPort: 443,
+};
+
+// --- State ---
+let timezones = [];
+let clockInterval = null;
+let prevTimes = {};
+
+// --- Clocks ---
+function getTime(timezone) {
+  return new Date().toLocaleTimeString('en-GB', {
+    timeZone: timezone,
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function buildClockHTML() {
+  const el = document.getElementById('clocks');
+  el.innerHTML = timezones.map(tz => {
+    const time = getTime(tz.timezone);
+    prevTimes[tz.timezone] = time;
+    const digits = time.split('').map((ch, i) => {
+      if (ch === ':') return `<span class="clock-colon">:</span>`;
+      return `<span class="clock-digit"><span class="clock-digit-inner" data-tz="${tz.timezone}" data-idx="${i}">${ch}</span></span>`;
+    }).join('');
+    return `<div class="clock-item">
+      <span class="clock-city">${tz.label}</span>
+      <span class="clock-time">${digits}</span>
+    </div>`;
+  }).join('');
+}
+
+function tickClocks() {
+  timezones.forEach(tz => {
+    const time = getTime(tz.timezone);
+    const prev = prevTimes[tz.timezone] || '';
+    if (time === prev) return;
+
+    time.split('').forEach((ch, i) => {
+      if (ch === ':') return;
+      if (prev[i] === ch) return;
+      const digit = document.querySelector(`.clock-digit-inner[data-tz="${tz.timezone}"][data-idx="${i}"]`);
+      if (!digit) return;
+      digit.classList.remove('flip');
+      void digit.offsetWidth;
+      digit.textContent = ch;
+      digit.classList.add('flip');
+    });
+
+    prevTimes[tz.timezone] = time;
+  });
+}
+
+function startClocks() {
+  if (clockInterval) clearInterval(clockInterval);
+  prevTimes = {};
+  buildClockHTML();
+  clockInterval = setInterval(tickClocks, 1000);
+}
+
+// --- Fade transition ---
+function updateTimezones(newTimezones) {
+  const el = document.getElementById('clocks');
+  el.classList.add('fading');
+
+  setTimeout(() => {
+    timezones = newTimezones;
+    prevTimes = {};
+    buildClockHTML();
+    el.classList.remove('fading');
+  }, 400);
+}
+
+// --- Initial load ---
+async function loadState() {
+  try {
+    const res = await fetch(`${CONFIG.apiBase}/overlay/state`);
+    const data = await res.json();
+    timezones = data.timezones;
+    startClocks();
+  } catch (e) {
+    console.error('Failed to load overlay state:', e);
+  }
+}
+
+// --- WebSocket ---
+function connectWebSocket() {
+  const pusher = new Pusher(CONFIG.wsKey, {
+    wsHost: CONFIG.wsHost,
+    wsPort: CONFIG.wsPort,
+    wssPort: CONFIG.wsPort,
+    forceTLS: true,
+    enabledTransports: ['ws', 'wss'],
+    disableStats: true,
+  });
+
+  const channel = pusher.subscribe('wire.overlay');
+
+  channel.bind('App\\Events\\TimezonesUpdated', (data) => {
+    console.log('TimezonesUpdated:', data);
+    updateTimezones(data.timezones);
+  });
+
+  pusher.connection.bind('connected', () => {
+    console.log('WebSocket connected');
+  });
+
+  pusher.connection.bind('error', (err) => {
+    console.error('WebSocket error:', err);
+  });
+}
+
+// --- Scale to fit viewport (16:9) ---
+function scaleOverlay() {
+  const root = document.getElementById('overlayRoot');
+  const scaleX = window.innerWidth / 1280;
+  const scaleY = window.innerHeight / 720;
+  const scale = Math.min(scaleX, scaleY);
+  root.style.transform = `translate(-50%, -50%) scale(${scale})`;
+}
+window.addEventListener('resize', scaleOverlay);
+scaleOverlay();
+
+// --- Init ---
+loadState();
+connectWebSocket();
+</script>
+</body>
+</html>
