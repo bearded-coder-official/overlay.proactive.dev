@@ -556,10 +556,12 @@ function renderFooter() {
 }
 
 function updateFooter(newFooter) {
-  fadeSwap('#footerBar', () => {
-    footer = newFooter;
-    renderFooter();
-  });
+  const tl = gsap.timeline();
+  tl.to('#footerHashtag', { opacity: 0, duration: 0.3, ease: 'power2.in' }, 0);
+  tl.to('#footerCtas', { opacity: 0, duration: 0.3, ease: 'power2.in' }, 0);
+  tl.call(() => { footer = newFooter; renderFooter(); });
+  tl.to('#footerHashtag', { opacity: 1, duration: 0.3, ease: 'power2.out' });
+  tl.to('#footerCtas', { opacity: 1, duration: 0.3, ease: 'power2.out' }, '<');
 }
 
 // ============================================================
