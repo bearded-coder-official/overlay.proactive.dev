@@ -9,7 +9,7 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --bg: #ffffff;
+    --bg: #1a1a1e;
     --accent: #fdb826;
     --accent2: #2d2d2d;
     --text: #1a1a1a;
@@ -37,6 +37,38 @@
     background: var(--bg);
     font-family: 'Barlow', sans-serif;
     color: var(--text);
+  }
+
+  /* BG PATTERN */
+  .bg-pattern {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .bg-pattern-inner {
+    position: absolute;
+    top: -100%;
+    left: -100%;
+    width: 300%;
+    height: 300%;
+  }
+
+  .bg-pattern-row {
+    white-space: nowrap;
+    line-height: 1;
+    padding: 18px 0;
+  }
+
+  .bg-pattern-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    letter-spacing: 12px;
+    text-transform: uppercase;
+    display: inline;
+    padding: 0 40px;
   }
 
   /* TOP BAR */
@@ -158,8 +190,8 @@
   /* TICKER STRIP */
   .ticker-strip {
     position: absolute;
-    bottom: 36px; left: 0; right: 0;
-    height: 44px;
+    bottom: 35px; left: 0; right: 0;
+    height: 45px;
     background: var(--panel);
     display: flex;
     align-items: center;
@@ -288,6 +320,11 @@
 <body>
 
 <div class="overlay-root" id="overlayRoot">
+
+<div class="bg-pattern">
+  <div class="bg-pattern-inner" id="bgPattern"></div>
+</div>
+
 <div class="top-bar">
   <div class="logo">PROACTIVE <span>WIRE</span></div>
   <div class="divider"></div>
@@ -589,9 +626,9 @@ async function loadState() {
     timezones = data.timezones;
     tickerSpeed = data.ticker_speed || 5;
     footer = data.footer || {};
-
     activeTickers = data.tickers || [];
 
+    renderBackground(data.background || {});
     startClocks();
     renderTickerTape();
     renderFooter();
@@ -631,11 +668,14 @@ function connectWebSocket() {
     if (data.settings.ticker_speed && data.settings.ticker_speed !== tickerSpeed) {
       tickerSpeed = data.settings.ticker_speed;
 
-      // Smooth acceleration/deceleration via GSAP timeScale
       if (tickerTween && tickerBaseDuration > 0) {
         const newTimeScale = tickerBaseDuration / speedToDuration(tickerSpeed);
         gsap.to(tickerTween, { timeScale: newTimeScale, duration: 2, ease: 'power2.inOut' });
       }
+    }
+
+    if (data.settings.background) {
+      updateBackground(data.settings.background);
     }
   });
 
@@ -664,6 +704,94 @@ function scaleOverlay() {
 }
 window.addEventListener('resize', scaleOverlay);
 scaleOverlay();
+
+// ============================================================
+// Background pattern
+// ============================================================
+let bgConfig = {};
+let bgTween = null;
+
+function directionToXY(direction) {
+  const d = 300;
+  switch (direction) {
+    case 'up-left':    return { x: -d, y: -d };
+    case 'up-right':   return { x: d, y: -d };
+    case 'down-left':  return { x: -d, y: d };
+    case 'down-right': return { x: d, y: d };
+    default:           return { x: -d, y: -d };
+  }
+}
+
+function renderBackground(config) {
+  bgConfig = config || {};
+  const container = document.getElementById('bgPattern');
+  const root = document.getElementById('overlayRoot');
+
+  if (!bgConfig.enabled) {
+    if (bgTween) { bgTween.kill(); bgTween = null; }
+    container.innerHTML = '';
+    root.style.background = bgConfig.bg_color || '#1a1a1e';
+    return;
+  }
+
+  root.style.background = bgConfig.bg_color || '#1a1a1e';
+
+  const text = bgConfig.text || 'PROACTIVE INVESTORS';
+  const angle = bgConfig.angle ?? 25;
+  const textColor = bgConfig.text_color || '#ffffff';
+  const opacity = (bgConfig.text_opacity ?? 3) / 100;
+  const fontSize = bgConfig.font_size || 48;
+  const speed = bgConfig.speed || 60;
+  const direction = bgConfig.direction || 'up-left';
+
+  const repeat = 16;
+  const rows = 40;
+
+  let html = '';
+  for (let i = 0; i < rows; i++) {
+    const offset = i % 2 === 0 ? '0' : `${fontSize * 3}px`;
+    html += `<div class="bg-pattern-row" style="padding-left:${offset}">`;
+    for (let j = 0; j < repeat; j++) {
+      html += `<span class="bg-pattern-text" style="font-size:${fontSize}px;color:${textColor};opacity:${opacity}">${text}</span>`;
+    }
+    html += '</div>';
+  }
+  container.innerHTML = html;
+
+  // GSAP drift animation
+  if (bgTween) bgTween.kill();
+  const { x, y } = directionToXY(direction);
+  gsap.set(container, { rotation: -angle, x: 0, y: 0 });
+  bgTween = gsap.to(container, {
+    x, y,
+    duration: speed,
+    ease: 'none',
+    repeat: -1,
+  });
+}
+
+function updateBackground(config) {
+  const container = document.getElementById('bgPattern');
+  // Crossfade: fade old out slowly, rebuild, fade new in
+  gsap.to(container, {
+    opacity: 0,
+    duration: 0.8,
+    ease: 'power2.in',
+    onComplete: () => {
+      renderBackground(config);
+      gsap.fromTo(container,
+        { opacity: 0 },
+        { opacity: 1, duration: 1, ease: 'power2.out' }
+      );
+    },
+  });
+  // Smooth background color transition
+  gsap.to(document.getElementById('overlayRoot'), {
+    backgroundColor: config.bg_color || '#1a1a1e',
+    duration: 1.5,
+    ease: 'power2.inOut',
+  });
+}
 
 // ============================================================
 // Init
