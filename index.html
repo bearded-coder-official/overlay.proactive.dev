@@ -9,13 +9,13 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --bg: #080d1a;
-    --accent: #e8a020;
-    --accent2: #1a6fd4;
-    --text: #f0f4ff;
-    --dim: #6a7a9a;
-    --panel: rgba(6, 10, 20, 0.97);
-    --border: rgba(232, 160, 32, 0.22);
+    --bg: #ffffff;
+    --accent: #fdb826;
+    --accent2: #2d2d2d;
+    --text: #1a1a1a;
+    --dim: #6b7280;
+    --panel: #2d2d2d;
+    --border: rgba(255, 255, 255, 0.12);
   }
 
   html, body {
@@ -62,17 +62,18 @@
     text-transform: uppercase;
     white-space: nowrap;
   }
+  .logo { color: #ffffff; }
   .logo span { color: var(--accent); }
 
   .divider {
     width: 1px;
     height: 30px;
-    background: var(--border);
+    background: rgba(255, 255, 255, 0.15);
   }
 
   .scene-badge {
-    background: var(--accent2);
-    color: #fff;
+    background: var(--accent);
+    color: #1a1a1a;
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 16px;
     font-weight: 700;
@@ -123,7 +124,7 @@
 
   .clock-city {
     font-size: 16px;
-    color: var(--dim);
+    color: rgba(255, 255, 255, 0.5);
     letter-spacing: 2px;
     font-family: 'Barlow Condensed', sans-serif;
     font-weight: 600;
@@ -134,6 +135,7 @@
     font-size: 24px;
     font-weight: 700;
     letter-spacing: 1px;
+    color: #ffffff;
     display: flex;
     gap: 0;
   }
