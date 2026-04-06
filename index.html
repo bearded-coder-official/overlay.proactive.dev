@@ -250,6 +250,7 @@
     font-weight: 600;
     color: rgba(255, 255, 255, 0.6);
     letter-spacing: 2px;
+    text-transform: uppercase;
     padding-right: 20px;
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     white-space: nowrap;
@@ -589,8 +590,7 @@ async function loadState() {
     tickerSpeed = data.ticker_speed || 5;
     footer = data.footer || {};
 
-    const allTickers = data.tickers || {};
-    activeTickers = Array.isArray(allTickers) ? allTickers : Object.values(allTickers).flat();
+    activeTickers = data.tickers || [];
 
     startClocks();
     renderTickerTape();
