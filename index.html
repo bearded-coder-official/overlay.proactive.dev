@@ -742,9 +742,9 @@ function renderBackground(config) {
   const textColor = bgConfig.text_color || '#ffffff';
   const opacity = (bgConfig.text_opacity ?? 3) / 100;
   const fontSize = bgConfig.font_size || 48;
-  // 1=550s (nearly static), 5=350s (subtle drift), 10=150s (gentle)
+  // 1=stopped, 2-10 = 500s down to 100s
   const speedLevel = bgConfig.speed || 5;
-  const speed = Math.round(590 - (speedLevel * 44));
+  const speed = speedLevel <= 1 ? 0 : Math.round(560 - (speedLevel * 50));
   const direction = bgConfig.direction || 'up-left';
 
   // Direction mapping:
@@ -772,7 +772,8 @@ function renderBackground(config) {
     const reverseRow = shouldReverse ? ' reverse' : '';
     const offset = (i % 2 === 0) ? 0 : fontSize * 4;
     html += `<div class="bg-pattern-row" style="height:${rowHeight}px">`;
-    html += `<div class="bg-pattern-scroll${reverseRow}" style="--bg-speed:${speed}s;padding-left:${offset}px">`;
+    const animStyle = speed > 0 ? `--bg-speed:${speed}s` : 'animation:none';
+    html += `<div class="bg-pattern-scroll${reverseRow}" style="${animStyle};padding-left:${offset}px">`;
     html += oneSet + oneSet;
     html += `</div></div>`;
   }
@@ -784,8 +785,8 @@ function renderBackground(config) {
 // ---- Background transition effects ----
 const bgTransitions = {
 
-  // 1. Wave — random scatter fade
-  wave(spans, done) {
+  // 1. Dissolve — random scatter fade
+  dissolve(spans, done) {
     gsap.to(spans, {
       opacity: 0,
       duration: 0.3,
@@ -793,7 +794,7 @@ const bgTransitions = {
       onComplete: done,
     });
   },
-  waveIn(spans, targetOpacity) {
+  dissolveIn(spans, targetOpacity) {
     gsap.fromTo(spans,
       { opacity: 0 },
       { opacity: targetOpacity, duration: 0.4, stagger: { each: 0.005, from: 'random' } }
@@ -849,20 +850,22 @@ const bgTransitions = {
     );
   },
 
-  // 5. Flip — 3D rotation
-  flip(spans, done) {
-    gsap.to(spans, {
-      rotationX: 90,
+  // 5. Blinds — rows collapse like shutters
+  blinds(spans, done) {
+    const rows = document.querySelectorAll('.bg-pattern-row');
+    gsap.to(rows, {
+      scaleY: 0,
       opacity: 0,
-      duration: 0.4,
-      stagger: { each: 0.004, from: 'center' },
+      duration: 0.3,
+      stagger: { each: 0.02, from: 'edges' },
       onComplete: done,
     });
   },
-  flipIn(spans, targetOpacity) {
-    gsap.fromTo(spans,
-      { rotationX: -90, opacity: 0 },
-      { rotationX: 0, opacity: targetOpacity, duration: 0.4, stagger: { each: 0.004, from: 'center' } }
+  blindsIn(spans, targetOpacity) {
+    const rows = document.querySelectorAll('.bg-pattern-row');
+    gsap.fromTo(rows,
+      { scaleY: 0, opacity: 0 },
+      { scaleY: 1, opacity: 1, duration: 0.3, stagger: { each: 0.02, from: 'edges' } }
     );
   },
 };
@@ -883,8 +886,8 @@ function updateBackground(config) {
   });
 
   if (spans.length > 0) {
-    const outFn = bgTransitions[effect] || bgTransitions.wave;
-    const inFn = bgTransitions[effect + 'In'] || bgTransitions.waveIn;
+    const outFn = bgTransitions[effect] || bgTransitions.dissolve;
+    const inFn = bgTransitions[effect + 'In'] || bgTransitions.dissolveIn;
 
     outFn(spans, () => {
       renderBackground(config);
