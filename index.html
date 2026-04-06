@@ -194,7 +194,7 @@
     display: inline-flex;
     white-space: nowrap;
     will-change: transform;
-    animation: tickerMarquee var(--ticker-duration, 40s) linear infinite;
+    animation: tickerMarquee var(--ticker-duration, 75s) linear infinite;
   }
 
   @keyframes tickerMarquee {
@@ -329,7 +329,13 @@ const CONFIG = {
 let timezones = [];
 let activeTickers = [];
 let footer = {};
-let tickerSpeed = 40;
+let tickerSpeed = 5;
+
+// Convert 1-10 scale to CSS animation duration in seconds
+// 1 = 120s (slow), 5 = 60s (medium), 10 = 15s (fast)
+function speedToDuration(level) {
+  return Math.round(135 - (level * 12));
+}
 let clockInterval = null;
 let prevTimes = {};
 
@@ -469,7 +475,7 @@ function renderTickerTape() {
   el.innerHTML = Array(copies).fill(oneSet).join('');
 
   // CSS animation moves -50%, so the first half = visible content that scrolls out
-  el.style.setProperty('--ticker-duration', tickerSpeed + 's');
+  el.style.setProperty('--ticker-duration', speedToDuration(tickerSpeed) + 's');
 }
 
 function formatPrice(n) {
@@ -480,9 +486,10 @@ function updateTickerPrices(newTickers) {
   newTickers.forEach(nt => {
     if (nt.price == null) return;
     const existing = activeTickers.find(t => t.symbol === nt.symbol);
-    if (!existing || (existing.price == nt.price && existing.change_pct == nt.change_pct)) return;
+    if (!existing) return;
+    if (existing.price == nt.price && existing.change_pct == nt.change_pct) return;
 
-    const oldPrice = Number(existing.price);
+    const oldPrice = Number(existing.price || 0);
     const newPrice = Number(nt.price);
     const oldPct = Number(existing.change_pct || 0);
     const newPct = Number(nt.change_pct || 0);
@@ -493,6 +500,7 @@ function updateTickerPrices(newTickers) {
     document.querySelectorAll(`[data-ticker="${nt.symbol}"]`).forEach(el => {
       const priceEl = el.querySelector('.ticker-price');
       const changeEl = el.querySelector('.ticker-change');
+      if (!priceEl || !changeEl) return;
 
       // Animate price number smoothly
       const proxy = { val: oldPrice };
@@ -505,7 +513,6 @@ function updateTickerPrices(newTickers) {
 
       // Animate change % number smoothly
       const pctProxy = { val: oldPct };
-      const directionChanged = (oldPct >= 0) !== (newPct >= 0);
       gsap.to(pctProxy, {
         val: newPct,
         duration: 1,
@@ -517,9 +524,8 @@ function updateTickerPrices(newTickers) {
       });
 
       // Smooth color transition on direction change
-      if (directionChanged) {
-        const newColor = newPct >= 0 ? '#22c55e' : '#ef4444';
-        gsap.to(changeEl, { color: newColor, duration: 0.6, ease: 'power2.inOut' });
+      if ((oldPct >= 0) !== (newPct >= 0)) {
+        gsap.to(changeEl, { color: newPct >= 0 ? '#22c55e' : '#ef4444', duration: 0.6, ease: 'power2.inOut' });
       }
 
       // Flash background on price change
@@ -573,7 +579,7 @@ async function loadState() {
     const data = await res.json();
 
     timezones = data.timezones;
-    tickerSpeed = data.ticker_speed || 40;
+    tickerSpeed = data.ticker_speed || 5;
     footer = data.footer || {};
 
     const allTickers = data.tickers || {};
@@ -617,22 +623,12 @@ function connectWebSocket() {
   channel.bind('App\\Events\\SettingsUpdated', (data) => {
     if (data.settings.ticker_speed && data.settings.ticker_speed !== tickerSpeed) {
       tickerSpeed = data.settings.ticker_speed;
-      document.getElementById('tickerScroll').style.setProperty('--ticker-duration', tickerSpeed + 's');
+      document.getElementById('tickerScroll').style.setProperty('--ticker-duration', speedToDuration(tickerSpeed) + 's');
     }
   });
 
   channel.bind('App\\Events\\TickersUpdated', (data) => {
-    const newSymbols = data.tickers.filter(t => t.price != null).map(t => t.symbol).sort().join(',');
-    const oldSymbols = activeTickers.filter(t => t.price != null).map(t => t.symbol).sort().join(',');
-
-    if (newSymbols !== oldSymbols) {
-      // Structure changed — silent replace, CSS animation continues
-      activeTickers = data.tickers;
-      renderTickerTape();
-    } else {
-      // Same tickers — update prices in-place
-      updateTickerPrices(data.tickers);
-    }
+    updateTickerPrices(data.tickers);
   });
 
   channel.bind('App\\Events\\FooterUpdated', (data) => {
