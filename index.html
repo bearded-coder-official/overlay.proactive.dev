@@ -15,7 +15,7 @@
     --text: #1a1a1a;
     --dim: #6b7280;
     --panel: #2d2d2d;
-    --border: rgba(255, 255, 255, 0.12);
+    --border: rgba(255, 255, 255, 0.15);
   }
 
   html, body {
@@ -171,6 +171,128 @@
     text-align: center;
     opacity: 0.5;
   }
+
+  /* TICKER STRIP */
+  .ticker-strip {
+    position: absolute;
+    bottom: 36px; left: 0; right: 0;
+    height: 44px;
+    background: var(--panel);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    z-index: 20;
+    transition: opacity 0.4s ease;
+  }
+  .ticker-strip.fading { opacity: 0; }
+
+  .ticker-strip-label {
+    background: var(--accent);
+    color: #1a1a1a;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    padding: 0 18px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    white-space: nowrap;
+    z-index: 2;
+    position: relative;
+  }
+
+  .ticker-scroll {
+    display: flex;
+    animation: tickerScroll var(--ticker-speed, 40s) linear infinite;
+    white-space: nowrap;
+  }
+
+  @keyframes tickerScroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .ticker-item {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    padding: 0 24px;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ticker-symbol {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .ticker-sep {
+    opacity: 0;
+    width: 0;
+    margin: 0;
+  }
+
+  .ticker-up { color: #22c55e; }
+  .ticker-down { color: #ef4444; }
+
+  /* FOOTER BAR */
+  .footer-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 36px;
+    background: #3a3a3a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 30px;
+    z-index: 20;
+    transition: opacity 0.4s ease;
+  }
+  .footer-bar.fading { opacity: 0; }
+
+  .footer-hashtag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 2px;
+    padding-right: 20px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    white-space: nowrap;
+  }
+
+  .footer-ctas {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .footer-cta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 20px;
+    white-space: nowrap;
+  }
+
+  .footer-cta-sep {
+    color: rgba(255, 255, 255, 0.15);
+    font-size: 10px;
+  }
+
+  .footer-cta-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+  }
 </style>
 </head>
 <body>
@@ -182,6 +304,16 @@
   <div class="scene-badge" id="sceneBadge">LIVE</div>
   <div class="live-badge"><div class="live-dot"></div>LIVE</div>
   <div class="top-clocks" id="clocks"></div>
+</div>
+
+<div class="ticker-strip" id="tickerStrip">
+  <div class="ticker-strip-label">STOCKS</div>
+  <div class="ticker-scroll" id="tickerScroll"></div>
+</div>
+
+<div class="footer-bar" id="footerBar">
+  <div class="footer-hashtag" id="footerHashtag">#PROACTIVEWIRE</div>
+  <div class="footer-ctas" id="footerCtas"></div>
 </div>
 
 </div><!-- /overlay-root -->
@@ -197,8 +329,18 @@ const CONFIG = {
 
 // --- State ---
 let timezones = [];
+let tickers = [];
+let footer = {};
+let tickerSpeed = 40;
 let clockInterval = null;
 let prevTimes = {};
+
+const CTA_CONFIG = {
+  show_like:      { icon: '👍', text: 'Like' },
+  show_subscribe: { icon: '🔔', text: 'Subscribe' },
+  show_chat:      { icon: '💬', text: 'Join Chat' },
+  show_share:     { icon: '🔗', text: 'Share' },
+};
 
 // --- Clocks ---
 function getTime(timezone) {
@@ -266,13 +408,77 @@ function updateTimezones(newTimezones) {
   }, 400);
 }
 
+// --- Ticker strip ---
+function getCurrentTickers() {
+  // TODO: filter by active scene when MasterScheduler is implemented
+  // For now, flatten all scene tickers into one list
+  if (Array.isArray(tickers)) return tickers;
+  return Object.values(tickers).flat();
+}
+
+function renderTickers() {
+  const el = document.getElementById('tickerScroll');
+  const items = getCurrentTickers().map(t => {
+    const cls = t.change_pct >= 0 ? 'ticker-up' : 'ticker-down';
+    const arrow = t.change_pct >= 0 ? '▲' : '▼';
+    const price = Number(t.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return `<span class="ticker-item">
+      <span class="ticker-symbol">${t.symbol}</span>
+      <span class="ticker-sep">|</span>
+      ${price}
+      <span class="ticker-sep">·</span>
+      <span class="${cls}">${arrow} ${Math.abs(t.change_pct).toFixed(2)}%</span>
+    </span>`;
+  }).join('');
+  // Duplicate for seamless loop
+  el.innerHTML = items + items;
+  el.style.setProperty('--ticker-speed', tickerSpeed + 's');
+}
+
+function updateTickers(newTickers) {
+  const el = document.getElementById('tickerStrip');
+  el.classList.add('fading');
+  setTimeout(() => {
+    tickers = newTickers;
+    renderTickers();
+    el.classList.remove('fading');
+  }, 400);
+}
+
+// --- Footer ---
+function renderFooter() {
+  document.getElementById('footerHashtag').textContent = footer.hashtag || '#PROACTIVEWIRE';
+
+  const ctas = document.getElementById('footerCtas');
+  ctas.innerHTML = Object.entries(CTA_CONFIG)
+    .filter(([key]) => footer[key] !== false)
+    .map(([, cfg], i, arr) => `<div class="footer-cta">
+      <span class="footer-cta-text">${cfg.text}</span>
+    </div>${i < arr.length - 1 ? '<span class="footer-cta-sep">·</span>' : ''}`).join('');
+}
+
+function updateFooter(newFooter) {
+  const el = document.getElementById('footerBar');
+  el.classList.add('fading');
+  setTimeout(() => {
+    footer = newFooter;
+    renderFooter();
+    el.classList.remove('fading');
+  }, 400);
+}
+
 // --- Initial load ---
 async function loadState() {
   try {
     const res = await fetch(`${CONFIG.apiBase}/overlay/state`);
     const data = await res.json();
     timezones = data.timezones;
+    tickers = data.tickers || {};
+    tickerSpeed = data.ticker_speed || 40;
+    footer = data.footer || {};
     startClocks();
+    renderTickers();
+    renderFooter();
   } catch (e) {
     console.error('Failed to load overlay state:', e);
   }
@@ -301,6 +507,24 @@ function connectWebSocket() {
   channel.bind('App\\Events\\TimezonesUpdated', (data) => {
     console.log('TimezonesUpdated:', data);
     updateTimezones(data.timezones);
+  });
+
+  channel.bind('App\\Events\\SettingsUpdated', (data) => {
+    console.log('SettingsUpdated:', data);
+    if (data.settings.ticker_speed) {
+      tickerSpeed = data.settings.ticker_speed;
+      document.getElementById('tickerScroll').style.setProperty('--ticker-speed', tickerSpeed + 's');
+    }
+  });
+
+  channel.bind('App\\Events\\TickersUpdated', (data) => {
+    console.log('TickersUpdated:', data);
+    updateTickers(data.tickers);
+  });
+
+  channel.bind('App\\Events\\FooterUpdated', (data) => {
+    console.log('FooterUpdated:', data);
+    updateFooter(data.footer);
   });
 
   pusher.connection.bind('state_change', (states) => {
