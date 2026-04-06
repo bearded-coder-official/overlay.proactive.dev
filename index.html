@@ -409,37 +409,57 @@ function updateTimezones(newTimezones) {
 }
 
 // --- Ticker strip ---
-function getCurrentTickers() {
-  // TODO: filter by active scene when MasterScheduler is implemented
-  // For now, flatten all scene tickers into one list
-  if (Array.isArray(tickers)) return tickers;
-  return Object.values(tickers).flat();
-}
+let activeTickers = [];
 
 function renderTickers() {
   const el = document.getElementById('tickerScroll');
-  const items = getCurrentTickers().map(t => {
+  const items = activeTickers.filter(t => t.price != null).map(t => {
     const cls = t.change_pct >= 0 ? 'ticker-up' : 'ticker-down';
     const arrow = t.change_pct >= 0 ? '▲' : '▼';
     const price = Number(t.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    return `<span class="ticker-item">
+    return `<span class="ticker-item" data-ticker="${t.symbol}">
       <span class="ticker-symbol">${t.symbol}</span>
       <span class="ticker-sep">|</span>
-      ${price}
+      <span class="ticker-price">${price}</span>
       <span class="ticker-sep">·</span>
-      <span class="${cls}">${arrow} ${Math.abs(t.change_pct).toFixed(2)}%</span>
+      <span class="ticker-change ${cls}">${arrow} ${Math.abs(t.change_pct || 0).toFixed(2)}%</span>
     </span>`;
   }).join('');
-  // Duplicate for seamless loop
   el.innerHTML = items + items;
   el.style.setProperty('--ticker-speed', tickerSpeed + 's');
 }
 
-function updateTickers(newTickers) {
+function updateTickerPrices(newTickers) {
+  // Update prices in-place without re-rendering the whole strip
+  let changed = false;
+  newTickers.forEach(nt => {
+    if (nt.price == null) return;
+    const existing = activeTickers.find(t => t.symbol === nt.symbol);
+    if (existing && (existing.price !== nt.price || existing.change_pct !== nt.change_pct)) {
+      existing.price = nt.price;
+      existing.change_pct = nt.change_pct;
+      changed = true;
+
+      // Update DOM elements in-place
+      document.querySelectorAll(`[data-ticker="${nt.symbol}"]`).forEach(el => {
+        const price = Number(nt.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const cls = nt.change_pct >= 0 ? 'ticker-up' : 'ticker-down';
+        const arrow = nt.change_pct >= 0 ? '▲' : '▼';
+        el.querySelector('.ticker-price').textContent = price;
+        const changeEl = el.querySelector('.ticker-change');
+        changeEl.textContent = `${arrow} ${Math.abs(nt.change_pct || 0).toFixed(2)}%`;
+        changeEl.className = `ticker-change ${cls}`;
+      });
+    }
+  });
+}
+
+function replaceTickersFade(newTickers) {
+  // Full replace with fade — used when structure changes (admin sync, scene change)
   const el = document.getElementById('tickerStrip');
   el.classList.add('fading');
   setTimeout(() => {
-    tickers = newTickers;
+    activeTickers = newTickers;
     renderTickers();
     el.classList.remove('fading');
   }, 400);
@@ -473,9 +493,13 @@ async function loadState() {
     const res = await fetch(`${CONFIG.apiBase}/overlay/state`);
     const data = await res.json();
     timezones = data.timezones;
-    tickers = data.tickers || {};
     tickerSpeed = data.ticker_speed || 40;
     footer = data.footer || {};
+
+    // Flatten all scene tickers for initial load (scheduler will push current scene)
+    const allTickers = data.tickers || {};
+    activeTickers = Array.isArray(allTickers) ? allTickers : Object.values(allTickers).flat();
+
     startClocks();
     renderTickers();
     renderFooter();
@@ -519,7 +543,13 @@ function connectWebSocket() {
 
   channel.bind('App\\Events\\TickersUpdated', (data) => {
     console.log('TickersUpdated:', data);
-    updateTickers(data.tickers);
+    if (activeTickers.length === 0 || data.tickers.length !== activeTickers.length) {
+      // Structure changed — full re-render with fade
+      replaceTickersFade(data.tickers);
+    } else {
+      // Same structure — update prices in-place (no flicker)
+      updateTickerPrices(data.tickers);
+    }
   });
 
   channel.bind('App\\Events\\FooterUpdated', (data) => {
