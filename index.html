@@ -28,7 +28,6 @@
   }
 
   .overlay-root {
-    --s: 1.5; /* scale factor: 1920/1280 */
     width: 1920px;
     height: 1080px;
     position: absolute;
@@ -61,8 +60,8 @@
     letter-spacing: 4px;
     text-transform: uppercase;
     white-space: nowrap;
+    color: #ffffff;
   }
-  .logo { color: #ffffff; }
   .logo span { color: var(--accent); }
 
   .divider {
@@ -99,19 +98,15 @@
     width: 12px; height: 12px;
     border-radius: 50%;
     background: #f04060;
-    animation: blink 1.2s ease-in-out infinite;
     box-shadow: 0 0 8px rgba(240, 64, 96, 0.6);
   }
-  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
 
   /* CLOCKS */
   .top-clocks {
     margin-left: auto;
     display: flex;
     gap: 6px;
-    transition: opacity 0.4s ease;
   }
-  .top-clocks.fading { opacity: 0; }
 
   .clock-item {
     display: flex;
@@ -152,18 +147,6 @@
 
   .clock-digit-inner {
     display: block;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
-  }
-
-  .clock-digit-inner.flip {
-    animation: digitFlip 0.7s ease-in-out;
-  }
-
-  @keyframes digitFlip {
-    0%   { transform: translateY(0); opacity: 1; }
-    30%  { transform: translateY(-60%); opacity: 0; }
-    50%  { transform: translateY(60%); opacity: 0; }
-    100% { transform: translateY(0); opacity: 1; }
   }
 
   .clock-colon {
@@ -182,9 +165,7 @@
     align-items: center;
     overflow: hidden;
     z-index: 20;
-    transition: opacity 0.4s ease;
   }
-  .ticker-strip.fading { opacity: 0; }
 
   .ticker-strip-label {
     background: var(--accent);
@@ -203,15 +184,22 @@
     position: relative;
   }
 
-  .ticker-scroll {
-    display: flex;
-    animation: tickerScroll var(--ticker-speed, 40s) linear infinite;
-    white-space: nowrap;
+  .ticker-scroll-wrapper {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
   }
 
-  @keyframes tickerScroll {
-    0%   { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+  .ticker-scroll {
+    display: inline-flex;
+    white-space: nowrap;
+    will-change: transform;
+    animation: tickerMarquee var(--ticker-duration, 40s) linear infinite;
+  }
+
+  @keyframes tickerMarquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
   }
 
   .ticker-item {
@@ -221,9 +209,10 @@
     color: #ffffff;
     padding: 0 24px;
     letter-spacing: 0.5px;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
+    flex-shrink: 0;
   }
 
   .ticker-symbol {
@@ -231,10 +220,18 @@
     font-weight: 700;
   }
 
-  .ticker-sep {
-    opacity: 0;
-    width: 0;
-    margin: 0;
+  .ticker-price {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ticker-change {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ticker-flash {
+    border-radius: 3px;
+    padding: 0 4px;
+    margin: 0 -4px;
   }
 
   .ticker-up { color: #22c55e; }
@@ -251,9 +248,7 @@
     justify-content: center;
     padding: 0 30px;
     z-index: 20;
-    transition: opacity 0.4s ease;
   }
-  .footer-bar.fading { opacity: 0; }
 
   .footer-hashtag {
     font-family: 'Barlow Condensed', sans-serif;
@@ -302,13 +297,15 @@
   <div class="logo">PROACTIVE <span>WIRE</span></div>
   <div class="divider"></div>
   <div class="scene-badge" id="sceneBadge">LIVE</div>
-  <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+  <div class="live-badge"><div class="live-dot" id="liveDot"></div>LIVE</div>
   <div class="top-clocks" id="clocks"></div>
 </div>
 
 <div class="ticker-strip" id="tickerStrip">
   <div class="ticker-strip-label">STOCKS</div>
-  <div class="ticker-scroll" id="tickerScroll"></div>
+  <div class="ticker-scroll-wrapper">
+    <div class="ticker-scroll" id="tickerScroll"></div>
+  </div>
 </div>
 
 <div class="footer-bar" id="footerBar">
@@ -318,6 +315,7 @@
 
 </div><!-- /overlay-root -->
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.7/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pusher/8.4.0-rc2/pusher.min.js"></script>
 <script>
 const CONFIG = {
@@ -329,20 +327,48 @@ const CONFIG = {
 
 // --- State ---
 let timezones = [];
-let tickers = [];
+let activeTickers = [];
 let footer = {};
 let tickerSpeed = 40;
 let clockInterval = null;
 let prevTimes = {};
 
 const CTA_CONFIG = {
-  show_like:      { icon: '👍', text: 'Like' },
-  show_subscribe: { icon: '🔔', text: 'Subscribe' },
-  show_chat:      { icon: '💬', text: 'Join Chat' },
-  show_share:     { icon: '🔗', text: 'Share' },
+  show_like:      { text: 'Like' },
+  show_subscribe: { text: 'Subscribe' },
+  show_chat:      { text: 'Join Chat' },
+  show_share:     { text: 'Share' },
 };
 
-// --- Clocks ---
+// ============================================================
+// GSAP — Live dot blink
+// ============================================================
+gsap.to('#liveDot', {
+  opacity: 0.2,
+  duration: 0.6,
+  repeat: -1,
+  yoyo: true,
+  ease: 'power1.inOut',
+});
+
+// ============================================================
+// GSAP — Fade helper
+// ============================================================
+function fadeSwap(el, callback) {
+  gsap.to(el, {
+    opacity: 0,
+    duration: 0.4,
+    ease: 'power2.in',
+    onComplete: () => {
+      callback();
+      gsap.to(el, { opacity: 1, duration: 0.4, ease: 'power2.out' });
+    },
+  });
+}
+
+// ============================================================
+// Clocks
+// ============================================================
 function getTime(timezone) {
   return new Date().toLocaleTimeString('en-GB', {
     timeZone: timezone,
@@ -374,14 +400,23 @@ function tickClocks() {
     if (time === prev) return;
 
     time.split('').forEach((ch, i) => {
-      if (ch === ':') return;
-      if (prev[i] === ch) return;
+      if (ch === ':' || prev[i] === ch) return;
       const digit = document.querySelector(`.clock-digit-inner[data-tz="${tz.timezone}"][data-idx="${i}"]`);
       if (!digit) return;
-      digit.classList.remove('flip');
-      void digit.offsetWidth;
-      digit.textContent = ch;
-      digit.classList.add('flip');
+
+      gsap.to(digit, {
+        y: '-60%',
+        opacity: 0,
+        duration: 0.3,
+        ease: 'power2.in',
+        onComplete: () => {
+          digit.textContent = ch;
+          gsap.fromTo(digit,
+            { y: '60%', opacity: 0 },
+            { y: '0%', opacity: 1, duration: 0.3, ease: 'power2.out' }
+          );
+        },
+      });
     });
 
     prevTimes[tz.timezone] = time;
@@ -395,77 +430,120 @@ function startClocks() {
   clockInterval = setInterval(tickClocks, 1000);
 }
 
-// --- Fade transition ---
 function updateTimezones(newTimezones) {
-  const el = document.getElementById('clocks');
-  el.classList.add('fading');
-
-  setTimeout(() => {
+  fadeSwap('#clocks', () => {
     timezones = newTimezones;
     prevTimes = {};
     buildClockHTML();
-    el.classList.remove('fading');
-  }, 400);
+  });
 }
 
-// --- Ticker strip ---
-let activeTickers = [];
+// ============================================================
+// Ticker tape — CSS animation for scroll, GSAP for effects
+// ============================================================
+function buildTickerItemHTML(t) {
+  const cls = t.change_pct >= 0 ? 'ticker-up' : 'ticker-down';
+  const arrow = t.change_pct >= 0 ? '▲' : '▼';
+  const price = Number(t.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return `<span class="ticker-item" data-ticker="${t.symbol}">
+    <span class="ticker-symbol">${t.symbol}</span>
+    <span class="ticker-price">${price}</span>
+    <span class="ticker-change ${cls}">${arrow} ${Math.abs(t.change_pct || 0).toFixed(2)}%</span>
+  </span>`;
+}
 
-function renderTickers() {
+function renderTickerTape() {
   const el = document.getElementById('tickerScroll');
-  const items = activeTickers.filter(t => t.price != null).map(t => {
-    const cls = t.change_pct >= 0 ? 'ticker-up' : 'ticker-down';
-    const arrow = t.change_pct >= 0 ? '▲' : '▼';
-    const price = Number(t.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    return `<span class="ticker-item" data-ticker="${t.symbol}">
-      <span class="ticker-symbol">${t.symbol}</span>
-      <span class="ticker-sep">|</span>
-      <span class="ticker-price">${price}</span>
-      <span class="ticker-sep">·</span>
-      <span class="ticker-change ${cls}">${arrow} ${Math.abs(t.change_pct || 0).toFixed(2)}%</span>
-    </span>`;
-  }).join('');
-  el.innerHTML = items + items;
-  el.style.setProperty('--ticker-speed', tickerSpeed + 's');
+  const wrapper = el.parentElement;
+  const visible = activeTickers.filter(t => t.price != null);
+  if (!visible.length) { el.innerHTML = ''; return; }
+
+  // Build one set, measure its width
+  const oneSet = visible.map(buildTickerItemHTML).join('');
+  el.innerHTML = oneSet;
+  const oneSetWidth = el.scrollWidth;
+  const viewportWidth = wrapper.offsetWidth;
+
+  // Clone enough to fill 2x viewport (one scrolls out, one scrolls in)
+  const copies = Math.max(2, Math.ceil((viewportWidth * 2) / oneSetWidth) + 1);
+  el.innerHTML = Array(copies).fill(oneSet).join('');
+
+  // CSS animation moves -50%, so the first half = visible content that scrolls out
+  el.style.setProperty('--ticker-duration', tickerSpeed + 's');
+}
+
+function formatPrice(n) {
+  return Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function updateTickerPrices(newTickers) {
-  // Update prices in-place without re-rendering the whole strip
-  let changed = false;
   newTickers.forEach(nt => {
     if (nt.price == null) return;
     const existing = activeTickers.find(t => t.symbol === nt.symbol);
-    if (existing && (existing.price !== nt.price || existing.change_pct !== nt.change_pct)) {
-      existing.price = nt.price;
-      existing.change_pct = nt.change_pct;
-      changed = true;
+    if (!existing || (existing.price == nt.price && existing.change_pct == nt.change_pct)) return;
 
-      // Update DOM elements in-place
-      document.querySelectorAll(`[data-ticker="${nt.symbol}"]`).forEach(el => {
-        const price = Number(nt.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        const cls = nt.change_pct >= 0 ? 'ticker-up' : 'ticker-down';
-        const arrow = nt.change_pct >= 0 ? '▲' : '▼';
-        el.querySelector('.ticker-price').textContent = price;
-        const changeEl = el.querySelector('.ticker-change');
-        changeEl.textContent = `${arrow} ${Math.abs(nt.change_pct || 0).toFixed(2)}%`;
-        changeEl.className = `ticker-change ${cls}`;
+    const oldPrice = Number(existing.price);
+    const newPrice = Number(nt.price);
+    const oldPct = Number(existing.change_pct || 0);
+    const newPct = Number(nt.change_pct || 0);
+
+    existing.price = nt.price;
+    existing.change_pct = nt.change_pct;
+
+    document.querySelectorAll(`[data-ticker="${nt.symbol}"]`).forEach(el => {
+      const priceEl = el.querySelector('.ticker-price');
+      const changeEl = el.querySelector('.ticker-change');
+
+      // Animate price number smoothly
+      const proxy = { val: oldPrice };
+      gsap.to(proxy, {
+        val: newPrice,
+        duration: 1,
+        ease: 'power1.out',
+        onUpdate: () => { priceEl.textContent = formatPrice(proxy.val); },
       });
-    }
+
+      // Animate change % number smoothly
+      const pctProxy = { val: oldPct };
+      const directionChanged = (oldPct >= 0) !== (newPct >= 0);
+      gsap.to(pctProxy, {
+        val: newPct,
+        duration: 1,
+        ease: 'power1.out',
+        onUpdate: () => {
+          const arrow = pctProxy.val >= 0 ? '▲' : '▼';
+          changeEl.textContent = `${arrow} ${Math.abs(pctProxy.val).toFixed(2)}%`;
+        },
+      });
+
+      // Smooth color transition on direction change
+      if (directionChanged) {
+        const newColor = newPct >= 0 ? '#22c55e' : '#ef4444';
+        gsap.to(changeEl, { color: newColor, duration: 0.6, ease: 'power2.inOut' });
+      }
+
+      // Flash background on price change
+      if (newPrice !== oldPrice) {
+        const flashColor = newPrice > oldPrice ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)';
+        gsap.fromTo(priceEl,
+          { backgroundColor: flashColor },
+          { backgroundColor: 'transparent', duration: 1.5, ease: 'power2.out' }
+        );
+      }
+    });
   });
 }
 
 function replaceTickersFade(newTickers) {
-  // Full replace with fade — used when structure changes (admin sync, scene change)
-  const el = document.getElementById('tickerStrip');
-  el.classList.add('fading');
-  setTimeout(() => {
+  fadeSwap('#tickerStrip', () => {
     activeTickers = newTickers;
-    renderTickers();
-    el.classList.remove('fading');
-  }, 400);
+    renderTickerTape();
+  });
 }
 
-// --- Footer ---
+// ============================================================
+// Footer
+// ============================================================
 function renderFooter() {
   document.getElementById('footerHashtag').textContent = footer.hashtag || '#PROACTIVEWIRE';
 
@@ -478,37 +556,43 @@ function renderFooter() {
 }
 
 function updateFooter(newFooter) {
-  const el = document.getElementById('footerBar');
-  el.classList.add('fading');
-  setTimeout(() => {
+  fadeSwap('#footerBar', () => {
     footer = newFooter;
     renderFooter();
-    el.classList.remove('fading');
-  }, 400);
+  });
 }
 
-// --- Initial load ---
+// ============================================================
+// Initial load
+// ============================================================
 async function loadState() {
   try {
     const res = await fetch(`${CONFIG.apiBase}/overlay/state`);
     const data = await res.json();
+
     timezones = data.timezones;
     tickerSpeed = data.ticker_speed || 40;
     footer = data.footer || {};
 
-    // Flatten all scene tickers for initial load (scheduler will push current scene)
     const allTickers = data.tickers || {};
     activeTickers = Array.isArray(allTickers) ? allTickers : Object.values(allTickers).flat();
 
     startClocks();
-    renderTickers();
+    renderTickerTape();
     renderFooter();
+
+    // Entrance animation
+    gsap.from('.top-bar', { y: -72, duration: 0.6, ease: 'power3.out' });
+    gsap.from('#tickerStrip', { y: 80, duration: 0.6, ease: 'power3.out', delay: 0.2 });
+    gsap.from('#footerBar', { y: 36, duration: 0.6, ease: 'power3.out', delay: 0.3 });
   } catch (e) {
     console.error('Failed to load overlay state:', e);
   }
 }
 
-// --- WebSocket ---
+// ============================================================
+// WebSocket
+// ============================================================
 function connectWebSocket() {
   Pusher.logToConsole = true;
 
@@ -524,53 +608,43 @@ function connectWebSocket() {
 
   const channel = pusher.subscribe('wire.overlay');
 
-  channel.bind_global((eventName, data) => {
-    console.log('[WS event]', eventName, data);
-  });
-
   channel.bind('App\\Events\\TimezonesUpdated', (data) => {
-    console.log('TimezonesUpdated:', data);
     updateTimezones(data.timezones);
   });
 
   channel.bind('App\\Events\\SettingsUpdated', (data) => {
-    console.log('SettingsUpdated:', data);
-    if (data.settings.ticker_speed) {
+    if (data.settings.ticker_speed && data.settings.ticker_speed !== tickerSpeed) {
       tickerSpeed = data.settings.ticker_speed;
-      document.getElementById('tickerScroll').style.setProperty('--ticker-speed', tickerSpeed + 's');
+      document.getElementById('tickerScroll').style.setProperty('--ticker-duration', tickerSpeed + 's');
     }
   });
 
   channel.bind('App\\Events\\TickersUpdated', (data) => {
-    console.log('TickersUpdated:', data);
-    if (activeTickers.length === 0 || data.tickers.length !== activeTickers.length) {
-      // Structure changed — full re-render with fade
-      replaceTickersFade(data.tickers);
+    const newSymbols = data.tickers.filter(t => t.price != null).map(t => t.symbol).sort().join(',');
+    const oldSymbols = activeTickers.filter(t => t.price != null).map(t => t.symbol).sort().join(',');
+
+    if (newSymbols !== oldSymbols) {
+      // Structure changed — silent replace, CSS animation continues
+      activeTickers = data.tickers;
+      renderTickerTape();
     } else {
-      // Same structure — update prices in-place (no flicker)
+      // Same tickers — update prices in-place
       updateTickerPrices(data.tickers);
     }
   });
 
   channel.bind('App\\Events\\FooterUpdated', (data) => {
-    console.log('FooterUpdated:', data);
     updateFooter(data.footer);
   });
 
-  pusher.connection.bind('state_change', (states) => {
-    console.log('[WS state]', states.previous, '->', states.current);
-  });
-
   pusher.connection.bind('connected', () => {
-    console.log('[WS] Connected, socket_id:', pusher.connection.socket_id);
-  });
-
-  pusher.connection.bind('error', (err) => {
-    console.error('[WS] Error:', err);
+    console.log('[WS] Connected');
   });
 }
 
-// --- Scale to fit viewport (16:9) ---
+// ============================================================
+// Scale overlay to fit viewport
+// ============================================================
 function scaleOverlay() {
   const root = document.getElementById('overlayRoot');
   const scaleX = window.innerWidth / 1920;
@@ -581,7 +655,9 @@ function scaleOverlay() {
 window.addEventListener('resize', scaleOverlay);
 scaleOverlay();
 
-// --- Init ---
+// ============================================================
+// Init
+// ============================================================
 loadState();
 connectWebSocket();
 </script>
