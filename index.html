@@ -56,10 +56,24 @@
     height: 300%;
   }
 
+  .bg-pattern-scroll {
+    display: inline-flex;
+    white-space: nowrap;
+    animation: bgScroll var(--bg-speed, 60s) linear infinite;
+  }
+
+  .bg-pattern-scroll.reverse {
+    animation-direction: reverse;
+  }
+
+  @keyframes bgScroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
   .bg-pattern-row {
     white-space: nowrap;
     line-height: 1;
-    padding: 18px 0;
   }
 
   .bg-pattern-text {
@@ -709,23 +723,6 @@ scaleOverlay();
 // Background pattern
 // ============================================================
 let bgConfig = {};
-let bgTween = null;
-
-function directionToXY(direction, angle) {
-  const rad = (angle * Math.PI) / 180;
-  const d = 300;
-  // Move along the angle of the text rotation
-  const dx = Math.cos(rad) * d;
-  const dy = Math.sin(rad) * d;
-
-  switch (direction) {
-    case 'up-left':    return { x: -dx, y: -dy };
-    case 'up-right':   return { x: dx, y: -dy };
-    case 'down-left':  return { x: -dx, y: dy };
-    case 'down-right': return { x: dx, y: dy };
-    default:           return { x: -dx, y: -dy };
-  }
-}
 
 function renderBackground(config) {
   bgConfig = config || {};
@@ -733,7 +730,6 @@ function renderBackground(config) {
   const root = document.getElementById('overlayRoot');
 
   if (!bgConfig.enabled) {
-    if (bgTween) { bgTween.kill(); bgTween = null; }
     container.innerHTML = '';
     root.style.background = bgConfig.bg_color || '#1a1a1e';
     return;
@@ -746,58 +742,158 @@ function renderBackground(config) {
   const textColor = bgConfig.text_color || '#ffffff';
   const opacity = (bgConfig.text_opacity ?? 3) / 100;
   const fontSize = bgConfig.font_size || 48;
-  // Convert 1-10 to seconds: 1=120s (slow), 5=60s, 10=10s
+  // 1=550s (nearly static), 5=350s (subtle drift), 10=150s (gentle)
   const speedLevel = bgConfig.speed || 5;
-  const speed = Math.round(132 - (speedLevel * 12));
+  const speed = Math.round(590 - (speedLevel * 44));
   const direction = bgConfig.direction || 'up-left';
 
-  const repeat = 16;
+  // Direction mapping:
+  // rotate(-angle) + scroll left  = ↖ up-left
+  // rotate(-angle) + scroll right = ↘ down-right
+  // rotate(+angle) + scroll left  = ↙ down-left
+  // rotate(+angle) + scroll right = ↗ up-right
+  const isUp = direction.includes('up');
+  const isLeft = direction.includes('left');
+  const rotSign = (isLeft === isUp) ? 1 : -1;
+
+  const rowHeight = fontSize * 1.6;
   const rows = 40;
+
+  // Build one set of text spans
+  const oneSet = Array(10).fill(
+    `<span class="bg-pattern-text" style="font-size:${fontSize}px;color:${textColor};opacity:${opacity}">${text}</span>`
+  ).join('');
 
   let html = '';
   for (let i = 0; i < rows; i++) {
-    const offset = i % 2 === 0 ? '0' : `${fontSize * 3}px`;
-    html += `<div class="bg-pattern-row" style="padding-left:${offset}">`;
-    for (let j = 0; j < repeat; j++) {
-      html += `<span class="bg-pattern-text" style="font-size:${fontSize}px;color:${textColor};opacity:${opacity}">${text}</span>`;
-    }
-    html += '</div>';
+    // Scroll: left dirs = default, right dirs = reverse. Alternate flips odd rows.
+    const alternate = bgConfig.alternate_rows && (i % 2 === 1);
+    const shouldReverse = isLeft ? alternate : !alternate;
+    const reverseRow = shouldReverse ? ' reverse' : '';
+    const offset = (i % 2 === 0) ? 0 : fontSize * 4;
+    html += `<div class="bg-pattern-row" style="height:${rowHeight}px">`;
+    html += `<div class="bg-pattern-scroll${reverseRow}" style="--bg-speed:${speed}s;padding-left:${offset}px">`;
+    html += oneSet + oneSet;
+    html += `</div></div>`;
   }
-  container.innerHTML = html;
 
-  // GSAP drift animation
-  if (bgTween) bgTween.kill();
-  const { x, y } = directionToXY(direction, angle);
-  gsap.set(container, { rotation: -angle, x: 0, y: 0 });
-  bgTween = gsap.to(container, {
-    x, y,
-    duration: speed,
-    ease: 'none',
-    repeat: -1,
-  });
+  container.innerHTML = html;
+  container.style.transform = `rotate(${rotSign * angle}deg)`;
 }
+
+// ---- Background transition effects ----
+const bgTransitions = {
+
+  // 1. Wave — random scatter fade
+  wave(spans, done) {
+    gsap.to(spans, {
+      opacity: 0,
+      duration: 0.3,
+      stagger: { each: 0.005, from: 'random' },
+      onComplete: done,
+    });
+  },
+  waveIn(spans, targetOpacity) {
+    gsap.fromTo(spans,
+      { opacity: 0 },
+      { opacity: targetOpacity, duration: 0.4, stagger: { each: 0.005, from: 'random' } }
+    );
+  },
+
+  // 2. Typewriter — left to right reveal
+  typewriter(spans, done) {
+    gsap.to(spans, {
+      opacity: 0,
+      duration: 0.2,
+      stagger: { each: 0.003, from: 'start' },
+      onComplete: done,
+    });
+  },
+  typewriterIn(spans, targetOpacity) {
+    gsap.fromTo(spans,
+      { opacity: 0 },
+      { opacity: targetOpacity, duration: 0.2, stagger: { each: 0.003, from: 'start' } }
+    );
+  },
+
+  // 3. Cascade — top to bottom rows
+  cascade(spans, done) {
+    gsap.to(spans, {
+      opacity: 0,
+      y: -20,
+      duration: 0.4,
+      stagger: { each: 0.008, from: 'start' },
+      onComplete: done,
+    });
+  },
+  cascadeIn(spans, targetOpacity) {
+    gsap.fromTo(spans,
+      { opacity: 0, y: 20 },
+      { opacity: targetOpacity, y: 0, duration: 0.4, stagger: { each: 0.008, from: 'start' } }
+    );
+  },
+
+  // 4. Glitch — digital flicker
+  glitch(spans, done) {
+    gsap.to(spans, {
+      opacity: 0,
+      duration: 0.15,
+      stagger: { each: 0.001, from: 'random', repeat: 2, yoyo: true },
+      onComplete: done,
+    });
+  },
+  glitchIn(spans, targetOpacity) {
+    gsap.fromTo(spans,
+      { opacity: 0 },
+      { opacity: targetOpacity, duration: 0.15, stagger: { each: 0.001, from: 'random', repeat: 2, yoyo: true } }
+    );
+  },
+
+  // 5. Flip — 3D rotation
+  flip(spans, done) {
+    gsap.to(spans, {
+      rotationX: 90,
+      opacity: 0,
+      duration: 0.4,
+      stagger: { each: 0.004, from: 'center' },
+      onComplete: done,
+    });
+  },
+  flipIn(spans, targetOpacity) {
+    gsap.fromTo(spans,
+      { rotationX: -90, opacity: 0 },
+      { rotationX: 0, opacity: targetOpacity, duration: 0.4, stagger: { each: 0.004, from: 'center' } }
+    );
+  },
+};
 
 function updateBackground(config) {
   const container = document.getElementById('bgPattern');
-  // Crossfade: fade old out slowly, rebuild, fade new in
-  gsap.to(container, {
-    opacity: 0,
-    duration: 0.8,
-    ease: 'power2.in',
-    onComplete: () => {
-      renderBackground(config);
-      gsap.fromTo(container,
-        { opacity: 0 },
-        { opacity: 1, duration: 1, ease: 'power2.out' }
-      );
-    },
-  });
-  // Smooth background color transition
+  const spans = container.querySelectorAll('.bg-pattern-text');
+  const newText = config.text || bgConfig.text || 'PROACTIVE INVESTORS';
+  const textChanged = newText !== (bgConfig.text || '');
+  const effect = config.transition || bgConfig.transition || 'wave';
+  const targetOpacity = (config.text_opacity ?? bgConfig.text_opacity ?? 3) / 100;
+
+  // Smooth background color transition always
   gsap.to(document.getElementById('overlayRoot'), {
     backgroundColor: config.bg_color || '#1a1a1e',
     duration: 1.5,
     ease: 'power2.inOut',
   });
+
+  if (spans.length > 0) {
+    const outFn = bgTransitions[effect] || bgTransitions.wave;
+    const inFn = bgTransitions[effect + 'In'] || bgTransitions.waveIn;
+
+    outFn(spans, () => {
+      renderBackground(config);
+      const newSpans = container.querySelectorAll('.bg-pattern-text');
+      inFn(newSpans, targetOpacity);
+    });
+  } else {
+    renderBackground(config);
+  }
 }
 
 // ============================================================
