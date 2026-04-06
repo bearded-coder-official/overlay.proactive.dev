@@ -28,8 +28,9 @@
   }
 
   .overlay-root {
-    width: 1280px;
-    height: 720px;
+    --s: 1.5; /* scale factor: 1920/1280 */
+    width: 1920px;
+    height: 1080px;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -43,21 +44,21 @@
   .top-bar {
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 48px;
+    height: 72px;
     background: var(--panel);
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
-    padding: 0 20px;
-    gap: 16px;
+    padding: 0 30px;
+    gap: 24px;
     z-index: 20;
   }
 
   .logo {
     font-family: 'Barlow Condensed', sans-serif;
     font-weight: 800;
-    font-size: 18px;
-    letter-spacing: 3px;
+    font-size: 27px;
+    letter-spacing: 4px;
     text-transform: uppercase;
     white-space: nowrap;
   }
@@ -65,7 +66,7 @@
 
   .divider {
     width: 1px;
-    height: 20px;
+    height: 30px;
     background: var(--border);
   }
 
@@ -73,11 +74,11 @@
     background: var(--accent2);
     color: #fff;
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
+    font-size: 16px;
     font-weight: 700;
-    letter-spacing: 2px;
-    padding: 4px 12px;
-    border-radius: 2px;
+    letter-spacing: 3px;
+    padding: 6px 18px;
+    border-radius: 3px;
     text-transform: uppercase;
     white-space: nowrap;
   }
@@ -85,20 +86,20 @@
   .live-badge {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 9px;
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 12px;
+    font-size: 18px;
     font-weight: 700;
-    letter-spacing: 2px;
+    letter-spacing: 3px;
     color: #f04060;
     white-space: nowrap;
   }
   .live-dot {
-    width: 8px; height: 8px;
+    width: 12px; height: 12px;
     border-radius: 50%;
     background: #f04060;
     animation: blink 1.2s ease-in-out infinite;
-    box-shadow: 0 0 6px rgba(240, 64, 96, 0.6);
+    box-shadow: 0 0 8px rgba(240, 64, 96, 0.6);
   }
   @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
 
@@ -106,7 +107,7 @@
   .top-clocks {
     margin-left: auto;
     display: flex;
-    gap: 4px;
+    gap: 6px;
     transition: opacity 0.4s ease;
   }
   .top-clocks.fading { opacity: 0; }
@@ -114,25 +115,25 @@
   .clock-item {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 0 12px;
+    gap: 9px;
+    padding: 0 18px;
     border-left: 1px solid var(--border);
   }
   .clock-item:first-child { border-left: none; }
 
   .clock-city {
-    font-size: 11px;
+    font-size: 16px;
     color: var(--dim);
-    letter-spacing: 1.5px;
+    letter-spacing: 2px;
     font-family: 'Barlow Condensed', sans-serif;
     font-weight: 600;
     text-transform: uppercase;
   }
   .clock-time {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 16px;
+    font-size: 24px;
     font-weight: 700;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
     display: flex;
     gap: 0;
   }
@@ -277,7 +278,10 @@ async function loadState() {
 
 // --- WebSocket ---
 function connectWebSocket() {
+  Pusher.logToConsole = true;
+
   const pusher = new Pusher(CONFIG.wsKey, {
+    cluster: '',
     wsHost: CONFIG.wsHost,
     wsPort: CONFIG.wsPort,
     wssPort: CONFIG.wsPort,
@@ -288,25 +292,33 @@ function connectWebSocket() {
 
   const channel = pusher.subscribe('wire.overlay');
 
+  channel.bind_global((eventName, data) => {
+    console.log('[WS event]', eventName, data);
+  });
+
   channel.bind('App\\Events\\TimezonesUpdated', (data) => {
     console.log('TimezonesUpdated:', data);
     updateTimezones(data.timezones);
   });
 
+  pusher.connection.bind('state_change', (states) => {
+    console.log('[WS state]', states.previous, '->', states.current);
+  });
+
   pusher.connection.bind('connected', () => {
-    console.log('WebSocket connected');
+    console.log('[WS] Connected, socket_id:', pusher.connection.socket_id);
   });
 
   pusher.connection.bind('error', (err) => {
-    console.error('WebSocket error:', err);
+    console.error('[WS] Error:', err);
   });
 }
 
 // --- Scale to fit viewport (16:9) ---
 function scaleOverlay() {
   const root = document.getElementById('overlayRoot');
-  const scaleX = window.innerWidth / 1280;
-  const scaleY = window.innerHeight / 720;
+  const scaleX = window.innerWidth / 1920;
+  const scaleY = window.innerHeight / 1080;
   const scale = Math.min(scaleX, scaleY);
   root.style.transform = `translate(-50%, -50%) scale(${scale})`;
 }
