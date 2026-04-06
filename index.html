@@ -194,12 +194,6 @@
     display: inline-flex;
     white-space: nowrap;
     will-change: transform;
-    animation: tickerMarquee var(--ticker-duration, 75s) linear infinite;
-  }
-
-  @keyframes tickerMarquee {
-    from { transform: translateX(0); }
-    to   { transform: translateX(-50%); }
   }
 
   .ticker-item {
@@ -330,9 +324,10 @@ let timezones = [];
 let activeTickers = [];
 let footer = {};
 let tickerSpeed = 5;
+let tickerTween = null;
+let tickerBaseDuration = 0;
 
-// Convert 1-10 scale to CSS animation duration in seconds
-// 1 = 120s (slow), 5 = 60s (medium), 10 = 15s (fast)
+// Convert 1-10 scale to animation duration in seconds
 function speedToDuration(level) {
   return Math.round(135 - (level * 12));
 }
@@ -459,23 +454,34 @@ function buildTickerItemHTML(t) {
 }
 
 function renderTickerTape() {
+  if (tickerTween) { tickerTween.kill(); tickerTween = null; }
+
   const el = document.getElementById('tickerScroll');
   const wrapper = el.parentElement;
   const visible = activeTickers.filter(t => t.price != null);
   if (!visible.length) { el.innerHTML = ''; return; }
 
-  // Build one set, measure its width
+  // Build one set, measure it
   const oneSet = visible.map(buildTickerItemHTML).join('');
   el.innerHTML = oneSet;
   const oneSetWidth = el.scrollWidth;
   const viewportWidth = wrapper.offsetWidth;
 
-  // Clone enough to fill 2x viewport (one scrolls out, one scrolls in)
+  if (oneSetWidth === 0) return;
+
+  // Enough copies so content fills viewport at any scroll position
   const copies = Math.max(2, Math.ceil((viewportWidth * 2) / oneSetWidth) + 1);
   el.innerHTML = Array(copies).fill(oneSet).join('');
 
-  // CSS animation moves -50%, so the first half = visible content that scrolls out
-  el.style.setProperty('--ticker-duration', speedToDuration(tickerSpeed) + 's');
+  // GSAP infinite scroll — animate exactly one set width
+  tickerBaseDuration = speedToDuration(tickerSpeed);
+  gsap.set(el, { x: 0 });
+  tickerTween = gsap.to(el, {
+    x: -oneSetWidth,
+    duration: tickerBaseDuration,
+    ease: 'none',
+    repeat: -1,
+  });
 }
 
 function formatPrice(n) {
@@ -623,7 +629,12 @@ function connectWebSocket() {
   channel.bind('App\\Events\\SettingsUpdated', (data) => {
     if (data.settings.ticker_speed && data.settings.ticker_speed !== tickerSpeed) {
       tickerSpeed = data.settings.ticker_speed;
-      document.getElementById('tickerScroll').style.setProperty('--ticker-duration', speedToDuration(tickerSpeed) + 's');
+
+      // Smooth acceleration/deceleration via GSAP timeScale
+      if (tickerTween && tickerBaseDuration > 0) {
+        const newTimeScale = tickerBaseDuration / speedToDuration(tickerSpeed);
+        gsap.to(tickerTween, { timeScale: newTimeScale, duration: 2, ease: 'power2.inOut' });
+      }
     }
   });
 
