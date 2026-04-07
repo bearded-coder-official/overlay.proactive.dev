@@ -475,7 +475,7 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    gap: 14px;
+    gap: 12px;
     container-type: inline-size;
     font-family: 'Barlow Condensed', sans-serif;
   }
@@ -483,10 +483,17 @@
   /* --- SESSION BUG --- */
   .aug-bug {
     background: var(--panel);
-    padding: clamp(10px, 3.5cqi, 18px) clamp(14px, 4.5cqi, 22px);
+    display: flex;
+    flex-direction: column;
+  }
+  .aug-bug-row {
+    padding: clamp(9px, 3cqi, 16px) clamp(14px, 4.5cqi, 22px);
     display: flex;
     align-items: center;
     gap: clamp(10px, 3.5cqi, 18px);
+  }
+  .aug-bug-row + .aug-bug-row {
+    border-top: 1px solid rgba(255,255,255,0.06);
   }
   .aug-bug-dot {
     width: clamp(8px, 2.8cqi, 14px);
@@ -498,6 +505,7 @@
     flex-shrink: 0;
   }
   .aug-bug-dot.closed { background: rgba(255,255,255,0.35); box-shadow: none; animation: none; }
+  .aug-bug-dot.next   { background: var(--accent); box-shadow: 0 0 6px rgba(253,184,38,0.6); animation: none; }
   @keyframes aug-bug-pulse {
     0%, 100% { opacity: 1; }
     50%      { opacity: 0.4; }
@@ -518,13 +526,14 @@
     line-height: 1;
   }
   .aug-bug-time {
-    font-size: clamp(16px, 6.5cqi, 28px);
+    font-size: clamp(15px, 5.8cqi, 26px);
     font-weight: 800;
     color: var(--accent);
     font-variant-numeric: tabular-nums;
     line-height: 1;
     letter-spacing: 0.03em;
   }
+  .aug-bug-time.dim { color: rgba(255,255,255,0.35); }
 
   /* --- MARKET PULSE --- */
   .aug-pulse {
@@ -593,6 +602,132 @@
   }
   .aug-pulse-change.up { color: #22c55e; }
   .aug-pulse-change.down { color: #ef4444; }
+
+  /* --- FEAR & GREED --- */
+  .aug-fg {
+    background: var(--panel);
+  }
+  .aug-fg-head {
+    background: var(--accent);
+    padding: clamp(8px, 3cqi, 16px) clamp(14px, 4.5cqi, 22px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .aug-fg-tag {
+    color: #1a1a1a;
+    font-size: clamp(13px, 4.5cqi, 20px);
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .aug-fg-sub {
+    color: rgba(26,26,26,0.7);
+    font-size: clamp(12px, 4cqi, 18px);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .aug-fg-body {
+    padding: clamp(14px, 4.5cqi, 22px) clamp(16px, 5cqi, 24px) clamp(16px, 5cqi, 24px);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(10px, 3.5cqi, 18px);
+  }
+  .aug-fg-display {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: clamp(10px, 3cqi, 16px);
+  }
+  .aug-fg-value {
+    font-size: clamp(40px, 14cqi, 64px);
+    font-weight: 900;
+    line-height: 0.85;
+    letter-spacing: -0.02em;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+  }
+  .aug-fg-label {
+    font-size: clamp(13px, 4.5cqi, 20px);
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    line-height: 1;
+    text-align: right;
+  }
+  .aug-fg-bar-wrap {
+    position: relative;
+    padding-top: clamp(10px, 3.5cqi, 16px);
+  }
+  .aug-fg-marker {
+    position: absolute;
+    top: 0;
+    width: 0;
+    height: 0;
+    border-left: clamp(5px, 1.8cqi, 8px) solid transparent;
+    border-right: clamp(5px, 1.8cqi, 8px) solid transparent;
+    border-top: clamp(7px, 2.5cqi, 11px) solid #fff;
+    transform: translateX(-50%);
+    transition: left 0.4s ease-out;
+    filter: drop-shadow(0 0 4px rgba(255,255,255,0.5));
+  }
+  .aug-fg-bar {
+    display: flex;
+    gap: clamp(2px, 0.7cqi, 4px);
+    height: clamp(12px, 4cqi, 18px);
+  }
+  .aug-fg-bar-cell {
+    flex: 1;
+    opacity: 0.18;
+    transition: opacity 0.3s;
+  }
+  .aug-fg-bar-cell.active { opacity: 1; }
+  .aug-fg-bar-cell.c0 { background: #ef4444; }
+  .aug-fg-bar-cell.c1 { background: #f97316; }
+  .aug-fg-bar-cell.c2 { background: #facc15; }
+  .aug-fg-bar-cell.c3 { background: #84cc16; }
+  .aug-fg-bar-cell.c4 { background: #22c55e; }
+  .aug-fg-ends {
+    display: flex;
+    justify-content: space-between;
+    font-size: clamp(9px, 3.2cqi, 13px);
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    line-height: 1;
+  }
+
+  /* --- SPONSOR / AD (banner) --- */
+  .aug-ad {
+    background: var(--panel);
+    position: relative;
+  }
+  .aug-ad-tag {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    background: rgba(0,0,0,0.65);
+    color: rgba(255,255,255,0.7);
+    font-size: clamp(9px, 3.2cqi, 13px);
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    line-height: 1;
+    padding: clamp(5px, 1.8cqi, 9px) clamp(9px, 3cqi, 14px);
+  }
+  .aug-ad-banner {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background-color: #000;
+    background-size: cover;
+    background-position: center;
+    display: block;
+  }
 
   /* --- PRICE ALERT --- */
   .aug-alert {
@@ -809,10 +944,19 @@
 <div class="content-area">
   <div class="aug-stack">
     <div class="aug-bug" id="augBug">
-      <div class="aug-bug-dot" id="augBugDot"></div>
-      <div class="aug-bug-text">
-        <div class="aug-bug-label" id="augBugLabel">NYSE OPENS IN</div>
-        <div class="aug-bug-time" id="augBugTime">02:34:11</div>
+      <div class="aug-bug-row" id="augBugRowClose">
+        <div class="aug-bug-dot" id="augBugDotClose"></div>
+        <div class="aug-bug-text">
+          <div class="aug-bug-label" id="augBugLabelClose">CLOSES IN</div>
+          <div class="aug-bug-time" id="augBugTimeClose">--:--:--</div>
+        </div>
+      </div>
+      <div class="aug-bug-row">
+        <div class="aug-bug-dot next" id="augBugDotNext"></div>
+        <div class="aug-bug-text">
+          <div class="aug-bug-label" id="augBugLabelNext">OPENS IN</div>
+          <div class="aug-bug-time" id="augBugTimeNext">--:--:--</div>
+        </div>
       </div>
     </div>
 
@@ -822,6 +966,33 @@
         <div class="aug-pulse-title" id="augPulseTitle">Indices</div>
       </div>
       <div class="aug-pulse-rows" id="augPulseRows"></div>
+    </div>
+
+    <div class="aug-fg" id="augFg">
+      <div class="aug-fg-head">
+        <div class="aug-fg-tag">Fear &amp; Greed</div>
+        <div class="aug-fg-sub">Index</div>
+      </div>
+      <div class="aug-fg-body">
+        <div class="aug-fg-display">
+          <div class="aug-fg-value" id="augFgValue">—</div>
+          <div class="aug-fg-label" id="augFgLabel">—</div>
+        </div>
+        <div class="aug-fg-bar-wrap">
+          <div class="aug-fg-marker" id="augFgMarker" style="left: 50%"></div>
+          <div class="aug-fg-bar">
+            <div class="aug-fg-bar-cell c0"></div>
+            <div class="aug-fg-bar-cell c1"></div>
+            <div class="aug-fg-bar-cell c2"></div>
+            <div class="aug-fg-bar-cell c3"></div>
+            <div class="aug-fg-bar-cell c4"></div>
+          </div>
+        </div>
+        <div class="aug-fg-ends">
+          <span>Extreme Fear</span>
+          <span>Extreme Greed</span>
+        </div>
+      </div>
     </div>
 
     <div class="aug-alert" id="augAlert">
@@ -837,6 +1008,11 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="aug-ad" id="augAd">
+      <div class="aug-ad-tag">Sponsored</div>
+      <div class="aug-ad-banner" id="augAdBanner"></div>
     </div>
   </div>
 
@@ -1266,52 +1442,93 @@ window.addEventListener('load', syncAugStackHeight);
 // Persistent SESSION BUG + periodic MARKET PULSE + event PRICE ALERT
 // ============================================================
 
-// --- SESSION BUG: countdown to next NYSE open/close ---
-// Hardcoded NYSE schedule (UTC): open 13:30, close 20:00 (Mon-Fri)
-function getNyseStatus() {
-  const now = new Date();
-  const utcDay = now.getUTCDay();
-  const utcH = now.getUTCHours();
-  const utcM = now.getUTCMinutes();
-  const utcS = now.getUTCSeconds();
-  const nowSec = utcH * 3600 + utcM * 60 + utcS;
-  const openSec  = 13 * 3600 + 30 * 60;
-  const closeSec = 20 * 3600;
+// --- SESSION BUG: closing of currently open market + next market to open ---
+// Schedules in UTC, Mon-Fri. Markets covered by Proactive Investors:
+// ASX (Sydney), LSE (London), TSX (Toronto), NYSE (New York).
+const MARKETS = [
+  { name: 'ASX',  openH: 0,  openM: 0,  closeH: 6,  closeM: 0  }, // Sydney  10:00-16:00 AEST
+  { name: 'LSE',  openH: 7,  openM: 0,  closeH: 15, closeM: 30 }, // London  08:00-16:30 BST
+  { name: 'TSX',  openH: 13, openM: 30, closeH: 20, closeM: 0  }, // Toronto 09:30-16:00 EDT
+  { name: 'NYSE', openH: 13, openM: 30, closeH: 20, closeM: 0  }, // NY      09:30-16:00 EDT
+];
 
-  const isWeekday = utcDay >= 1 && utcDay <= 5;
-  const isOpen = isWeekday && nowSec >= openSec && nowSec < closeSec;
-
-  let label, secondsTo;
-  if (isOpen) {
-    label = 'NYSE CLOSES IN';
-    secondsTo = closeSec - nowSec;
-  } else {
-    label = 'NYSE OPENS IN';
-    // Next open: today if before 13:30 on weekday, else next weekday
-    let daysAhead = 0;
-    if (isWeekday && nowSec < openSec) {
-      daysAhead = 0;
-    } else {
-      // skip to next weekday
-      let d = utcDay;
-      do { daysAhead++; d = (d + 1) % 7; } while (d === 0 || d === 6);
+function buildMarketIntervals() {
+  // Generate (name, open, close) week-second intervals for Mon-Fri (day 1..5)
+  const out = [];
+  for (const m of MARKETS) {
+    for (let d = 1; d <= 5; d++) {
+      out.push({
+        name:  m.name,
+        open:  d * 86400 + m.openH * 3600 + m.openM * 60,
+        close: d * 86400 + m.closeH * 3600 + m.closeM * 60,
+      });
     }
-    secondsTo = daysAhead * 86400 - nowSec + openSec;
+  }
+  return out;
+}
+const MARKET_INTERVALS = buildMarketIntervals();
+
+function getMarketStatus() {
+  const now = new Date();
+  const nowWeek =
+    now.getUTCDay() * 86400 +
+    now.getUTCHours() * 3600 +
+    now.getUTCMinutes() * 60 +
+    now.getUTCSeconds();
+
+  // Currently open (pick the one closing soonest)
+  let closing = null;
+  for (const iv of MARKET_INTERVALS) {
+    if (nowWeek >= iv.open && nowWeek < iv.close) {
+      const dt = iv.close - nowWeek;
+      if (!closing || dt < closing.secondsTo) {
+        closing = { name: iv.name, secondsTo: dt };
+      }
+    }
   }
 
-  const hh = Math.floor(secondsTo / 3600);
-  const mm = Math.floor((secondsTo % 3600) / 60);
-  const ss = secondsTo % 60;
-  const time = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
-  return { isOpen, label, time };
+  // Next to open (smallest forward delta to an open event, wrap to next week)
+  let nextOpen = null;
+  for (const iv of MARKET_INTERVALS) {
+    let dt = iv.open - nowWeek;
+    if (dt <= 0) dt += 7 * 86400;
+    if (!nextOpen || dt < nextOpen.secondsTo) {
+      nextOpen = { name: iv.name, secondsTo: dt };
+    }
+  }
+
+  return { closing, nextOpen };
+}
+
+function fmtCountdown(sec) {
+  const days = Math.floor(sec / 86400);
+  const h = Math.floor((sec % 86400) / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = sec % 60;
+  if (days > 0) return `${days}D ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
 
 function tickSessionBug() {
-  const { isOpen, label, time } = getNyseStatus();
-  document.getElementById('augBugLabel').textContent = label;
-  document.getElementById('augBugTime').textContent = time;
-  const dot = document.getElementById('augBugDot');
-  dot.classList.toggle('closed', !isOpen);
+  const { closing, nextOpen } = getMarketStatus();
+  const closingRow = document.getElementById('augBugRowClose');
+  const labelClose = document.getElementById('augBugLabelClose');
+  const timeClose  = document.getElementById('augBugTimeClose');
+  const labelNext  = document.getElementById('augBugLabelNext');
+  const timeNext   = document.getElementById('augBugTimeNext');
+
+  if (closing) {
+    closingRow.style.display = '';
+    labelClose.textContent = `${closing.name} CLOSES IN`;
+    timeClose.textContent  = fmtCountdown(closing.secondsTo);
+  } else {
+    closingRow.style.display = 'none';
+  }
+
+  if (nextOpen) {
+    labelNext.textContent = `${nextOpen.name} OPENS IN`;
+    timeNext.textContent  = fmtCountdown(nextOpen.secondsTo);
+  }
 }
 tickSessionBug();
 setInterval(tickSessionBug, 1000);
@@ -1430,6 +1647,61 @@ function rotateAlert() {
 }
 renderPriceAlert();
 setInterval(rotateAlert, 10000);
+
+// --- FEAR & GREED ---
+function renderFearGreed(value) {
+  const v = Math.max(0, Math.min(100, value));
+  let label, color, bucket;
+  if (v < 20)      { label = 'EXTREME FEAR';  color = '#ef4444'; bucket = 0; }
+  else if (v < 40) { label = 'FEAR';          color = '#f97316'; bucket = 1; }
+  else if (v < 60) { label = 'NEUTRAL';       color = '#facc15'; bucket = 2; }
+  else if (v < 80) { label = 'GREED';         color = '#84cc16'; bucket = 3; }
+  else             { label = 'EXTREME GREED'; color = '#22c55e'; bucket = 4; }
+
+  const valueEl = document.getElementById('augFgValue');
+  const labelEl = document.getElementById('augFgLabel');
+  valueEl.textContent = v;
+  labelEl.textContent = label;
+  labelEl.style.color = color;
+
+  document.getElementById('augFgMarker').style.left = `${v}%`;
+  document.querySelectorAll('#augFg .aug-fg-bar-cell').forEach((cell, i) => {
+    cell.classList.toggle('active', i === bucket);
+  });
+}
+// Initial value (dummy until wired to a real source)
+renderFearGreed(68);
+
+// --- SPONSOR / AD: rotating banner images every 12s ---
+// Each entry is the URL of a banner image (16:9 recommended).
+// Replace these with real sponsor banners; placeholders for now.
+const adBanners = [
+  'https://placehold.co/480x360/1e3a8a/ffffff?text=Aurum+Mining',
+  'https://placehold.co/480x360/166534/ffffff?text=Volt+Battery',
+  'https://placehold.co/480x360/7c2d12/ffffff?text=Quantum+Health',
+  'https://placehold.co/480x360/581c87/ffffff?text=NorthStar',
+];
+let adIndex = 0;
+
+function renderAd() {
+  document.getElementById('augAdBanner').style.backgroundImage = `url("${adBanners[adIndex]}")`;
+}
+
+function rotateAd() {
+  const banner = document.getElementById('augAdBanner');
+  gsap.to(banner, {
+    opacity: 0,
+    duration: 0.3,
+    ease: 'power2.in',
+    onComplete: () => {
+      adIndex = (adIndex + 1) % adBanners.length;
+      renderAd();
+      gsap.fromTo(banner, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power2.out' });
+    },
+  });
+}
+renderAd();
+setInterval(rotateAd, 12000);
 
 // ============================================================
 // Content block (lower-third)
