@@ -85,11 +85,70 @@
     padding: 0 40px;
   }
 
+  /* BREAKING NEWS */
+  .breaking-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 52px;
+    background: rgba(200, 20, 40, 0.95);
+    display: none;
+    align-items: center;
+    overflow: hidden;
+    z-index: 30;
+  }
+
+  .breaking-bar.visible {
+    display: flex;
+  }
+
+  .breaking-label {
+    background: #7a0818;
+    color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    padding: 0 20px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .breaking-scroll-wrapper {
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .breaking-scroll {
+    display: inline-flex;
+    white-space: nowrap;
+    animation: breakingScroll 15s linear infinite;
+  }
+
+  .breaking-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #fff;
+    padding: 0 40px;
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+
+  @keyframes breakingScroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
   /* TOP BAR */
   .top-bar {
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 72px;
+    transition: top 0.5s ease;
     background: var(--panel);
     border-bottom: 1px solid var(--border);
     display: flex;
@@ -339,7 +398,14 @@
   <div class="bg-pattern-inner" id="bgPattern"></div>
 </div>
 
-<div class="top-bar">
+<div class="breaking-bar" id="breakingBar">
+  <div class="breaking-label">⚡ BREAKING</div>
+  <div class="breaking-scroll-wrapper">
+    <div class="breaking-scroll" id="breakingScroll"></div>
+  </div>
+</div>
+
+<div class="top-bar" id="topBar">
   <div class="logo">PROACTIVE <span>WIRE</span></div>
   <div class="divider"></div>
   <div class="scene-badge" id="sceneBadge">LIVE</div>
@@ -674,6 +740,14 @@ function connectWebSocket() {
 
   const channel = pusher.subscribe('wire.overlay');
 
+  channel.bind('App\\Events\\BreakingNewsStarted', (data) => {
+    showBreakingNews(data.headline);
+  });
+
+  channel.bind('App\\Events\\BreakingNewsStopped', () => {
+    hideBreakingNews();
+  });
+
   channel.bind('App\\Events\\TimezonesUpdated', (data) => {
     updateTimezones(data.timezones);
   });
@@ -718,6 +792,35 @@ function scaleOverlay() {
 }
 window.addEventListener('resize', scaleOverlay);
 scaleOverlay();
+
+// ============================================================
+// Breaking News
+// ============================================================
+function showBreakingNews(headline) {
+  const bar = document.getElementById('breakingBar');
+  const text = document.getElementById('breakingText');
+  const topBar = document.getElementById('topBar');
+
+  const scroll = document.getElementById('breakingScroll');
+  const item = `<span class="breaking-text">${headline}</span>`;
+  scroll.innerHTML = item + item + item + item;
+  bar.classList.add('visible');
+  gsap.fromTo(bar, { y: '-100%' }, { y: 0, duration: 0.5, ease: 'power3.out' });
+  gsap.to(topBar, { top: 52, duration: 0.5, ease: 'power3.out' });
+}
+
+function hideBreakingNews() {
+  const bar = document.getElementById('breakingBar');
+  const topBar = document.getElementById('topBar');
+
+  gsap.to(bar, {
+    y: '-100%',
+    duration: 0.5,
+    ease: 'power3.in',
+    onComplete: () => bar.classList.remove('visible'),
+  });
+  gsap.to(topBar, { top: 0, duration: 0.5, ease: 'power3.in' });
+}
 
 // ============================================================
 // Background pattern
