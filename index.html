@@ -274,9 +274,11 @@
     bottom: var(--footer-zone-h);
     left: 0;
     right: 0;
-    padding-right: 360px; /* reserved space for augmentation overlays */
+    padding: 16px 32px;
+    gap: 32px;
     z-index: 5;
     display: flex;
+    align-items: center;
     will-change: top;
   }
 
@@ -288,7 +290,7 @@
     align-items: center;
     justify-content: center;
     position: relative;
-    padding: 16px;
+    align-self: stretch;
     min-width: 0;
   }
 
@@ -466,14 +468,14 @@
      container-type: inline-size enables cqi-based dynamic sizing.
      Change `width` to scale all child fonts/spacing automatically. */
   .aug-stack {
-    position: absolute;
-    top: 18px;
-    right: 18px;
+    flex-shrink: 0;
+    align-self: center;
+    order: 2;
     width: 320px;
     display: flex;
     flex-direction: column;
+    justify-content: flex-start;
     gap: 14px;
-    z-index: 30;
     container-type: inline-size;
     font-family: 'Barlow Condensed', sans-serif;
   }
@@ -1244,8 +1246,20 @@ function scaleOverlay() {
   const scale = Math.min(scaleX, scaleY);
   root.style.transform = `translate(-50%, -50%) scale(${scale})`;
 }
-window.addEventListener('resize', scaleOverlay);
+window.addEventListener('resize', () => { scaleOverlay(); syncAugStackHeight(); });
 scaleOverlay();
+
+// Match aug-stack height to video-frame so both share the same vertical center
+// and the widgets inside align with the top of the video frame.
+function syncAugStackHeight() {
+  const frame = document.querySelector('.video-frame');
+  const stack = document.querySelector('.aug-stack');
+  if (!frame || !stack) return;
+  stack.style.height = frame.offsetHeight + 'px';
+}
+// Initial sync after layout settles
+requestAnimationFrame(syncAugStackHeight);
+window.addEventListener('load', syncAugStackHeight);
 
 // ============================================================
 // Augmentation overlays
