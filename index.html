@@ -305,6 +305,18 @@
     transition: max-height 0.5s ease;
   }
 
+  .content-video,
+  .content-iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+  }
+
+  .video-frame.show-video .content-video { display: block; }
+  .video-frame.show-iframe .content-iframe { display: block; background: #fff; }
+
   .overlay-root.breaking-active .video-frame {
     max-height: 648px;
   }
@@ -640,6 +652,7 @@
       <video class="content-video" muted playsinline>
         <source src="" type="video/mp4">
       </video>
+      <iframe class="content-iframe" id="contentIframe" src="" frameborder="0"></iframe>
     </div>
 
     <div class="lower-third">
@@ -1063,6 +1076,8 @@ scaleOverlay();
 let qrInstance = null;
 let currentCompanyIndex = 0;
 let companyRotateInterval = null;
+let durationTimer = null;
+let durationProgress = null;
 
 
 function setQrCode(url) {
@@ -1118,17 +1133,18 @@ function playIntro() {
 
 // Outro: hide video frame + lower-third
 function playOutro() {
-  if (companyRotateInterval) {
-    clearInterval(companyRotateInterval);
-    companyRotateInterval = null;
-  }
+  if (companyRotateInterval) { clearInterval(companyRotateInterval); companyRotateInterval = null; }
+  if (durationTimer) { clearTimeout(durationTimer); durationTimer = null; }
+  if (durationProgress) { clearInterval(durationProgress); durationProgress = null; }
+
   const tl = gsap.timeline({
     onComplete: () => {
       const video = document.querySelector('.content-video');
-      if (video) {
-        video.pause();
-        video.currentTime = 0;
-      }
+      const iframe = document.getElementById('contentIframe');
+      const frame = document.querySelector('.video-frame');
+      if (video) { video.pause(); video.currentTime = 0; }
+      if (iframe) iframe.src = 'about:blank';
+      frame.classList.remove('show-video', 'show-iframe');
     },
   });
   tl.to('.lower-third', { opacity: 0, y: 30, duration: 0.4, ease: 'power3.in' });
@@ -1173,28 +1189,51 @@ function renderContentBlock(block) {
     }
   }
 
-  // Load video and play
+  const frame = document.querySelector('.video-frame');
+  const video = document.querySelector('.content-video');
+  const iframe = document.getElementById('contentIframe');
+  const progressFill = document.getElementById('ltProgressFill');
+  progressFill.style.width = '0%';
+
+  // Reset both
+  frame.classList.remove('show-video', 'show-iframe');
+  video.pause();
+  video.removeAttribute('src');
+  iframe.src = 'about:blank';
+  if (durationTimer) { clearTimeout(durationTimer); durationTimer = null; }
+  if (durationProgress) { clearInterval(durationProgress); durationProgress = null; }
+
+  // Load content based on type
   if (block.media?.url) {
-    const video = document.querySelector('.content-video');
-    const source = video?.querySelector('source');
-    if (source) {
-      source.src = block.media.url;
-      video.load();
+    frame.classList.add('show-video');
+    const source = video.querySelector('source');
+    source.src = block.media.url;
+    video.load();
+    video.onended = () => playOutro();
+    video.ontimeupdate = () => {
+      if (video.duration > 0) {
+        progressFill.style.width = (video.currentTime / video.duration * 100) + '%';
+      }
+    };
+    video.play().catch(err => console.warn('Video play failed:', err));
+  } else if (block.embed?.url) {
+    frame.classList.add('show-iframe');
+    iframe.src = block.embed.url;
 
-      // Setup ended handler — outro when video finishes
-      video.onended = () => playOutro();
+    // Iframe lifecycle controlled by duration_sec
+    const duration = (block.duration_sec || 60) * 1000;
+    const startTime = Date.now();
 
-      // Progress indicator
-      const progressFill = document.getElementById('ltProgressFill');
-      progressFill.style.width = '0%';
-      video.ontimeupdate = () => {
-        if (video.duration > 0) {
-          progressFill.style.width = (video.currentTime / video.duration * 100) + '%';
-        }
-      };
+    durationProgress = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      progressFill.style.width = Math.min(elapsed / duration * 100, 100) + '%';
+    }, 100);
 
-      video.play().catch(err => console.warn('Video play failed:', err));
-    }
+    durationTimer = setTimeout(() => {
+      clearInterval(durationProgress);
+      durationProgress = null;
+      playOutro();
+    }, duration);
   }
 
   // Intro animation
