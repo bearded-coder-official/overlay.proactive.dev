@@ -16,6 +16,9 @@
     --dim: #6b7280;
     --panel: #2d2d2d;
     --border: rgba(255, 255, 255, 0.15);
+    --top-bar-h: 72px;
+    --breaking-h: 38px;
+    --footer-zone-h: 80px;
   }
 
   html, body {
@@ -37,6 +40,7 @@
     background: var(--bg);
     font-family: 'Barlow', sans-serif;
     color: var(--text);
+    overflow: hidden;
   }
 
   /* BG PATTERN */
@@ -89,26 +93,23 @@
   .breaking-bar {
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 52px;
+    height: var(--breaking-h);
     background: rgba(200, 20, 40, 0.95);
-    display: none;
+    display: flex;
     align-items: center;
     overflow: hidden;
     z-index: 30;
-  }
-
-  .breaking-bar.visible {
-    display: flex;
+    will-change: transform;
   }
 
   .breaking-label {
     background: #7a0818;
     color: #fff;
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 16px;
+    font-size: 13px;
     font-weight: 800;
-    letter-spacing: 3px;
-    padding: 0 20px;
+    letter-spacing: 2.5px;
+    padding: 0 16px;
     height: 100%;
     display: flex;
     align-items: center;
@@ -129,7 +130,7 @@
 
   .breaking-text {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 22px;
+    font-size: 17px;
     font-weight: 700;
     letter-spacing: 1px;
     color: #fff;
@@ -147,8 +148,8 @@
   .top-bar {
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 72px;
-    transition: top 0.5s ease;
+    height: var(--top-bar-h);
+    will-change: transform;
     background: var(--panel);
     border-bottom: 1px solid var(--border);
     display: flex;
@@ -258,6 +259,220 @@
     width: 0.3em;
     text-align: center;
     opacity: 0.5;
+  }
+
+  /* CONTENT AREA */
+  .content-area {
+    position: absolute;
+    top: var(--top-bar-h);
+    bottom: var(--footer-zone-h);
+    left: 0;
+    right: 0;
+    z-index: 5;
+    display: flex;
+    will-change: top;
+  }
+
+  .video-block {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 40px 80px;
+    gap: 0;
+    min-width: 0;
+  }
+
+  .video-frame {
+    width: 78%;
+    max-width: 78%;
+    max-height: 700px;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    overflow: hidden;
+    position: relative;
+    opacity: 0;
+    will-change: opacity, transform;
+    transition: max-height 0.5s ease;
+  }
+
+  .overlay-root.breaking-active .video-frame {
+    max-height: 648px;
+  }
+
+  .content-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  /* LOWER THIRD */
+  .lower-third {
+    width: 78%;
+    background: var(--panel);
+    display: flex;
+    align-items: stretch;
+    height: 124px;
+    flex-shrink: 0;
+    opacity: 0;
+    will-change: opacity, transform;
+    position: relative;
+  }
+
+  .lt-progress {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .lt-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    transition: width 0.2s linear;
+  }
+
+  .lt-main {
+    flex: 1;
+    min-width: 0;
+    padding: 22px 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 14px;
+  }
+
+  .lt-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #fff;
+    line-height: 1.1;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .lt-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .lt-meta-sector {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 2.5px;
+    color: var(--accent);
+    background: rgba(253, 184, 38, 0.12);
+    padding: 6px 14px;
+    text-transform: uppercase;
+  }
+
+  .lt-meta-company {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #fff;
+    text-transform: uppercase;
+  }
+
+  .lt-meta-divider {
+    width: 1px;
+    height: 22px;
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .lt-meta-ticker {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  .lt-meta-ticker-symbol {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .lt-meta-ticker-price {
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lt-meta-ticker-change {
+    font-variant-numeric: tabular-nums;
+    font-size: 15px;
+  }
+  .lt-meta-ticker-change.up { color: #22c55e; }
+  .lt-meta-ticker-change.down { color: #ef4444; }
+
+  .lt-qr-side {
+    width: 124px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .lt-qr {
+    width: 96px;
+    height: 96px;
+    background: #fff;
+    padding: 6px;
+  }
+  .lt-qr img, .lt-qr canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .widgets-panel {
+    width: 360px;
+    background: var(--panel);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .widget-section {
+    padding: 18px 22px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .widget-section:last-child { border-bottom: none; }
+
+  .widget-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 12px;
+  }
+
+  .widget-placeholder {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.25);
+    letter-spacing: 1px;
+    text-align: center;
+    padding: 20px 0;
   }
 
   /* TICKER STRIP */
@@ -413,6 +628,41 @@
   <div class="top-clocks" id="clocks"></div>
 </div>
 
+<div class="content-area">
+  <div class="video-block">
+    <div class="video-frame">
+      <video class="content-video" muted playsinline>
+        <source src="" type="video/mp4">
+      </video>
+    </div>
+
+    <div class="lower-third">
+      <div class="lt-progress"><div class="lt-progress-fill" id="ltProgressFill"></div></div>
+      <div class="lt-main">
+        <div class="lt-title" id="ltTitle"></div>
+        <div class="lt-meta" id="ltMeta"></div>
+      </div>
+      <div class="lt-qr-side">
+        <div class="lt-qr" id="ltQr"></div>
+      </div>
+    </div>
+  </div>
+  <div class="widgets-panel">
+    <div class="widget-section">
+      <div class="widget-title">Market Overview</div>
+      <div class="widget-placeholder">— Coming soon —</div>
+    </div>
+    <div class="widget-section">
+      <div class="widget-title">Fear &amp; Greed</div>
+      <div class="widget-placeholder">— Coming soon —</div>
+    </div>
+    <div class="widget-section">
+      <div class="widget-title">Major Pairs</div>
+      <div class="widget-placeholder">— Coming soon —</div>
+    </div>
+  </div>
+</div>
+
 <div class="ticker-strip" id="tickerStrip">
   <div class="ticker-strip-label">MARKETS</div>
   <div class="ticker-scroll-wrapper">
@@ -429,6 +679,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.7/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pusher/8.4.0-rc2/pusher.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 const CONFIG = {
   apiBase: 'https://wire.proactive.dev/api',
@@ -712,6 +963,8 @@ async function loadState() {
     startClocks();
     renderTickerTape();
     renderFooter();
+    // Note: content block is NOT loaded on init — overlay starts empty,
+    // waiting for ContentBlockStarted event from admin
 
     // Entrance animation
     gsap.from('.top-bar', { y: -72, duration: 0.6, ease: 'power3.out' });
@@ -771,6 +1024,11 @@ function connectWebSocket() {
     updateTickerPrices(data.tickers);
   });
 
+  channel.bind('App\\Events\\ContentBlockStarted', (data) => {
+    console.log('ContentBlockStarted:', data);
+    renderContentBlock(data.block);
+  });
+
   channel.bind('App\\Events\\FooterUpdated', (data) => {
     updateFooter(data.footer);
   });
@@ -794,32 +1052,182 @@ window.addEventListener('resize', scaleOverlay);
 scaleOverlay();
 
 // ============================================================
+// Content block (lower-third)
+// ============================================================
+let qrInstance = null;
+let currentCompanyIndex = 0;
+let companyRotateInterval = null;
+
+
+function setQrCode(url) {
+  const el = document.getElementById('ltQr');
+  if (!el) return;
+  el.innerHTML = '';
+  qrInstance = new QRCode(el, {
+    text: url,
+    width: 88,
+    height: 88,
+    colorDark: '#000000',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M,
+  });
+}
+
+function renderCompanyMeta(company) {
+  const el = document.getElementById('ltMeta');
+  if (!el || !company) return;
+
+  const ticker = (company.tickers || [])[0];
+  const tickerHtml = ticker
+    ? `<span class="lt-meta-divider"></span>
+       <span class="lt-meta-ticker">
+         <span class="lt-meta-ticker-symbol">${ticker.exchange}:${ticker.symbol}</span>
+         <span class="lt-meta-ticker-price">$${Number(ticker.price).toFixed(2)}</span>
+         <span class="lt-meta-ticker-change ${ticker.change_pct >= 0 ? 'up' : 'down'}">
+           ${ticker.change_pct >= 0 ? '▲' : '▼'} ${Math.abs(ticker.change_pct).toFixed(2)}%
+         </span>
+       </span>`
+    : '';
+
+  el.innerHTML = `
+    ${company.sector ? `<span class="lt-meta-sector">${company.sector}</span>` : ''}
+    <span class="lt-meta-company">${company.name}</span>
+    ${tickerHtml}
+  `;
+}
+
+// Intro: animate video frame + lower-third in
+function playIntro() {
+  const tl = gsap.timeline();
+  tl.fromTo('.video-frame',
+    { opacity: 0, scale: 0.96 },
+    { opacity: 1, scale: 1, duration: 0.6, ease: 'power3.out' }
+  );
+  tl.fromTo('.lower-third',
+    { opacity: 0, y: 30 },
+    { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' },
+    '-=0.3'
+  );
+}
+
+// Outro: hide video frame + lower-third
+function playOutro() {
+  if (companyRotateInterval) {
+    clearInterval(companyRotateInterval);
+    companyRotateInterval = null;
+  }
+  const tl = gsap.timeline({
+    onComplete: () => {
+      const video = document.querySelector('.content-video');
+      if (video) {
+        video.pause();
+        video.currentTime = 0;
+      }
+    },
+  });
+  tl.to('.lower-third', { opacity: 0, y: 30, duration: 0.4, ease: 'power3.in' });
+  tl.to('.video-frame',
+    { opacity: 0, scale: 0.96, duration: 0.5, ease: 'power3.in' },
+    '-=0.3'
+  );
+}
+
+function renderContentBlock(block) {
+  const titleEl = document.getElementById('ltTitle');
+  if (titleEl) titleEl.textContent = block.article?.title || '';
+
+  if (block.article?.url) setQrCode(block.article.url);
+
+  // Companies
+  if (companyRotateInterval) clearInterval(companyRotateInterval);
+  currentCompanyIndex = 0;
+
+  const companies = block.companies || [];
+  if (companies.length) {
+    renderCompanyMeta(companies[0]);
+
+    if (companies.length > 1) {
+      companyRotateInterval = setInterval(() => {
+        const meta = document.getElementById('ltMeta');
+        gsap.to(meta, {
+          opacity: 0,
+          y: -4,
+          duration: 0.3,
+          ease: 'power2.in',
+          onComplete: () => {
+            currentCompanyIndex = (currentCompanyIndex + 1) % companies.length;
+            renderCompanyMeta(companies[currentCompanyIndex]);
+            gsap.fromTo(meta,
+              { opacity: 0, y: 4 },
+              { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }
+            );
+          },
+        });
+      }, 6000);
+    }
+  }
+
+  // Load video and play
+  if (block.media?.url) {
+    const video = document.querySelector('.content-video');
+    const source = video?.querySelector('source');
+    if (source) {
+      source.src = block.media.url;
+      video.load();
+
+      // Setup ended handler — outro when video finishes
+      video.onended = () => playOutro();
+
+      // Progress indicator
+      const progressFill = document.getElementById('ltProgressFill');
+      progressFill.style.width = '0%';
+      video.ontimeupdate = () => {
+        if (video.duration > 0) {
+          progressFill.style.width = (video.currentTime / video.duration * 100) + '%';
+        }
+      };
+
+      video.play().catch(err => console.warn('Video play failed:', err));
+    }
+  }
+
+  // Intro animation
+  playIntro();
+}
+
+
+// ============================================================
 // Breaking News
 // ============================================================
-function showBreakingNews(headline) {
-  const bar = document.getElementById('breakingBar');
-  const text = document.getElementById('breakingText');
-  const topBar = document.getElementById('topBar');
+function getCssVar(name) {
+  return parseInt(getComputedStyle(document.documentElement).getPropertyValue(name), 10);
+}
 
+const BREAKING_H = getCssVar('--breaking-h');
+const TOP_BAR_H = getCssVar('--top-bar-h');
+
+gsap.set('#breakingBar', { y: -BREAKING_H });
+
+function showBreakingNews(headline) {
   const scroll = document.getElementById('breakingScroll');
   const item = `<span class="breaking-text">${headline}</span>`;
   scroll.innerHTML = item + item + item + item;
-  bar.classList.add('visible');
-  gsap.fromTo(bar, { y: '-100%' }, { y: 0, duration: 0.5, ease: 'power3.out' });
-  gsap.to(topBar, { top: 52, duration: 0.5, ease: 'power3.out' });
+
+  document.getElementById('overlayRoot').classList.add('breaking-active');
+
+  const tl = gsap.timeline({ defaults: { duration: 0.5, ease: 'power3.inOut' } });
+  tl.to('#breakingBar', { y: 0 }, 0);
+  tl.to('#topBar', { y: BREAKING_H }, 0);
+  tl.to('.content-area', { top: TOP_BAR_H + BREAKING_H }, 0);
 }
 
 function hideBreakingNews() {
-  const bar = document.getElementById('breakingBar');
-  const topBar = document.getElementById('topBar');
+  document.getElementById('overlayRoot').classList.remove('breaking-active');
 
-  gsap.to(bar, {
-    y: '-100%',
-    duration: 0.5,
-    ease: 'power3.in',
-    onComplete: () => bar.classList.remove('visible'),
-  });
-  gsap.to(topBar, { top: 0, duration: 0.5, ease: 'power3.in' });
+  const tl = gsap.timeline({ defaults: { duration: 0.5, ease: 'power3.inOut' } });
+  tl.to('#breakingBar', { y: -BREAKING_H }, 0);
+  tl.to('#topBar', { y: 0 }, 0);
+  tl.to('.content-area', { top: TOP_BAR_H }, 0);
 }
 
 // ============================================================
