@@ -287,22 +287,19 @@
     align-items: center;
     justify-content: center;
     position: relative;
-    padding: 40px 80px;
-    gap: 0;
+    padding: 16px;
     min-width: 0;
   }
 
   .video-frame {
-    width: 78%;
-    max-width: 78%;
-    max-height: 700px;
+    width: 100%;
     aspect-ratio: 16 / 9;
+    max-height: 100%;
     background: #000;
     overflow: hidden;
     position: relative;
     opacity: 0;
     will-change: opacity, transform;
-    transition: max-height 0.5s ease;
   }
 
   .content-video,
@@ -317,10 +314,6 @@
   .video-frame.show-video .content-video { display: block; }
   .video-frame.show-iframe .content-iframe { display: block; background: #fff; }
 
-  .overlay-root.breaking-active .video-frame {
-    max-height: 648px;
-  }
-
   .content-video {
     width: 100%;
     height: 100%;
@@ -328,17 +321,20 @@
     display: block;
   }
 
-  /* LOWER THIRD */
+  /* LOWER THIRD — overlays bottom of video-frame */
   .lower-third {
-    width: 78%;
-    background: var(--panel);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(45, 45, 45, 0.92);
+    backdrop-filter: blur(8px);
     display: flex;
     align-items: stretch;
     height: 124px;
-    flex-shrink: 0;
+    z-index: 5;
     opacity: 0;
     will-change: opacity, transform;
-    position: relative;
   }
 
   .lt-progress {
@@ -465,33 +461,80 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    padding: 16px;
+    gap: 10px;
   }
 
-  .widget-section {
-    padding: 18px 22px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  .widget-tile {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
   }
 
-  .widget-section:last-child { border-bottom: none; }
+  .widget-tile-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+  }
 
-  .widget-title {
+  .widget-tile-label {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.4);
-    margin-bottom: 12px;
   }
 
-  .widget-placeholder {
+  .widget-tile-badge {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.25);
-    letter-spacing: 1px;
-    text-align: center;
-    padding: 20px 0;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: rgba(255, 255, 255, 0.35);
+    text-transform: uppercase;
   }
+
+  .widget-tile-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: #fff;
+    line-height: 1;
+    margin: 6px 0 4px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .widget-tile-change {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  .widget-tile-change.up { color: #22c55e; }
+  .widget-tile-change.down { color: #ef4444; }
+  .widget-tile-change-abs { color: rgba(255, 255, 255, 0.35); }
+
+  .widget-tile-bar {
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 2px;
+    background: var(--accent);
+  }
+  .widget-tile.up .widget-tile-bar { background: #22c55e; }
+  .widget-tile.down .widget-tile-bar { background: #ef4444; }
 
   /* TICKER STRIP */
   .ticker-strip {
@@ -653,33 +696,20 @@
         <source src="" type="video/mp4">
       </video>
       <iframe class="content-iframe" id="contentIframe" src="" frameborder="0"></iframe>
-    </div>
 
-    <div class="lower-third">
-      <div class="lt-progress"><div class="lt-progress-fill" id="ltProgressFill"></div></div>
-      <div class="lt-main">
-        <div class="lt-title" id="ltTitle"></div>
-        <div class="lt-meta" id="ltMeta"></div>
-      </div>
-      <div class="lt-qr-side">
-        <div class="lt-qr" id="ltQr"></div>
+      <div class="lower-third">
+        <div class="lt-progress"><div class="lt-progress-fill" id="ltProgressFill"></div></div>
+        <div class="lt-main">
+          <div class="lt-title" id="ltTitle"></div>
+          <div class="lt-meta" id="ltMeta"></div>
+        </div>
+        <div class="lt-qr-side">
+          <div class="lt-qr" id="ltQr"></div>
+        </div>
       </div>
     </div>
   </div>
-  <div class="widgets-panel">
-    <div class="widget-section">
-      <div class="widget-title">Market Overview</div>
-      <div class="widget-placeholder">— Coming soon —</div>
-    </div>
-    <div class="widget-section">
-      <div class="widget-title">Fear &amp; Greed</div>
-      <div class="widget-placeholder">— Coming soon —</div>
-    </div>
-    <div class="widget-section">
-      <div class="widget-title">Major Pairs</div>
-      <div class="widget-placeholder">— Coming soon —</div>
-    </div>
-  </div>
+  <div class="widgets-panel" id="widgetsPanel"></div>
 </div>
 
 <div class="ticker-strip" id="tickerStrip">
@@ -1069,6 +1099,45 @@ function scaleOverlay() {
 }
 window.addEventListener('resize', scaleOverlay);
 scaleOverlay();
+
+// ============================================================
+// Widgets panel — tiles
+// ============================================================
+const widgetTiles = [
+  { label: 'S&P 500',  badge: 'INDEX',     value: '5,204.18', changePct: 0.32, changeAbs: '+16.45' },
+  { label: 'NASDAQ',   badge: 'INDEX',     value: '18,420',   changePct: 0.45, changeAbs: '+82.30' },
+  { label: 'DOW',      badge: 'INDEX',     value: '43,210',   changePct: -0.12, changeAbs: '-51.85' },
+  { label: 'GOLD',     badge: 'COMMODITY', value: '$2,341',   changePct: 0.70, changeAbs: '+$16.30' },
+  { label: 'BTC/USD',  badge: 'CRYPTO',    value: '$68,420',  changePct: -0.55, changeAbs: '-$378' },
+  { label: 'EUR/USD',  badge: 'FX',        value: '1.0842',   changePct: 0.05, changeAbs: '+0.0005' },
+];
+
+function renderWidgetTiles() {
+  const el = document.getElementById('widgetsPanel');
+  if (!el) return;
+
+  el.innerHTML = widgetTiles.map(t => {
+    const dir = t.changePct >= 0 ? 'up' : 'down';
+    const arrow = t.changePct >= 0 ? '▲' : '▼';
+    const barWidth = Math.min(Math.abs(t.changePct) * 30, 100);
+    return `
+      <div class="widget-tile ${dir}">
+        <div class="widget-tile-row">
+          <span class="widget-tile-label">${t.label}</span>
+          <span class="widget-tile-badge">${t.badge}</span>
+        </div>
+        <div class="widget-tile-value">${t.value}</div>
+        <div class="widget-tile-row">
+          <span class="widget-tile-change ${dir}">${arrow} ${Math.abs(t.changePct).toFixed(2)}%</span>
+          <span class="widget-tile-change-abs">${t.changeAbs}</span>
+        </div>
+        <div class="widget-tile-bar" style="width:${barWidth}%"></div>
+      </div>
+    `;
+  }).join('');
+}
+
+renderWidgetTiles();
 
 // ============================================================
 // Content block (lower-third)
