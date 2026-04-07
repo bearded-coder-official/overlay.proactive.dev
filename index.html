@@ -120,23 +120,29 @@
   .breaking-scroll-wrapper {
     flex: 1;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    height: 100%;
   }
 
   .breaking-scroll {
     display: inline-flex;
+    align-items: center;
     white-space: nowrap;
     animation: breakingScroll 15s linear infinite;
+    line-height: 1;
   }
 
   .breaking-text {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 17px;
+    font-size: 21px;
     font-weight: 700;
     letter-spacing: 1px;
     color: #fff;
     padding: 0 40px;
     white-space: nowrap;
     text-transform: uppercase;
+    line-height: 1;
   }
 
   @keyframes breakingScroll {
