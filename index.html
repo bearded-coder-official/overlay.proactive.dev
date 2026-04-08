@@ -1744,6 +1744,18 @@ function connectWebSocket() {
     renderContentBlock(data.block);
   });
 
+  channel.bind('App\\Events\\ContentBlockStopped', () => {
+    console.log('ContentBlockStopped');
+    // Only fire playOutro if the frame is currently showing content,
+    // otherwise it would fade nothing and harass the idle state.
+    const frame = document.querySelector('.video-frame');
+    if (frame && (frame.classList.contains('show-video') ||
+                  frame.classList.contains('show-iframe') ||
+                  frame.classList.contains('show-voice'))) {
+      playOutro();
+    }
+  });
+
   channel.bind('App\\Events\\FooterUpdated', (data) => {
     updateFooter(data.footer);
   });
@@ -1754,6 +1766,11 @@ function connectWebSocket() {
 
   channel.bind('App\\Events\\MusicSettingsUpdated', (data) => {
     MusicPlayer.applySettings(data);
+  });
+
+  channel.bind('App\\Events\\OverlayRefreshRequested', () => {
+    console.log('[Overlay] Refresh requested by admin');
+    location.reload();
   });
 
   pusher.connection.bind('connected', () => {
