@@ -1661,6 +1661,9 @@ async function loadState() {
 
     renderBackground(data.background || {});
     applyBroadcastName(data.broadcast_name || 'Proactive Wire');
+    if (typeof data.next_countdown_sec === 'number' && data.next_countdown_sec > 0) {
+      NEXT_COUNTDOWN_SEC = data.next_countdown_sec;
+    }
     startClocks();
     renderTickerTape();
     renderFooter();
@@ -1732,6 +1735,10 @@ function connectWebSocket() {
 
     if (data.settings.broadcast_name) {
       applyBroadcastName(data.settings.broadcast_name);
+    }
+
+    if (typeof data.settings.next_countdown_sec === 'number' && data.settings.next_countdown_sec > 0) {
+      NEXT_COUNTDOWN_SEC = data.settings.next_countdown_sec;
     }
   });
 
@@ -2138,7 +2145,7 @@ function renderCompanyMeta(company) {
 // When the content block ends (playOutro):
 //   1. content + lower-third exit
 //   2. flyInIdle() — idle returns
-const NEXT_COUNTDOWN_SEC = 10;
+let NEXT_COUNTDOWN_SEC = 10; // overridden by /api/overlay/state.next_countdown_sec
 let nextCountdownTimer = null;
 
 // Initial state — idle visible centred, banner/lower-third hidden.
@@ -2301,15 +2308,18 @@ function showNextBanner(block, countdownSec) {
   );
 
   // Tick the countdown digit each second.
+  // We stop one tick early so "1" stays on screen for its full second
+  // and the content fires immediately after — never displaying "0".
   let remaining = countdownSec;
   if (nextCountdownTimer) clearInterval(nextCountdownTimer);
   nextCountdownTimer = setInterval(() => {
     remaining -= 1;
-    if (cdEl) cdEl.textContent = String(Math.max(0, remaining));
     if (remaining <= 0) {
       clearInterval(nextCountdownTimer);
       nextCountdownTimer = null;
+      return;
     }
+    if (cdEl) cdEl.textContent = String(remaining);
   }, 1000);
 }
 
