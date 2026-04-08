@@ -1,0 +1,4577 @@
+{
+  "language_code": null,
+  "segments": [
+    {
+      "text": "Pure Point Uranium Group Inc CEO Chris",
+      "start_time": 0.12,
+      "end_time": 2.64,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "Pure",
+          "start_time": 0.12,
+          "end_time": 0.32
+        },
+        {
+          "text": " ",
+          "start_time": 0.32,
+          "end_time": 0.36
+        },
+        {
+          "text": "Point",
+          "start_time": 0.36,
+          "end_time": 0.54
+        },
+        {
+          "text": " ",
+          "start_time": 0.54,
+          "end_time": 0.62
+        },
+        {
+          "text": "Uranium",
+          "start_time": 0.62,
+          "end_time": 0.99
+        },
+        {
+          "text": " ",
+          "start_time": 0.99,
+          "end_time": 1.08
+        },
+        {
+          "text": "Group",
+          "start_time": 1.08,
+          "end_time": 1.32
+        },
+        {
+          "text": " ",
+          "start_time": 1.32,
+          "end_time": 1.38
+        },
+        {
+          "text": "Inc",
+          "start_time": 1.38,
+          "end_time": 1.54
+        },
+        {
+          "text": " ",
+          "start_time": 1.54,
+          "end_time": 1.66
+        },
+        {
+          "text": "CEO",
+          "start_time": 1.66,
+          "end_time": 2.14
+        },
+        {
+          "text": " ",
+          "start_time": 2.14,
+          "end_time": 2.32
+        },
+        {
+          "text": "Chris",
+          "start_time": 2.32,
+          "end_time": 2.64
+        }
+      ]
+    },
+    {
+      "text": "Frostad talked with Proactive about the",
+      "start_time": 2.66,
+      "end_time": 4.68,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "Frostad",
+          "start_time": 2.66,
+          "end_time": 3.4
+        },
+        {
+          "text": " ",
+          "start_time": 3.4,
+          "end_time": 3.409
+        },
+        {
+          "text": "talked",
+          "start_time": 3.409,
+          "end_time": 3.64
+        },
+        {
+          "text": " ",
+          "start_time": 3.64,
+          "end_time": 3.68
+        },
+        {
+          "text": "with",
+          "start_time": 3.68,
+          "end_time": 3.79
+        },
+        {
+          "text": " ",
+          "start_time": 3.79,
+          "end_time": 3.8
+        },
+        {
+          "text": "Proactive",
+          "start_time": 3.8,
+          "end_time": 4.38
+        },
+        {
+          "text": " ",
+          "start_time": 4.38,
+          "end_time": 4.439
+        },
+        {
+          "text": "about",
+          "start_time": 4.44,
+          "end_time": 4.59
+        },
+        {
+          "text": " ",
+          "start_time": 4.59,
+          "end_time": 4.59
+        },
+        {
+          "text": "the",
+          "start_time": 4.59,
+          "end_time": 4.68
+        }
+      ]
+    },
+    {
+      "text": "company's latest uranium exploration",
+      "start_time": 4.72,
+      "end_time": 6.53,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "company's",
+          "start_time": 4.72,
+          "end_time": 5.11
+        },
+        {
+          "text": " ",
+          "start_time": 5.11,
+          "end_time": 5.22
+        },
+        {
+          "text": "latest",
+          "start_time": 5.22,
+          "end_time": 5.53
+        },
+        {
+          "text": " ",
+          "start_time": 5.53,
+          "end_time": 5.58
+        },
+        {
+          "text": "uranium",
+          "start_time": 5.58,
+          "end_time": 6.0
+        },
+        {
+          "text": " ",
+          "start_time": 6.0,
+          "end_time": 6.04
+        },
+        {
+          "text": "exploration",
+          "start_time": 6.04,
+          "end_time": 6.53
+        }
+      ]
+    },
+    {
+      "text": "progress at its Dorado project in northern",
+      "start_time": 6.62,
+      "end_time": 9.2,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "progress",
+          "start_time": 6.62,
+          "end_time": 7.47
+        },
+        {
+          "text": " ",
+          "start_time": 7.47,
+          "end_time": 7.479
+        },
+        {
+          "text": "at",
+          "start_time": 7.48,
+          "end_time": 7.54
+        },
+        {
+          "text": " ",
+          "start_time": 7.54,
+          "end_time": 7.58
+        },
+        {
+          "text": "its",
+          "start_time": 7.58,
+          "end_time": 7.729
+        },
+        {
+          "text": " ",
+          "start_time": 7.729,
+          "end_time": 7.739
+        },
+        {
+          "text": "Dorado",
+          "start_time": 7.74,
+          "end_time": 8.18
+        },
+        {
+          "text": " ",
+          "start_time": 8.18,
+          "end_time": 8.2
+        },
+        {
+          "text": "project",
+          "start_time": 8.2,
+          "end_time": 8.7
+        },
+        {
+          "text": " ",
+          "start_time": 8.7,
+          "end_time": 8.72
+        },
+        {
+          "text": "in",
+          "start_time": 8.72,
+          "end_time": 8.87
+        },
+        {
+          "text": " ",
+          "start_time": 8.87,
+          "end_time": 8.879
+        },
+        {
+          "text": "northern",
+          "start_time": 8.88,
+          "end_time": 9.2
+        }
+      ]
+    },
+    {
+      "text": "Saskatchewan, as well as the broader",
+      "start_time": 9.22,
+      "end_time": 11.3,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "Saskatchewan,",
+          "start_time": 9.22,
+          "end_time": 9.89
+        },
+        {
+          "text": " ",
+          "start_time": 9.89,
+          "end_time": 10.39
+        },
+        {
+          "text": "as",
+          "start_time": 10.39,
+          "end_time": 10.54
+        },
+        {
+          "text": " ",
+          "start_time": 10.54,
+          "end_time": 10.6
+        },
+        {
+          "text": "well",
+          "start_time": 10.6,
+          "end_time": 10.7
+        },
+        {
+          "text": " ",
+          "start_time": 10.7,
+          "end_time": 10.74
+        },
+        {
+          "text": "as",
+          "start_time": 10.74,
+          "end_time": 10.84
+        },
+        {
+          "text": " ",
+          "start_time": 10.84,
+          "end_time": 10.879
+        },
+        {
+          "text": "the",
+          "start_time": 10.88,
+          "end_time": 10.96
+        },
+        {
+          "text": " ",
+          "start_time": 10.96,
+          "end_time": 10.98
+        },
+        {
+          "text": "broader",
+          "start_time": 10.98,
+          "end_time": 11.3
+        }
+      ]
+    },
+    {
+      "text": "process behind making and advancing a",
+      "start_time": 11.31,
+      "end_time": 13.29,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "process",
+          "start_time": 11.31,
+          "end_time": 11.83
+        },
+        {
+          "text": " ",
+          "start_time": 11.83,
+          "end_time": 11.84
+        },
+        {
+          "text": "behind",
+          "start_time": 11.84,
+          "end_time": 12.15
+        },
+        {
+          "text": " ",
+          "start_time": 12.15,
+          "end_time": 12.18
+        },
+        {
+          "text": "making",
+          "start_time": 12.18,
+          "end_time": 12.57
+        },
+        {
+          "text": " ",
+          "start_time": 12.57,
+          "end_time": 12.58
+        },
+        {
+          "text": "and",
+          "start_time": 12.58,
+          "end_time": 12.65
+        },
+        {
+          "text": " ",
+          "start_time": 12.65,
+          "end_time": 12.68
+        },
+        {
+          "text": "advancing",
+          "start_time": 12.68,
+          "end_time": 13.25
+        },
+        {
+          "text": " ",
+          "start_time": 13.25,
+          "end_time": 13.28
+        },
+        {
+          "text": "a",
+          "start_time": 13.28,
+          "end_time": 13.29
+        }
+      ]
+    },
+    {
+      "text": "discovery.",
+      "start_time": 13.34,
+      "end_time": 13.83,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "discovery.",
+          "start_time": 13.34,
+          "end_time": 13.83
+        }
+      ]
+    },
+    {
+      "text": "Frostad explained that Pure Point Uranium",
+      "start_time": 14.86,
+      "end_time": 16.71,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "Frostad",
+          "start_time": 14.86,
+          "end_time": 15.24
+        },
+        {
+          "text": " ",
+          "start_time": 15.24,
+          "end_time": 15.26
+        },
+        {
+          "text": "explained",
+          "start_time": 15.26,
+          "end_time": 15.67
+        },
+        {
+          "text": " ",
+          "start_time": 15.67,
+          "end_time": 15.7
+        },
+        {
+          "text": "that",
+          "start_time": 15.7,
+          "end_time": 15.83
+        },
+        {
+          "text": " ",
+          "start_time": 15.83,
+          "end_time": 15.86
+        },
+        {
+          "text": "Pure",
+          "start_time": 15.86,
+          "end_time": 16.0
+        },
+        {
+          "text": " ",
+          "start_time": 16.0,
+          "end_time": 16.1
+        },
+        {
+          "text": "Point",
+          "start_time": 16.1,
+          "end_time": 16.28
+        },
+        {
+          "text": " ",
+          "start_time": 16.28,
+          "end_time": 16.36
+        },
+        {
+          "text": "Uranium",
+          "start_time": 16.36,
+          "end_time": 16.71
+        }
+      ]
+    },
+    {
+      "text": "Group operates in one of the world's most",
+      "start_time": 16.78,
+      "end_time": 18.53,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "Group",
+          "start_time": 16.78,
+          "end_time": 17.14
+        },
+        {
+          "text": " ",
+          "start_time": 17.14,
+          "end_time": 17.22
+        },
+        {
+          "text": "operates",
+          "start_time": 17.22,
+          "end_time": 17.59
+        },
+        {
+          "text": " ",
+          "start_time": 17.59,
+          "end_time": 17.6
+        },
+        {
+          "text": "in",
+          "start_time": 17.6,
+          "end_time": 17.71
+        },
+        {
+          "text": " ",
+          "start_time": 17.71,
+          "end_time": 17.74
+        },
+        {
+          "text": "one",
+          "start_time": 17.74,
+          "end_time": 17.78
+        },
+        {
+          "text": " ",
+          "start_time": 17.78,
+          "end_time": 17.82
+        },
+        {
+          "text": "of",
+          "start_time": 17.82,
+          "end_time": 17.87
+        },
+        {
+          "text": " ",
+          "start_time": 17.87,
+          "end_time": 17.9
+        },
+        {
+          "text": "the",
+          "start_time": 17.9,
+          "end_time": 18.0
+        },
+        {
+          "text": " ",
+          "start_time": 18.0,
+          "end_time": 18.04
+        },
+        {
+          "text": "world's",
+          "start_time": 18.04,
+          "end_time": 18.3
+        },
+        {
+          "text": " ",
+          "start_time": 18.3,
+          "end_time": 18.36
+        },
+        {
+          "text": "most",
+          "start_time": 18.36,
+          "end_time": 18.53
+        }
+      ]
+    },
+    {
+      "text": "prolific uranium regions and works",
+      "start_time": 18.56,
+      "end_time": 20.78,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "prolific",
+          "start_time": 18.56,
+          "end_time": 19.08
+        },
+        {
+          "text": " ",
+          "start_time": 19.08,
+          "end_time": 19.14
+        },
+        {
+          "text": "uranium",
+          "start_time": 19.14,
+          "end_time": 19.55
+        },
+        {
+          "text": " ",
+          "start_time": 19.55,
+          "end_time": 19.55
+        },
+        {
+          "text": "regions",
+          "start_time": 19.55,
+          "end_time": 20.0
+        },
+        {
+          "text": " ",
+          "start_time": 20.0,
+          "end_time": 20.4
+        },
+        {
+          "text": "and",
+          "start_time": 20.4,
+          "end_time": 20.54
+        },
+        {
+          "text": " ",
+          "start_time": 20.54,
+          "end_time": 20.599
+        },
+        {
+          "text": "works",
+          "start_time": 20.6,
+          "end_time": 20.78
+        }
+      ]
+    },
+    {
+      "text": "alongside major partners including Cameco,",
+      "start_time": 20.84,
+      "end_time": 23.08,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "alongside",
+          "start_time": 20.84,
+          "end_time": 21.34
+        },
+        {
+          "text": " ",
+          "start_time": 21.34,
+          "end_time": 21.44
+        },
+        {
+          "text": "major",
+          "start_time": 21.44,
+          "end_time": 21.74
+        },
+        {
+          "text": " ",
+          "start_time": 21.74,
+          "end_time": 21.78
+        },
+        {
+          "text": "partners",
+          "start_time": 21.78,
+          "end_time": 22.24
+        },
+        {
+          "text": " ",
+          "start_time": 22.24,
+          "end_time": 22.26
+        },
+        {
+          "text": "including",
+          "start_time": 22.26,
+          "end_time": 22.69
+        },
+        {
+          "text": " ",
+          "start_time": 22.69,
+          "end_time": 22.72
+        },
+        {
+          "text": "Cameco,",
+          "start_time": 22.72,
+          "end_time": 23.08
+        }
+      ]
+    },
+    {
+      "text": "Orano, and IsoEnergy.",
+      "start_time": 23.54,
+      "end_time": 25.19,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "Orano,",
+          "start_time": 23.54,
+          "end_time": 24.24
+        },
+        {
+          "text": " ",
+          "start_time": 24.24,
+          "end_time": 24.28
+        },
+        {
+          "text": "and",
+          "start_time": 24.28,
+          "end_time": 24.44
+        },
+        {
+          "text": " ",
+          "start_time": 24.44,
+          "end_time": 24.5
+        },
+        {
+          "text": "IsoEnergy.",
+          "start_time": 24.5,
+          "end_time": 25.19
+        }
+      ]
+    },
+    {
+      "text": "The discussion focused on the company's",
+      "start_time": 26.22,
+      "end_time": 27.88,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "The",
+          "start_time": 26.22,
+          "end_time": 26.28
+        },
+        {
+          "text": " ",
+          "start_time": 26.28,
+          "end_time": 26.3
+        },
+        {
+          "text": "discussion",
+          "start_time": 26.3,
+          "end_time": 26.8
+        },
+        {
+          "text": " ",
+          "start_time": 26.8,
+          "end_time": 26.84
+        },
+        {
+          "text": "focused",
+          "start_time": 26.84,
+          "end_time": 27.18
+        },
+        {
+          "text": " ",
+          "start_time": 27.18,
+          "end_time": 27.22
+        },
+        {
+          "text": "on",
+          "start_time": 27.22,
+          "end_time": 27.29
+        },
+        {
+          "text": " ",
+          "start_time": 27.29,
+          "end_time": 27.3
+        },
+        {
+          "text": "the",
+          "start_time": 27.3,
+          "end_time": 27.38
+        },
+        {
+          "text": " ",
+          "start_time": 27.38,
+          "end_time": 27.4
+        },
+        {
+          "text": "company's",
+          "start_time": 27.4,
+          "end_time": 27.88
+        }
+      ]
+    },
+    {
+      "text": "recent discovery at the Dorado project,",
+      "start_time": 27.92,
+      "end_time": 29.82,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "recent",
+          "start_time": 27.92,
+          "end_time": 28.18
+        },
+        {
+          "text": " ",
+          "start_time": 28.18,
+          "end_time": 28.2
+        },
+        {
+          "text": "discovery",
+          "start_time": 28.2,
+          "end_time": 28.74
+        },
+        {
+          "text": " ",
+          "start_time": 28.74,
+          "end_time": 28.76
+        },
+        {
+          "text": "at",
+          "start_time": 28.76,
+          "end_time": 28.85
+        },
+        {
+          "text": " ",
+          "start_time": 28.85,
+          "end_time": 28.86
+        },
+        {
+          "text": "the",
+          "start_time": 28.86,
+          "end_time": 28.94
+        },
+        {
+          "text": " ",
+          "start_time": 28.94,
+          "end_time": 28.96
+        },
+        {
+          "text": "Dorado",
+          "start_time": 28.96,
+          "end_time": 29.36
+        },
+        {
+          "text": " ",
+          "start_time": 29.36,
+          "end_time": 29.38
+        },
+        {
+          "text": "project,",
+          "start_time": 29.38,
+          "end_time": 29.82
+        }
+      ]
+    },
+    {
+      "text": "specifically within the Nova zone, where",
+      "start_time": 30.14,
+      "end_time": 32.38,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "specifically",
+          "start_time": 30.14,
+          "end_time": 30.8
+        },
+        {
+          "text": " ",
+          "start_time": 30.8,
+          "end_time": 30.84
+        },
+        {
+          "text": "within",
+          "start_time": 30.84,
+          "end_time": 31.07
+        },
+        {
+          "text": " ",
+          "start_time": 31.07,
+          "end_time": 31.1
+        },
+        {
+          "text": "the",
+          "start_time": 31.1,
+          "end_time": 31.2
+        },
+        {
+          "text": " ",
+          "start_time": 31.2,
+          "end_time": 31.24
+        },
+        {
+          "text": "Nova",
+          "start_time": 31.24,
+          "end_time": 31.48
+        },
+        {
+          "text": " ",
+          "start_time": 31.48,
+          "end_time": 31.6
+        },
+        {
+          "text": "zone,",
+          "start_time": 31.6,
+          "end_time": 31.86
+        },
+        {
+          "text": " ",
+          "start_time": 31.86,
+          "end_time": 32.259
+        },
+        {
+          "text": "where",
+          "start_time": 32.259,
+          "end_time": 32.38
+        }
+      ]
+    },
+    {
+      "text": "initial drilling intersected high-grade",
+      "start_time": 32.439,
+      "end_time": 34.64,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "initial",
+          "start_time": 32.439,
+          "end_time": 32.86
+        },
+        {
+          "text": " ",
+          "start_time": 32.86,
+          "end_time": 32.9
+        },
+        {
+          "text": "drilling",
+          "start_time": 32.9,
+          "end_time": 33.36
+        },
+        {
+          "text": " ",
+          "start_time": 33.36,
+          "end_time": 33.4
+        },
+        {
+          "text": "intersected",
+          "start_time": 33.4,
+          "end_time": 34.0
+        },
+        {
+          "text": " ",
+          "start_time": 34.0,
+          "end_time": 34.06
+        },
+        {
+          "text": "high-grade",
+          "start_time": 34.06,
+          "end_time": 34.64
+        }
+      ]
+    },
+    {
+      "text": "uranium mineralization.",
+      "start_time": 34.76,
+      "end_time": 36.04,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "uranium",
+          "start_time": 34.76,
+          "end_time": 35.2
+        },
+        {
+          "text": " ",
+          "start_time": 35.2,
+          "end_time": 35.24
+        },
+        {
+          "text": "mineralization.",
+          "start_time": 35.24,
+          "end_time": 36.04
+        }
+      ]
+    },
+    {
+      "text": "Proactive.",
+      "start_time": 37.14,
+      "end_time": 37.7,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "Proactive.",
+          "start_time": 37.14,
+          "end_time": 37.7
+        }
+      ]
+    },
+    {
+      "text": "Welcome back inside our Proactive",
+      "start_time": 38.36,
+      "end_time": 39.75,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "Welcome",
+          "start_time": 38.36,
+          "end_time": 38.62
+        },
+        {
+          "text": " ",
+          "start_time": 38.62,
+          "end_time": 38.64
+        },
+        {
+          "text": "back",
+          "start_time": 38.64,
+          "end_time": 38.82
+        },
+        {
+          "text": " ",
+          "start_time": 38.82,
+          "end_time": 38.86
+        },
+        {
+          "text": "inside",
+          "start_time": 38.86,
+          "end_time": 39.11
+        },
+        {
+          "text": " ",
+          "start_time": 39.11,
+          "end_time": 39.14
+        },
+        {
+          "text": "our",
+          "start_time": 39.14,
+          "end_time": 39.24
+        },
+        {
+          "text": " ",
+          "start_time": 39.24,
+          "end_time": 39.28
+        },
+        {
+          "text": "Proactive",
+          "start_time": 39.28,
+          "end_time": 39.75
+        }
+      ]
+    },
+    {
+      "text": "newsroom. Joining me now is Chris Frostad,",
+      "start_time": 39.75,
+      "end_time": 42.66,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "newsroom.",
+          "start_time": 39.75,
+          "end_time": 40.78
+        },
+        {
+          "text": " ",
+          "start_time": 40.78,
+          "end_time": 40.9
+        },
+        {
+          "text": "Joining",
+          "start_time": 40.9,
+          "end_time": 41.14
+        },
+        {
+          "text": " ",
+          "start_time": 41.14,
+          "end_time": 41.16
+        },
+        {
+          "text": "me",
+          "start_time": 41.16,
+          "end_time": 41.28
+        },
+        {
+          "text": " ",
+          "start_time": 41.28,
+          "end_time": 41.32
+        },
+        {
+          "text": "now",
+          "start_time": 41.32,
+          "end_time": 41.589
+        },
+        {
+          "text": " ",
+          "start_time": 41.589,
+          "end_time": 41.64
+        },
+        {
+          "text": "is",
+          "start_time": 41.64,
+          "end_time": 41.76
+        },
+        {
+          "text": " ",
+          "start_time": 41.76,
+          "end_time": 41.8
+        },
+        {
+          "text": "Chris",
+          "start_time": 41.8,
+          "end_time": 42.02
+        },
+        {
+          "text": " ",
+          "start_time": 42.02,
+          "end_time": 42.12
+        },
+        {
+          "text": "Frostad,",
+          "start_time": 42.12,
+          "end_time": 42.66
+        }
+      ]
+    },
+    {
+      "text": "CEO of Pure Point Uranium Group.",
+      "start_time": 43.06,
+      "end_time": 44.96,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "CEO",
+          "start_time": 43.06,
+          "end_time": 43.62
+        },
+        {
+          "text": " ",
+          "start_time": 43.62,
+          "end_time": 43.629
+        },
+        {
+          "text": "of",
+          "start_time": 43.629,
+          "end_time": 43.8
+        },
+        {
+          "text": " ",
+          "start_time": 43.8,
+          "end_time": 43.84
+        },
+        {
+          "text": "Pure",
+          "start_time": 43.84,
+          "end_time": 43.96
+        },
+        {
+          "text": " ",
+          "start_time": 43.96,
+          "end_time": 44.06
+        },
+        {
+          "text": "Point",
+          "start_time": 44.06,
+          "end_time": 44.26
+        },
+        {
+          "text": " ",
+          "start_time": 44.26,
+          "end_time": 44.3
+        },
+        {
+          "text": "Uranium",
+          "start_time": 44.3,
+          "end_time": 44.65
+        },
+        {
+          "text": " ",
+          "start_time": 44.65,
+          "end_time": 44.72
+        },
+        {
+          "text": "Group.",
+          "start_time": 44.72,
+          "end_time": 44.96
+        }
+      ]
+    },
+    {
+      "text": "Chris, good to see you. How are you?",
+      "start_time": 45.56,
+      "end_time": 47.18,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "Chris,",
+          "start_time": 45.56,
+          "end_time": 45.86
+        },
+        {
+          "text": " ",
+          "start_time": 45.86,
+          "end_time": 46.08
+        },
+        {
+          "text": "good",
+          "start_time": 46.08,
+          "end_time": 46.19
+        },
+        {
+          "text": " ",
+          "start_time": 46.19,
+          "end_time": 46.2
+        },
+        {
+          "text": "to",
+          "start_time": 46.2,
+          "end_time": 46.3
+        },
+        {
+          "text": " ",
+          "start_time": 46.3,
+          "end_time": 46.32
+        },
+        {
+          "text": "see",
+          "start_time": 46.32,
+          "end_time": 46.46
+        },
+        {
+          "text": " ",
+          "start_time": 46.46,
+          "end_time": 46.5
+        },
+        {
+          "text": "you.",
+          "start_time": 46.5,
+          "end_time": 46.74
+        },
+        {
+          "text": " ",
+          "start_time": 46.74,
+          "end_time": 46.8
+        },
+        {
+          "text": "How",
+          "start_time": 46.8,
+          "end_time": 46.89
+        },
+        {
+          "text": " ",
+          "start_time": 46.89,
+          "end_time": 46.94
+        },
+        {
+          "text": "are",
+          "start_time": 46.94,
+          "end_time": 47.0
+        },
+        {
+          "text": " ",
+          "start_time": 47.0,
+          "end_time": 47.1
+        },
+        {
+          "text": "you?",
+          "start_time": 47.1,
+          "end_time": 47.18
+        }
+      ]
+    },
+    {
+      "text": "Good to be here. I'm doing really well",
+      "start_time": 47.98,
+      "end_time": 49.4,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "Good",
+          "start_time": 47.98,
+          "end_time": 48.07
+        },
+        {
+          "text": " ",
+          "start_time": 48.07,
+          "end_time": 48.08
+        },
+        {
+          "text": "to",
+          "start_time": 48.08,
+          "end_time": 48.14
+        },
+        {
+          "text": " ",
+          "start_time": 48.14,
+          "end_time": 48.16
+        },
+        {
+          "text": "be",
+          "start_time": 48.16,
+          "end_time": 48.28
+        },
+        {
+          "text": " ",
+          "start_time": 48.28,
+          "end_time": 48.32
+        },
+        {
+          "text": "here.",
+          "start_time": 48.32,
+          "end_time": 48.72
+        },
+        {
+          "text": " ",
+          "start_time": 48.72,
+          "end_time": 48.78
+        },
+        {
+          "text": "I'm",
+          "start_time": 48.78,
+          "end_time": 48.86
+        },
+        {
+          "text": " ",
+          "start_time": 48.86,
+          "end_time": 48.88
+        },
+        {
+          "text": "doing",
+          "start_time": 48.88,
+          "end_time": 49.05
+        },
+        {
+          "text": " ",
+          "start_time": 49.05,
+          "end_time": 49.06
+        },
+        {
+          "text": "really",
+          "start_time": 49.06,
+          "end_time": 49.269
+        },
+        {
+          "text": " ",
+          "start_time": 49.269,
+          "end_time": 49.28
+        },
+        {
+          "text": "well",
+          "start_time": 49.28,
+          "end_time": 49.4
+        }
+      ]
+    },
+    {
+      "text": "right now. We're getting out of the",
+      "start_time": 49.46,
+      "end_time": 50.7,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "right",
+          "start_time": 49.46,
+          "end_time": 49.58
+        },
+        {
+          "text": " ",
+          "start_time": 49.58,
+          "end_time": 49.65
+        },
+        {
+          "text": "now.",
+          "start_time": 49.65,
+          "end_time": 50.14
+        },
+        {
+          "text": " ",
+          "start_time": 50.14,
+          "end_time": 50.15
+        },
+        {
+          "text": "We're",
+          "start_time": 50.15,
+          "end_time": 50.24
+        },
+        {
+          "text": " ",
+          "start_time": 50.24,
+          "end_time": 50.25
+        },
+        {
+          "text": "getting",
+          "start_time": 50.25,
+          "end_time": 50.449
+        },
+        {
+          "text": " ",
+          "start_time": 50.449,
+          "end_time": 50.48
+        },
+        {
+          "text": "out",
+          "start_time": 50.48,
+          "end_time": 50.57
+        },
+        {
+          "text": " ",
+          "start_time": 50.57,
+          "end_time": 50.58
+        },
+        {
+          "text": "of",
+          "start_time": 50.58,
+          "end_time": 50.63
+        },
+        {
+          "text": " ",
+          "start_time": 50.63,
+          "end_time": 50.64
+        },
+        {
+          "text": "the",
+          "start_time": 50.64,
+          "end_time": 50.7
+        }
+      ]
+    },
+    {
+      "text": "wintertime, and things are looking a",
+      "start_time": 50.74,
+      "end_time": 52.04,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "wintertime,",
+          "start_time": 50.74,
+          "end_time": 51.26
+        },
+        {
+          "text": " ",
+          "start_time": 51.26,
+          "end_time": 51.28
+        },
+        {
+          "text": "and",
+          "start_time": 51.28,
+          "end_time": 51.449
+        },
+        {
+          "text": " ",
+          "start_time": 51.449,
+          "end_time": 51.48
+        },
+        {
+          "text": "things",
+          "start_time": 51.48,
+          "end_time": 51.65
+        },
+        {
+          "text": " ",
+          "start_time": 51.65,
+          "end_time": 51.68
+        },
+        {
+          "text": "are",
+          "start_time": 51.68,
+          "end_time": 51.74
+        },
+        {
+          "text": " ",
+          "start_time": 51.74,
+          "end_time": 51.78
+        },
+        {
+          "text": "looking",
+          "start_time": 51.78,
+          "end_time": 51.99
+        },
+        {
+          "text": " ",
+          "start_time": 51.99,
+          "end_time": 52.02
+        },
+        {
+          "text": "a",
+          "start_time": 52.02,
+          "end_time": 52.04
+        }
+      ]
+    },
+    {
+      "text": "little sunnier here in Toronto.",
+      "start_time": 52.08,
+      "end_time": 54.08,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "little",
+          "start_time": 52.08,
+          "end_time": 52.269
+        },
+        {
+          "text": " ",
+          "start_time": 52.269,
+          "end_time": 52.3
+        },
+        {
+          "text": "sunnier",
+          "start_time": 52.3,
+          "end_time": 52.65
+        },
+        {
+          "text": " ",
+          "start_time": 52.65,
+          "end_time": 52.68
+        },
+        {
+          "text": "here",
+          "start_time": 52.68,
+          "end_time": 52.78
+        },
+        {
+          "text": " ",
+          "start_time": 52.78,
+          "end_time": 52.8
+        },
+        {
+          "text": "in",
+          "start_time": 52.8,
+          "end_time": 52.88
+        },
+        {
+          "text": " ",
+          "start_time": 52.88,
+          "end_time": 52.9
+        },
+        {
+          "text": "Toronto.",
+          "start_time": 52.9,
+          "end_time": 54.08
+        }
+      ]
+    },
+    {
+      "text": "For those not familiar, give us some",
+      "start_time": 54.12,
+      "end_time": 55.79,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "For",
+          "start_time": 54.12,
+          "end_time": 54.22
+        },
+        {
+          "text": " ",
+          "start_time": 54.22,
+          "end_time": 54.26
+        },
+        {
+          "text": "those",
+          "start_time": 54.26,
+          "end_time": 54.43
+        },
+        {
+          "text": " ",
+          "start_time": 54.43,
+          "end_time": 54.48
+        },
+        {
+          "text": "not",
+          "start_time": 54.48,
+          "end_time": 54.61
+        },
+        {
+          "text": " ",
+          "start_time": 54.61,
+          "end_time": 54.64
+        },
+        {
+          "text": "familiar,",
+          "start_time": 54.64,
+          "end_time": 55.07
+        },
+        {
+          "text": " ",
+          "start_time": 55.07,
+          "end_time": 55.4
+        },
+        {
+          "text": "give",
+          "start_time": 55.4,
+          "end_time": 55.49
+        },
+        {
+          "text": " ",
+          "start_time": 55.49,
+          "end_time": 55.52
+        },
+        {
+          "text": "us",
+          "start_time": 55.52,
+          "end_time": 55.61
+        },
+        {
+          "text": " ",
+          "start_time": 55.61,
+          "end_time": 55.62
+        },
+        {
+          "text": "some",
+          "start_time": 55.62,
+          "end_time": 55.79
+        }
+      ]
+    },
+    {
+      "text": "background on the company.",
+      "start_time": 55.86,
+      "end_time": 56.66,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "background",
+          "start_time": 55.86,
+          "end_time": 56.14
+        },
+        {
+          "text": " ",
+          "start_time": 56.14,
+          "end_time": 56.16
+        },
+        {
+          "text": "on",
+          "start_time": 56.16,
+          "end_time": 56.23
+        },
+        {
+          "text": " ",
+          "start_time": 56.23,
+          "end_time": 56.26
+        },
+        {
+          "text": "the",
+          "start_time": 56.26,
+          "end_time": 56.32
+        },
+        {
+          "text": " ",
+          "start_time": 56.32,
+          "end_time": 56.36
+        },
+        {
+          "text": "company.",
+          "start_time": 56.36,
+          "end_time": 56.66
+        }
+      ]
+    },
+    {
+      "text": "Pure Point is a uranium exploration",
+      "start_time": 57.52,
+      "end_time": 59.54,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "Pure",
+          "start_time": 57.52,
+          "end_time": 57.66
+        },
+        {
+          "text": " ",
+          "start_time": 57.66,
+          "end_time": 57.76
+        },
+        {
+          "text": "Point",
+          "start_time": 57.76,
+          "end_time": 58.08
+        },
+        {
+          "text": " ",
+          "start_time": 58.08,
+          "end_time": 58.12
+        },
+        {
+          "text": "is",
+          "start_time": 58.12,
+          "end_time": 58.21
+        },
+        {
+          "text": " ",
+          "start_time": 58.21,
+          "end_time": 58.3
+        },
+        {
+          "text": "a",
+          "start_time": 58.3,
+          "end_time": 58.31
+        },
+        {
+          "text": " ",
+          "start_time": 58.31,
+          "end_time": 58.36
+        },
+        {
+          "text": "uranium",
+          "start_time": 58.36,
+          "end_time": 58.8
+        },
+        {
+          "text": " ",
+          "start_time": 58.8,
+          "end_time": 58.86
+        },
+        {
+          "text": "exploration",
+          "start_time": 58.86,
+          "end_time": 59.54
+        }
+      ]
+    },
+    {
+      "text": "company operating in northern",
+      "start_time": 59.58,
+      "end_time": 61.02,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "company",
+          "start_time": 59.58,
+          "end_time": 59.98
+        },
+        {
+          "text": " ",
+          "start_time": 59.98,
+          "end_time": 60.04
+        },
+        {
+          "text": "operating",
+          "start_time": 60.04,
+          "end_time": 60.49
+        },
+        {
+          "text": " ",
+          "start_time": 60.49,
+          "end_time": 60.52
+        },
+        {
+          "text": "in",
+          "start_time": 60.52,
+          "end_time": 60.6
+        },
+        {
+          "text": " ",
+          "start_time": 60.6,
+          "end_time": 60.62
+        },
+        {
+          "text": "northern",
+          "start_time": 60.62,
+          "end_time": 61.02
+        }
+      ]
+    },
+    {
+      "text": "Saskatchewan, where all of Canada's",
+      "start_time": 61.04,
+      "end_time": 62.96,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "Saskatchewan,",
+          "start_time": 61.04,
+          "end_time": 61.769
+        },
+        {
+          "text": " ",
+          "start_time": 61.769,
+          "end_time": 62.02
+        },
+        {
+          "text": "where",
+          "start_time": 62.02,
+          "end_time": 62.18
+        },
+        {
+          "text": " ",
+          "start_time": 62.18,
+          "end_time": 62.26
+        },
+        {
+          "text": "all",
+          "start_time": 62.26,
+          "end_time": 62.39
+        },
+        {
+          "text": " ",
+          "start_time": 62.39,
+          "end_time": 62.42
+        },
+        {
+          "text": "of",
+          "start_time": 62.42,
+          "end_time": 62.52
+        },
+        {
+          "text": " ",
+          "start_time": 62.52,
+          "end_time": 62.56
+        },
+        {
+          "text": "Canada's",
+          "start_time": 62.56,
+          "end_time": 62.96
+        }
+      ]
+    },
+    {
+      "text": "uranium comes from.",
+      "start_time": 63.0,
+      "end_time": 63.87,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "uranium",
+          "start_time": 63.0,
+          "end_time": 63.38
+        },
+        {
+          "text": " ",
+          "start_time": 63.38,
+          "end_time": 63.42
+        },
+        {
+          "text": "comes",
+          "start_time": 63.42,
+          "end_time": 63.64
+        },
+        {
+          "text": " ",
+          "start_time": 63.64,
+          "end_time": 63.68
+        },
+        {
+          "text": "from.",
+          "start_time": 63.68,
+          "end_time": 63.87
+        }
+      ]
+    },
+    {
+      "text": "We work with significant partners",
+      "start_time": 64.72,
+      "end_time": 66.32,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "We",
+          "start_time": 64.72,
+          "end_time": 64.8
+        },
+        {
+          "text": " ",
+          "start_time": 64.8,
+          "end_time": 64.84
+        },
+        {
+          "text": "work",
+          "start_time": 64.84,
+          "end_time": 65.019
+        },
+        {
+          "text": " ",
+          "start_time": 65.019,
+          "end_time": 65.06
+        },
+        {
+          "text": "with",
+          "start_time": 65.06,
+          "end_time": 65.2
+        },
+        {
+          "text": " ",
+          "start_time": 65.2,
+          "end_time": 65.239
+        },
+        {
+          "text": "significant",
+          "start_time": 65.239,
+          "end_time": 65.8
+        },
+        {
+          "text": " ",
+          "start_time": 65.8,
+          "end_time": 65.84
+        },
+        {
+          "text": "partners",
+          "start_time": 65.84,
+          "end_time": 66.32
+        }
+      ]
+    },
+    {
+      "text": "including Cameco, Orano, and IsoEnergy.",
+      "start_time": 66.34,
+      "end_time": 69.82,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "including",
+          "start_time": 66.34,
+          "end_time": 66.73
+        },
+        {
+          "text": " ",
+          "start_time": 66.73,
+          "end_time": 66.78
+        },
+        {
+          "text": "Cameco,",
+          "start_time": 66.78,
+          "end_time": 67.46
+        },
+        {
+          "text": " ",
+          "start_time": 67.46,
+          "end_time": 67.5
+        },
+        {
+          "text": "Orano,",
+          "start_time": 67.5,
+          "end_time": 68.12
+        },
+        {
+          "text": " ",
+          "start_time": 68.12,
+          "end_time": 68.14
+        },
+        {
+          "text": "and",
+          "start_time": 68.14,
+          "end_time": 68.28
+        },
+        {
+          "text": " ",
+          "start_time": 68.28,
+          "end_time": 68.34
+        },
+        {
+          "text": "IsoEnergy.",
+          "start_time": 68.34,
+          "end_time": 69.82
+        }
+      ]
+    },
+    {
+      "text": "Most recently, we've been following up on",
+      "start_time": 69.88,
+      "end_time": 71.54,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "Most",
+          "start_time": 69.88,
+          "end_time": 70.12
+        },
+        {
+          "text": " ",
+          "start_time": 70.12,
+          "end_time": 70.14
+        },
+        {
+          "text": "recently,",
+          "start_time": 70.14,
+          "end_time": 70.5
+        },
+        {
+          "text": " ",
+          "start_time": 70.5,
+          "end_time": 70.6
+        },
+        {
+          "text": "we've",
+          "start_time": 70.6,
+          "end_time": 70.71
+        },
+        {
+          "text": " ",
+          "start_time": 70.71,
+          "end_time": 70.72
+        },
+        {
+          "text": "been",
+          "start_time": 70.72,
+          "end_time": 70.89
+        },
+        {
+          "text": " ",
+          "start_time": 70.89,
+          "end_time": 70.92
+        },
+        {
+          "text": "following",
+          "start_time": 70.92,
+          "end_time": 71.27
+        },
+        {
+          "text": " ",
+          "start_time": 71.27,
+          "end_time": 71.32
+        },
+        {
+          "text": "up",
+          "start_time": 71.32,
+          "end_time": 71.43
+        },
+        {
+          "text": " ",
+          "start_time": 71.43,
+          "end_time": 71.46
+        },
+        {
+          "text": "on",
+          "start_time": 71.46,
+          "end_time": 71.54
+        }
+      ]
+    },
+    {
+      "text": "our Dorado project, a joint venture with",
+      "start_time": 71.56,
+      "end_time": 73.9,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "our",
+          "start_time": 71.56,
+          "end_time": 71.7
+        },
+        {
+          "text": " ",
+          "start_time": 71.7,
+          "end_time": 71.72
+        },
+        {
+          "text": "Dorado",
+          "start_time": 71.72,
+          "end_time": 72.08
+        },
+        {
+          "text": " ",
+          "start_time": 72.08,
+          "end_time": 72.179
+        },
+        {
+          "text": "project,",
+          "start_time": 72.18,
+          "end_time": 72.61
+        },
+        {
+          "text": " ",
+          "start_time": 72.61,
+          "end_time": 73.06
+        },
+        {
+          "text": "a",
+          "start_time": 73.06,
+          "end_time": 73.16
+        },
+        {
+          "text": " ",
+          "start_time": 73.16,
+          "end_time": 73.2
+        },
+        {
+          "text": "joint",
+          "start_time": 73.2,
+          "end_time": 73.42
+        },
+        {
+          "text": " ",
+          "start_time": 73.42,
+          "end_time": 73.46
+        },
+        {
+          "text": "venture",
+          "start_time": 73.46,
+          "end_time": 73.72
+        },
+        {
+          "text": " ",
+          "start_time": 73.72,
+          "end_time": 73.76
+        },
+        {
+          "text": "with",
+          "start_time": 73.76,
+          "end_time": 73.9
+        }
+      ]
+    },
+    {
+      "text": "IsoEnergy.",
+      "start_time": 73.96,
+      "end_time": 75.44,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "IsoEnergy.",
+          "start_time": 73.96,
+          "end_time": 75.44
+        }
+      ]
+    },
+    {
+      "text": "You've made a discovery there. What does",
+      "start_time": 75.5,
+      "end_time": 77.19,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "You've",
+          "start_time": 75.5,
+          "end_time": 75.61
+        },
+        {
+          "text": " ",
+          "start_time": 75.61,
+          "end_time": 75.64
+        },
+        {
+          "text": "made",
+          "start_time": 75.64,
+          "end_time": 75.74
+        },
+        {
+          "text": " ",
+          "start_time": 75.74,
+          "end_time": 75.78
+        },
+        {
+          "text": "a",
+          "start_time": 75.78,
+          "end_time": 75.8
+        },
+        {
+          "text": " ",
+          "start_time": 75.8,
+          "end_time": 75.84
+        },
+        {
+          "text": "discovery",
+          "start_time": 75.84,
+          "end_time": 76.34
+        },
+        {
+          "text": " ",
+          "start_time": 76.34,
+          "end_time": 76.4
+        },
+        {
+          "text": "there.",
+          "start_time": 76.4,
+          "end_time": 76.98
+        },
+        {
+          "text": " ",
+          "start_time": 76.98,
+          "end_time": 77.02
+        },
+        {
+          "text": "What",
+          "start_time": 77.02,
+          "end_time": 77.09
+        },
+        {
+          "text": " ",
+          "start_time": 77.09,
+          "end_time": 77.1
+        },
+        {
+          "text": "does",
+          "start_time": 77.1,
+          "end_time": 77.19
+        }
+      ]
+    },
+    {
+      "text": "that mean in practice?",
+      "start_time": 77.24,
+      "end_time": 78.14,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "that",
+          "start_time": 77.24,
+          "end_time": 77.35
+        },
+        {
+          "text": " ",
+          "start_time": 77.35,
+          "end_time": 77.38
+        },
+        {
+          "text": "mean",
+          "start_time": 77.38,
+          "end_time": 77.51
+        },
+        {
+          "text": " ",
+          "start_time": 77.51,
+          "end_time": 77.54
+        },
+        {
+          "text": "in",
+          "start_time": 77.54,
+          "end_time": 77.62
+        },
+        {
+          "text": " ",
+          "start_time": 77.62,
+          "end_time": 77.66
+        },
+        {
+          "text": "practice?",
+          "start_time": 77.66,
+          "end_time": 78.14
+        }
+      ]
+    },
+    {
+      "text": "Most exploration drilling in northern",
+      "start_time": 78.93,
+      "end_time": 80.58,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "Most",
+          "start_time": 78.93,
+          "end_time": 79.24
+        },
+        {
+          "text": " ",
+          "start_time": 79.24,
+          "end_time": 79.25
+        },
+        {
+          "text": "exploration",
+          "start_time": 79.25,
+          "end_time": 79.81
+        },
+        {
+          "text": " ",
+          "start_time": 79.81,
+          "end_time": 79.86
+        },
+        {
+          "text": "drilling",
+          "start_time": 79.86,
+          "end_time": 80.14
+        },
+        {
+          "text": " ",
+          "start_time": 80.14,
+          "end_time": 80.16
+        },
+        {
+          "text": "in",
+          "start_time": 80.16,
+          "end_time": 80.24
+        },
+        {
+          "text": " ",
+          "start_time": 80.24,
+          "end_time": 80.28
+        },
+        {
+          "text": "northern",
+          "start_time": 80.28,
+          "end_time": 80.58
+        }
+      ]
+    },
+    {
+      "text": "Saskatchewan finds no uranium.",
+      "start_time": 80.6,
+      "end_time": 82.21,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "Saskatchewan",
+          "start_time": 80.6,
+          "end_time": 81.28
+        },
+        {
+          "text": " ",
+          "start_time": 81.28,
+          "end_time": 81.32
+        },
+        {
+          "text": "finds",
+          "start_time": 81.32,
+          "end_time": 81.57
+        },
+        {
+          "text": " ",
+          "start_time": 81.57,
+          "end_time": 81.62
+        },
+        {
+          "text": "no",
+          "start_time": 81.62,
+          "end_time": 81.76
+        },
+        {
+          "text": " ",
+          "start_time": 81.76,
+          "end_time": 81.8
+        },
+        {
+          "text": "uranium.",
+          "start_time": 81.8,
+          "end_time": 82.21
+        }
+      ]
+    },
+    {
+      "text": "When you do find something meaningful that",
+      "start_time": 83.14,
+      "end_time": 84.85,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "When",
+          "start_time": 83.14,
+          "end_time": 83.25
+        },
+        {
+          "text": " ",
+          "start_time": 83.25,
+          "end_time": 83.28
+        },
+        {
+          "text": "you",
+          "start_time": 83.28,
+          "end_time": 83.42
+        },
+        {
+          "text": " ",
+          "start_time": 83.42,
+          "end_time": 83.5
+        },
+        {
+          "text": "do",
+          "start_time": 83.5,
+          "end_time": 83.68
+        },
+        {
+          "text": " ",
+          "start_time": 83.68,
+          "end_time": 83.7
+        },
+        {
+          "text": "find",
+          "start_time": 83.7,
+          "end_time": 83.92
+        },
+        {
+          "text": " ",
+          "start_time": 83.92,
+          "end_time": 83.94
+        },
+        {
+          "text": "something",
+          "start_time": 83.94,
+          "end_time": 84.23
+        },
+        {
+          "text": " ",
+          "start_time": 84.23,
+          "end_time": 84.28
+        },
+        {
+          "text": "meaningful",
+          "start_time": 84.28,
+          "end_time": 84.73
+        },
+        {
+          "text": " ",
+          "start_time": 84.73,
+          "end_time": 84.76
+        },
+        {
+          "text": "that",
+          "start_time": 84.76,
+          "end_time": 84.85
+        }
+      ]
+    },
+    {
+      "text": "can be tied to a broader system, it's",
+      "start_time": 84.86,
+      "end_time": 86.91,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "can",
+          "start_time": 84.86,
+          "end_time": 84.96
+        },
+        {
+          "text": " ",
+          "start_time": 84.96,
+          "end_time": 84.98
+        },
+        {
+          "text": "be",
+          "start_time": 84.98,
+          "end_time": 85.1
+        },
+        {
+          "text": " ",
+          "start_time": 85.1,
+          "end_time": 85.14
+        },
+        {
+          "text": "tied",
+          "start_time": 85.14,
+          "end_time": 85.38
+        },
+        {
+          "text": " ",
+          "start_time": 85.38,
+          "end_time": 85.42
+        },
+        {
+          "text": "to",
+          "start_time": 85.42,
+          "end_time": 85.5
+        },
+        {
+          "text": " ",
+          "start_time": 85.5,
+          "end_time": 85.51
+        },
+        {
+          "text": "a",
+          "start_time": 85.51,
+          "end_time": 85.62
+        },
+        {
+          "text": " ",
+          "start_time": 85.62,
+          "end_time": 85.64
+        },
+        {
+          "text": "broader",
+          "start_time": 85.64,
+          "end_time": 85.97
+        },
+        {
+          "text": " ",
+          "start_time": 85.97,
+          "end_time": 86.0
+        },
+        {
+          "text": "system,",
+          "start_time": 86.0,
+          "end_time": 86.33
+        },
+        {
+          "text": " ",
+          "start_time": 86.33,
+          "end_time": 86.78
+        },
+        {
+          "text": "it's",
+          "start_time": 86.78,
+          "end_time": 86.91
+        }
+      ]
+    },
+    {
+      "text": "considered a discovery and needs",
+      "start_time": 86.92,
+      "end_time": 88.6,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "considered",
+          "start_time": 86.92,
+          "end_time": 87.33
+        },
+        {
+          "text": " ",
+          "start_time": 87.33,
+          "end_time": 87.38
+        },
+        {
+          "text": "a",
+          "start_time": 87.38,
+          "end_time": 87.44
+        },
+        {
+          "text": " ",
+          "start_time": 87.44,
+          "end_time": 87.46
+        },
+        {
+          "text": "discovery",
+          "start_time": 87.46,
+          "end_time": 88.24
+        },
+        {
+          "text": " ",
+          "start_time": 88.24,
+          "end_time": 88.28
+        },
+        {
+          "text": "and",
+          "start_time": 88.28,
+          "end_time": 88.35
+        },
+        {
+          "text": " ",
+          "start_time": 88.35,
+          "end_time": 88.4
+        },
+        {
+          "text": "needs",
+          "start_time": 88.44,
+          "end_time": 88.6
+        }
+      ]
+    },
+    {
+      "text": "follow-up.",
+      "start_time": 88.61,
+      "end_time": 89.08,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "follow-up.",
+          "start_time": 88.61,
+          "end_time": 89.08
+        }
+      ]
+    },
+    {
+      "text": "What happens next after a discovery?",
+      "start_time": 89.91,
+      "end_time": 91.47,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "What",
+          "start_time": 89.91,
+          "end_time": 90.04
+        },
+        {
+          "text": " ",
+          "start_time": 90.04,
+          "end_time": 90.08
+        },
+        {
+          "text": "happens",
+          "start_time": 90.08,
+          "end_time": 90.39
+        },
+        {
+          "text": " ",
+          "start_time": 90.39,
+          "end_time": 90.39
+        },
+        {
+          "text": "next",
+          "start_time": 90.39,
+          "end_time": 90.64
+        },
+        {
+          "text": " ",
+          "start_time": 90.64,
+          "end_time": 90.72
+        },
+        {
+          "text": "after",
+          "start_time": 90.72,
+          "end_time": 90.89
+        },
+        {
+          "text": " ",
+          "start_time": 90.89,
+          "end_time": 90.96
+        },
+        {
+          "text": "a",
+          "start_time": 90.96,
+          "end_time": 90.97
+        },
+        {
+          "text": " ",
+          "start_time": 90.97,
+          "end_time": 90.98
+        },
+        {
+          "text": "discovery?",
+          "start_time": 90.98,
+          "end_time": 91.47
+        }
+      ]
+    },
+    {
+      "text": "The real work happens after the fact. You",
+      "start_time": 92.44,
+      "end_time": 95.18,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "The",
+          "start_time": 92.44,
+          "end_time": 92.58
+        },
+        {
+          "text": " ",
+          "start_time": 92.58,
+          "end_time": 92.6
+        },
+        {
+          "text": "real",
+          "start_time": 92.6,
+          "end_time": 92.84
+        },
+        {
+          "text": " ",
+          "start_time": 92.84,
+          "end_time": 92.88
+        },
+        {
+          "text": "work",
+          "start_time": 92.88,
+          "end_time": 93.12
+        },
+        {
+          "text": " ",
+          "start_time": 93.12,
+          "end_time": 93.2
+        },
+        {
+          "text": "happens",
+          "start_time": 93.2,
+          "end_time": 93.52
+        },
+        {
+          "text": " ",
+          "start_time": 93.52,
+          "end_time": 93.6
+        },
+        {
+          "text": "after",
+          "start_time": 93.6,
+          "end_time": 93.81
+        },
+        {
+          "text": " ",
+          "start_time": 93.81,
+          "end_time": 93.82
+        },
+        {
+          "text": "the",
+          "start_time": 93.82,
+          "end_time": 93.92
+        },
+        {
+          "text": " ",
+          "start_time": 93.92,
+          "end_time": 93.94
+        },
+        {
+          "text": "fact.",
+          "start_time": 93.94,
+          "end_time": 95.02
+        },
+        {
+          "text": " ",
+          "start_time": 95.02,
+          "end_time": 95.1
+        },
+        {
+          "text": "You",
+          "start_time": 95.1,
+          "end_time": 95.18
+        }
+      ]
+    },
+    {
+      "text": "need to determine if the result is",
+      "start_time": 95.24,
+      "end_time": 96.61,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "need",
+          "start_time": 95.24,
+          "end_time": 95.35
+        },
+        {
+          "text": " ",
+          "start_time": 95.35,
+          "end_time": 95.36
+        },
+        {
+          "text": "to",
+          "start_time": 95.36,
+          "end_time": 95.44
+        },
+        {
+          "text": " ",
+          "start_time": 95.44,
+          "end_time": 95.48
+        },
+        {
+          "text": "determine",
+          "start_time": 95.48,
+          "end_time": 95.86
+        },
+        {
+          "text": " ",
+          "start_time": 95.86,
+          "end_time": 95.9
+        },
+        {
+          "text": "if",
+          "start_time": 95.9,
+          "end_time": 95.98
+        },
+        {
+          "text": " ",
+          "start_time": 95.98,
+          "end_time": 96.02
+        },
+        {
+          "text": "the",
+          "start_time": 96.02,
+          "end_time": 96.08
+        },
+        {
+          "text": " ",
+          "start_time": 96.08,
+          "end_time": 96.1
+        },
+        {
+          "text": "result",
+          "start_time": 96.1,
+          "end_time": 96.46
+        },
+        {
+          "text": " ",
+          "start_time": 96.46,
+          "end_time": 96.5
+        },
+        {
+          "text": "is",
+          "start_time": 96.5,
+          "end_time": 96.61
+        }
+      ]
+    },
+    {
+      "text": "repeatable. Rather than drilling randomly,",
+      "start_time": 96.64,
+      "end_time": 99.28,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "repeatable.",
+          "start_time": 96.64,
+          "end_time": 97.96
+        },
+        {
+          "text": " ",
+          "start_time": 97.96,
+          "end_time": 97.98
+        },
+        {
+          "text": "Rather",
+          "start_time": 97.98,
+          "end_time": 98.26
+        },
+        {
+          "text": " ",
+          "start_time": 98.26,
+          "end_time": 98.28
+        },
+        {
+          "text": "than",
+          "start_time": 98.28,
+          "end_time": 98.39
+        },
+        {
+          "text": " ",
+          "start_time": 98.39,
+          "end_time": 98.399
+        },
+        {
+          "text": "drilling",
+          "start_time": 98.4,
+          "end_time": 98.78
+        },
+        {
+          "text": " ",
+          "start_time": 98.78,
+          "end_time": 98.82
+        },
+        {
+          "text": "randomly,",
+          "start_time": 98.82,
+          "end_time": 99.28
+        }
+      ]
+    },
+    {
+      "text": "you expand around the initial hole,",
+      "start_time": 99.68,
+      "end_time": 101.19,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "you",
+          "start_time": 99.68,
+          "end_time": 99.74
+        },
+        {
+          "text": " ",
+          "start_time": 99.74,
+          "end_time": 99.76
+        },
+        {
+          "text": "expand",
+          "start_time": 99.76,
+          "end_time": 100.22
+        },
+        {
+          "text": " ",
+          "start_time": 100.22,
+          "end_time": 100.26
+        },
+        {
+          "text": "around",
+          "start_time": 100.26,
+          "end_time": 100.46
+        },
+        {
+          "text": " ",
+          "start_time": 100.46,
+          "end_time": 100.5
+        },
+        {
+          "text": "the",
+          "start_time": 100.5,
+          "end_time": 100.56
+        },
+        {
+          "text": " ",
+          "start_time": 100.56,
+          "end_time": 100.58
+        },
+        {
+          "text": "initial",
+          "start_time": 100.58,
+          "end_time": 100.92
+        },
+        {
+          "text": " ",
+          "start_time": 100.92,
+          "end_time": 100.96
+        },
+        {
+          "text": "hole,",
+          "start_time": 100.96,
+          "end_time": 101.19
+        }
+      ]
+    },
+    {
+      "text": "above, below, and laterally to better",
+      "start_time": 101.66,
+      "end_time": 104.19,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "above,",
+          "start_time": 101.66,
+          "end_time": 102.09
+        },
+        {
+          "text": " ",
+          "start_time": 102.09,
+          "end_time": 102.32
+        },
+        {
+          "text": "below,",
+          "start_time": 102.32,
+          "end_time": 102.74
+        },
+        {
+          "text": " ",
+          "start_time": 102.74,
+          "end_time": 102.76
+        },
+        {
+          "text": "and",
+          "start_time": 102.76,
+          "end_time": 102.87
+        },
+        {
+          "text": " ",
+          "start_time": 102.87,
+          "end_time": 102.96
+        },
+        {
+          "text": "laterally",
+          "start_time": 102.96,
+          "end_time": 103.78
+        },
+        {
+          "text": " ",
+          "start_time": 103.78,
+          "end_time": 103.82
+        },
+        {
+          "text": "to",
+          "start_time": 103.82,
+          "end_time": 103.94
+        },
+        {
+          "text": " ",
+          "start_time": 103.94,
+          "end_time": 103.96
+        },
+        {
+          "text": "better",
+          "start_time": 103.96,
+          "end_time": 104.19
+        }
+      ]
+    },
+    {
+      "text": "understand the mineralization.",
+      "start_time": 104.2,
+      "end_time": 106.28,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "understand",
+          "start_time": 104.2,
+          "end_time": 104.62
+        },
+        {
+          "text": " ",
+          "start_time": 104.62,
+          "end_time": 104.66
+        },
+        {
+          "text": "the",
+          "start_time": 104.66,
+          "end_time": 104.72
+        },
+        {
+          "text": " ",
+          "start_time": 104.72,
+          "end_time": 104.76
+        },
+        {
+          "text": "mineralization.",
+          "start_time": 104.76,
+          "end_time": 106.28
+        }
+      ]
+    },
+    {
+      "text": "How important is technology in this",
+      "start_time": 106.36,
+      "end_time": 107.69,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "How",
+          "start_time": 106.36,
+          "end_time": 106.46
+        },
+        {
+          "text": " ",
+          "start_time": 106.46,
+          "end_time": 106.5
+        },
+        {
+          "text": "important",
+          "start_time": 106.5,
+          "end_time": 106.84
+        },
+        {
+          "text": " ",
+          "start_time": 106.84,
+          "end_time": 106.88
+        },
+        {
+          "text": "is",
+          "start_time": 106.88,
+          "end_time": 106.97
+        },
+        {
+          "text": " ",
+          "start_time": 106.97,
+          "end_time": 106.98
+        },
+        {
+          "text": "technology",
+          "start_time": 106.98,
+          "end_time": 107.44
+        },
+        {
+          "text": " ",
+          "start_time": 107.44,
+          "end_time": 107.48
+        },
+        {
+          "text": "in",
+          "start_time": 107.48,
+          "end_time": 107.53
+        },
+        {
+          "text": " ",
+          "start_time": 107.53,
+          "end_time": 107.56
+        },
+        {
+          "text": "this",
+          "start_time": 107.56,
+          "end_time": 107.69
+        }
+      ]
+    },
+    {
+      "text": "process?",
+      "start_time": 107.7,
+      "end_time": 108.22,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "process?",
+          "start_time": 107.7,
+          "end_time": 108.22
+        }
+      ]
+    },
+    {
+      "text": "It's critical.",
+      "start_time": 109.16,
+      "end_time": 109.87,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "It's",
+          "start_time": 109.16,
+          "end_time": 109.38
+        },
+        {
+          "text": " ",
+          "start_time": 109.38,
+          "end_time": 109.44
+        },
+        {
+          "text": "critical.",
+          "start_time": 109.44,
+          "end_time": 109.87
+        }
+      ]
+    },
+    {
+      "text": "Uranium is invisible to geophysics, so we",
+      "start_time": 110.88,
+      "end_time": 113.52,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "Uranium",
+          "start_time": 110.88,
+          "end_time": 111.4
+        },
+        {
+          "text": " ",
+          "start_time": 111.4,
+          "end_time": 111.44
+        },
+        {
+          "text": "is",
+          "start_time": 111.44,
+          "end_time": 111.51
+        },
+        {
+          "text": " ",
+          "start_time": 111.51,
+          "end_time": 111.54
+        },
+        {
+          "text": "invisible",
+          "start_time": 111.54,
+          "end_time": 112.08
+        },
+        {
+          "text": " ",
+          "start_time": 112.08,
+          "end_time": 112.12
+        },
+        {
+          "text": "to",
+          "start_time": 112.12,
+          "end_time": 112.22
+        },
+        {
+          "text": " ",
+          "start_time": 112.22,
+          "end_time": 112.24
+        },
+        {
+          "text": "geophysics,",
+          "start_time": 112.24,
+          "end_time": 112.87
+        },
+        {
+          "text": " ",
+          "start_time": 112.87,
+          "end_time": 113.3
+        },
+        {
+          "text": "so",
+          "start_time": 113.3,
+          "end_time": 113.4
+        },
+        {
+          "text": " ",
+          "start_time": 113.4,
+          "end_time": 113.44
+        },
+        {
+          "text": "we",
+          "start_time": 113.44,
+          "end_time": 113.52
+        }
+      ]
+    },
+    {
+      "text": "look for indirect indicators like rock",
+      "start_time": 113.56,
+      "end_time": 115.48,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "look",
+          "start_time": 113.56,
+          "end_time": 113.72
+        },
+        {
+          "text": " ",
+          "start_time": 113.72,
+          "end_time": 113.74
+        },
+        {
+          "text": "for",
+          "start_time": 113.74,
+          "end_time": 113.92
+        },
+        {
+          "text": " ",
+          "start_time": 113.92,
+          "end_time": 113.98
+        },
+        {
+          "text": "indirect",
+          "start_time": 113.98,
+          "end_time": 114.4
+        },
+        {
+          "text": " ",
+          "start_time": 114.4,
+          "end_time": 114.46
+        },
+        {
+          "text": "indicators",
+          "start_time": 114.46,
+          "end_time": 114.96
+        },
+        {
+          "text": " ",
+          "start_time": 114.96,
+          "end_time": 115.0
+        },
+        {
+          "text": "like",
+          "start_time": 115.0,
+          "end_time": 115.17
+        },
+        {
+          "text": " ",
+          "start_time": 115.17,
+          "end_time": 115.22
+        },
+        {
+          "text": "rock",
+          "start_time": 115.22,
+          "end_time": 115.48
+        }
+      ]
+    },
+    {
+      "text": "types and structures. Once drilling",
+      "start_time": 115.52,
+      "end_time": 117.84,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "types",
+          "start_time": 115.52,
+          "end_time": 115.76
+        },
+        {
+          "text": " ",
+          "start_time": 115.76,
+          "end_time": 115.78
+        },
+        {
+          "text": "and",
+          "start_time": 115.78,
+          "end_time": 115.91
+        },
+        {
+          "text": " ",
+          "start_time": 115.91,
+          "end_time": 115.94
+        },
+        {
+          "text": "structures.",
+          "start_time": 115.94,
+          "end_time": 117.259
+        },
+        {
+          "text": " ",
+          "start_time": 117.259,
+          "end_time": 117.34
+        },
+        {
+          "text": "Once",
+          "start_time": 117.34,
+          "end_time": 117.49
+        },
+        {
+          "text": " ",
+          "start_time": 117.49,
+          "end_time": 117.56
+        },
+        {
+          "text": "drilling",
+          "start_time": 117.56,
+          "end_time": 117.84
+        }
+      ]
+    },
+    {
+      "text": "begins, we integrate that data with",
+      "start_time": 117.9,
+      "end_time": 119.77,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "begins,",
+          "start_time": 117.9,
+          "end_time": 118.54
+        },
+        {
+          "text": " ",
+          "start_time": 118.54,
+          "end_time": 118.56
+        },
+        {
+          "text": "we",
+          "start_time": 118.56,
+          "end_time": 118.62
+        },
+        {
+          "text": " ",
+          "start_time": 118.62,
+          "end_time": 118.78
+        },
+        {
+          "text": "integrate",
+          "start_time": 118.78,
+          "end_time": 119.14
+        },
+        {
+          "text": " ",
+          "start_time": 119.14,
+          "end_time": 119.15
+        },
+        {
+          "text": "that",
+          "start_time": 119.15,
+          "end_time": 119.35
+        },
+        {
+          "text": " ",
+          "start_time": 119.35,
+          "end_time": 119.36
+        },
+        {
+          "text": "data",
+          "start_time": 119.36,
+          "end_time": 119.58
+        },
+        {
+          "text": " ",
+          "start_time": 119.58,
+          "end_time": 119.62
+        },
+        {
+          "text": "with",
+          "start_time": 119.62,
+          "end_time": 119.77
+        }
+      ]
+    },
+    {
+      "text": "geophysics to understand what controls the",
+      "start_time": 119.8,
+      "end_time": 121.96,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "geophysics",
+          "start_time": 119.8,
+          "end_time": 120.6
+        },
+        {
+          "text": " ",
+          "start_time": 120.6,
+          "end_time": 120.64
+        },
+        {
+          "text": "to",
+          "start_time": 120.64,
+          "end_time": 120.72
+        },
+        {
+          "text": " ",
+          "start_time": 120.72,
+          "end_time": 120.76
+        },
+        {
+          "text": "understand",
+          "start_time": 120.76,
+          "end_time": 121.22
+        },
+        {
+          "text": " ",
+          "start_time": 121.22,
+          "end_time": 121.26
+        },
+        {
+          "text": "what",
+          "start_time": 121.26,
+          "end_time": 121.39
+        },
+        {
+          "text": " ",
+          "start_time": 121.39,
+          "end_time": 121.399
+        },
+        {
+          "text": "controls",
+          "start_time": 121.4,
+          "end_time": 121.88
+        },
+        {
+          "text": " ",
+          "start_time": 121.88,
+          "end_time": 121.92
+        },
+        {
+          "text": "the",
+          "start_time": 121.92,
+          "end_time": 121.96
+        }
+      ]
+    },
+    {
+      "text": "mineralization.",
+      "start_time": 122.0,
+      "end_time": 123.6,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "mineralization.",
+          "start_time": 122.0,
+          "end_time": 123.6
+        }
+      ]
+    },
+    {
+      "text": "Is that where modeling comes in?",
+      "start_time": 123.66,
+      "end_time": 125.72,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "Is",
+          "start_time": 123.66,
+          "end_time": 123.79
+        },
+        {
+          "text": " ",
+          "start_time": 123.79,
+          "end_time": 123.84
+        },
+        {
+          "text": "that",
+          "start_time": 123.84,
+          "end_time": 123.95
+        },
+        {
+          "text": " ",
+          "start_time": 123.95,
+          "end_time": 123.96
+        },
+        {
+          "text": "where",
+          "start_time": 123.96,
+          "end_time": 124.08
+        },
+        {
+          "text": " ",
+          "start_time": 124.08,
+          "end_time": 124.12
+        },
+        {
+          "text": "modeling",
+          "start_time": 124.12,
+          "end_time": 124.47
+        },
+        {
+          "text": " ",
+          "start_time": 124.47,
+          "end_time": 124.48
+        },
+        {
+          "text": "comes",
+          "start_time": 124.48,
+          "end_time": 124.69
+        },
+        {
+          "text": " ",
+          "start_time": 124.69,
+          "end_time": 124.74
+        },
+        {
+          "text": "in?",
+          "start_time": 124.74,
+          "end_time": 125.72
+        }
+      ]
+    },
+    {
+      "text": "Exactly. You build a model to understand",
+      "start_time": 125.78,
+      "end_time": 128.3,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "Exactly.",
+          "start_time": 125.78,
+          "end_time": 127.02
+        },
+        {
+          "text": " ",
+          "start_time": 127.02,
+          "end_time": 127.06
+        },
+        {
+          "text": "You",
+          "start_time": 127.06,
+          "end_time": 127.16
+        },
+        {
+          "text": " ",
+          "start_time": 127.16,
+          "end_time": 127.179
+        },
+        {
+          "text": "build",
+          "start_time": 127.18,
+          "end_time": 127.34
+        },
+        {
+          "text": " ",
+          "start_time": 127.34,
+          "end_time": 127.38
+        },
+        {
+          "text": "a",
+          "start_time": 127.38,
+          "end_time": 127.46
+        },
+        {
+          "text": " ",
+          "start_time": 127.46,
+          "end_time": 127.48
+        },
+        {
+          "text": "model",
+          "start_time": 127.48,
+          "end_time": 127.76
+        },
+        {
+          "text": " ",
+          "start_time": 127.76,
+          "end_time": 127.8
+        },
+        {
+          "text": "to",
+          "start_time": 127.8,
+          "end_time": 127.88
+        },
+        {
+          "text": " ",
+          "start_time": 127.88,
+          "end_time": 127.92
+        },
+        {
+          "text": "understand",
+          "start_time": 127.92,
+          "end_time": 128.3
+        }
+      ]
+    },
+    {
+      "text": "direction and controls.",
+      "start_time": 128.34,
+      "end_time": 129.539,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "direction",
+          "start_time": 128.34,
+          "end_time": 128.82
+        },
+        {
+          "text": " ",
+          "start_time": 128.82,
+          "end_time": 128.829
+        },
+        {
+          "text": "and",
+          "start_time": 128.829,
+          "end_time": 128.91
+        },
+        {
+          "text": " ",
+          "start_time": 128.91,
+          "end_time": 128.979
+        },
+        {
+          "text": "controls.",
+          "start_time": 128.979,
+          "end_time": 129.539
+        }
+      ]
+    },
+    {
+      "text": "Then you can step out, sometimes hundreds",
+      "start_time": 130.34,
+      "end_time": 132.26,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "Then",
+          "start_time": 130.34,
+          "end_time": 130.44
+        },
+        {
+          "text": " ",
+          "start_time": 130.44,
+          "end_time": 130.479
+        },
+        {
+          "text": "you",
+          "start_time": 130.479,
+          "end_time": 130.539
+        },
+        {
+          "text": " ",
+          "start_time": 130.539,
+          "end_time": 130.56
+        },
+        {
+          "text": "can",
+          "start_time": 130.56,
+          "end_time": 130.699
+        },
+        {
+          "text": " ",
+          "start_time": 130.699,
+          "end_time": 130.739
+        },
+        {
+          "text": "step",
+          "start_time": 130.74,
+          "end_time": 130.94
+        },
+        {
+          "text": " ",
+          "start_time": 130.94,
+          "end_time": 131.039
+        },
+        {
+          "text": "out,",
+          "start_time": 131.039,
+          "end_time": 131.2
+        },
+        {
+          "text": " ",
+          "start_time": 131.2,
+          "end_time": 131.48
+        },
+        {
+          "text": "sometimes",
+          "start_time": 131.48,
+          "end_time": 131.9
+        },
+        {
+          "text": " ",
+          "start_time": 131.9,
+          "end_time": 131.96
+        },
+        {
+          "text": "hundreds",
+          "start_time": 131.96,
+          "end_time": 132.26
+        }
+      ]
+    },
+    {
+      "text": "of meters, to see if mineralization",
+      "start_time": 132.32,
+      "end_time": 134.28,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "of",
+          "start_time": 132.32,
+          "end_time": 132.38
+        },
+        {
+          "text": " ",
+          "start_time": 132.38,
+          "end_time": 132.42
+        },
+        {
+          "text": "meters,",
+          "start_time": 132.42,
+          "end_time": 132.76
+        },
+        {
+          "text": " ",
+          "start_time": 132.76,
+          "end_time": 133.2
+        },
+        {
+          "text": "to",
+          "start_time": 133.2,
+          "end_time": 133.28
+        },
+        {
+          "text": " ",
+          "start_time": 133.28,
+          "end_time": 133.34
+        },
+        {
+          "text": "see",
+          "start_time": 133.34,
+          "end_time": 133.42
+        },
+        {
+          "text": " ",
+          "start_time": 133.42,
+          "end_time": 133.46
+        },
+        {
+          "text": "if",
+          "start_time": 133.46,
+          "end_time": 133.56
+        },
+        {
+          "text": " ",
+          "start_time": 133.56,
+          "end_time": 133.6
+        },
+        {
+          "text": "mineralization",
+          "start_time": 133.6,
+          "end_time": 134.28
+        }
+      ]
+    },
+    {
+      "text": "continues and refine your targeting.",
+      "start_time": 134.32,
+      "end_time": 137.0,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "continues",
+          "start_time": 134.32,
+          "end_time": 135.12
+        },
+        {
+          "text": " ",
+          "start_time": 135.12,
+          "end_time": 135.14
+        },
+        {
+          "text": "and",
+          "start_time": 135.14,
+          "end_time": 135.22
+        },
+        {
+          "text": " ",
+          "start_time": 135.22,
+          "end_time": 135.26
+        },
+        {
+          "text": "refine",
+          "start_time": 135.26,
+          "end_time": 135.59
+        },
+        {
+          "text": " ",
+          "start_time": 135.59,
+          "end_time": 135.64
+        },
+        {
+          "text": "your",
+          "start_time": 135.64,
+          "end_time": 135.74
+        },
+        {
+          "text": " ",
+          "start_time": 135.74,
+          "end_time": 135.78
+        },
+        {
+          "text": "targeting.",
+          "start_time": 135.78,
+          "end_time": 137.0
+        }
+      ]
+    },
+    {
+      "text": "How does this apply to Dorado?",
+      "start_time": 137.02,
+      "end_time": 138.32,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "How",
+          "start_time": 137.02,
+          "end_time": 137.16
+        },
+        {
+          "text": " ",
+          "start_time": 137.16,
+          "end_time": 137.18
+        },
+        {
+          "text": "does",
+          "start_time": 137.18,
+          "end_time": 137.3
+        },
+        {
+          "text": " ",
+          "start_time": 137.3,
+          "end_time": 137.34
+        },
+        {
+          "text": "this",
+          "start_time": 137.34,
+          "end_time": 137.43
+        },
+        {
+          "text": " ",
+          "start_time": 137.43,
+          "end_time": 137.48
+        },
+        {
+          "text": "apply",
+          "start_time": 137.48,
+          "end_time": 137.72
+        },
+        {
+          "text": " ",
+          "start_time": 137.72,
+          "end_time": 137.76
+        },
+        {
+          "text": "to",
+          "start_time": 137.76,
+          "end_time": 137.84
+        },
+        {
+          "text": " ",
+          "start_time": 137.84,
+          "end_time": 137.86
+        },
+        {
+          "text": "Dorado?",
+          "start_time": 137.86,
+          "end_time": 138.32
+        }
+      ]
+    },
+    {
+      "text": "We made a discovery at the Nova zone,",
+      "start_time": 139.29,
+      "end_time": 140.989,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "We",
+          "start_time": 139.29,
+          "end_time": 139.44
+        },
+        {
+          "text": " ",
+          "start_time": 139.44,
+          "end_time": 139.48
+        },
+        {
+          "text": "made",
+          "start_time": 139.48,
+          "end_time": 139.6
+        },
+        {
+          "text": " ",
+          "start_time": 139.6,
+          "end_time": 139.609
+        },
+        {
+          "text": "a",
+          "start_time": 139.609,
+          "end_time": 139.68
+        },
+        {
+          "text": " ",
+          "start_time": 139.68,
+          "end_time": 139.69
+        },
+        {
+          "text": "discovery",
+          "start_time": 139.69,
+          "end_time": 140.16
+        },
+        {
+          "text": " ",
+          "start_time": 140.16,
+          "end_time": 140.18
+        },
+        {
+          "text": "at",
+          "start_time": 140.18,
+          "end_time": 140.269
+        },
+        {
+          "text": " ",
+          "start_time": 140.269,
+          "end_time": 140.28
+        },
+        {
+          "text": "the",
+          "start_time": 140.28,
+          "end_time": 140.36
+        },
+        {
+          "text": " ",
+          "start_time": 140.36,
+          "end_time": 140.4
+        },
+        {
+          "text": "Nova",
+          "start_time": 140.4,
+          "end_time": 140.66
+        },
+        {
+          "text": " ",
+          "start_time": 140.66,
+          "end_time": 140.72
+        },
+        {
+          "text": "zone,",
+          "start_time": 140.72,
+          "end_time": 140.989
+        }
+      ]
+    },
+    {
+      "text": "hitting high-grade uranium in a specific",
+      "start_time": 141.34,
+      "end_time": 143.39,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "hitting",
+          "start_time": 141.34,
+          "end_time": 141.65
+        },
+        {
+          "text": " ",
+          "start_time": 141.65,
+          "end_time": 141.65
+        },
+        {
+          "text": "high-grade",
+          "start_time": 141.65,
+          "end_time": 142.14
+        },
+        {
+          "text": " ",
+          "start_time": 142.14,
+          "end_time": 142.22
+        },
+        {
+          "text": "uranium",
+          "start_time": 142.22,
+          "end_time": 142.62
+        },
+        {
+          "text": " ",
+          "start_time": 142.62,
+          "end_time": 142.72
+        },
+        {
+          "text": "in",
+          "start_time": 142.72,
+          "end_time": 142.769
+        },
+        {
+          "text": " ",
+          "start_time": 142.769,
+          "end_time": 142.799
+        },
+        {
+          "text": "a",
+          "start_time": 142.8,
+          "end_time": 142.86
+        },
+        {
+          "text": " ",
+          "start_time": 142.86,
+          "end_time": 142.94
+        },
+        {
+          "text": "specific",
+          "start_time": 142.94,
+          "end_time": 143.39
+        }
+      ]
+    },
+    {
+      "text": "area. We drilled four holes and identified",
+      "start_time": 143.44,
+      "end_time": 146.48,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "area.",
+          "start_time": 143.44,
+          "end_time": 144.6
+        },
+        {
+          "text": " ",
+          "start_time": 144.6,
+          "end_time": 144.64
+        },
+        {
+          "text": "We",
+          "start_time": 144.64,
+          "end_time": 144.74
+        },
+        {
+          "text": " ",
+          "start_time": 144.74,
+          "end_time": 144.76
+        },
+        {
+          "text": "drilled",
+          "start_time": 144.76,
+          "end_time": 145.07
+        },
+        {
+          "text": " ",
+          "start_time": 145.07,
+          "end_time": 145.1
+        },
+        {
+          "text": "four",
+          "start_time": 145.1,
+          "end_time": 145.3
+        },
+        {
+          "text": " ",
+          "start_time": 145.3,
+          "end_time": 145.34
+        },
+        {
+          "text": "holes",
+          "start_time": 145.34,
+          "end_time": 145.93
+        },
+        {
+          "text": " ",
+          "start_time": 145.93,
+          "end_time": 145.94
+        },
+        {
+          "text": "and",
+          "start_time": 145.94,
+          "end_time": 146.01
+        },
+        {
+          "text": " ",
+          "start_time": 146.01,
+          "end_time": 146.06
+        },
+        {
+          "text": "identified",
+          "start_time": 146.06,
+          "end_time": 146.48
+        }
+      ]
+    },
+    {
+      "text": "a direction of continuity. Now we're",
+      "start_time": 146.52,
+      "end_time": 149.14,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "a",
+          "start_time": 146.52,
+          "end_time": 146.58
+        },
+        {
+          "text": " ",
+          "start_time": 146.58,
+          "end_time": 146.6
+        },
+        {
+          "text": "direction",
+          "start_time": 146.6,
+          "end_time": 146.97
+        },
+        {
+          "text": " ",
+          "start_time": 146.97,
+          "end_time": 147.0
+        },
+        {
+          "text": "of",
+          "start_time": 147.0,
+          "end_time": 147.08
+        },
+        {
+          "text": " ",
+          "start_time": 147.08,
+          "end_time": 147.12
+        },
+        {
+          "text": "continuity.",
+          "start_time": 147.12,
+          "end_time": 148.56
+        },
+        {
+          "text": " ",
+          "start_time": 148.56,
+          "end_time": 148.66
+        },
+        {
+          "text": "Now",
+          "start_time": 148.74,
+          "end_time": 148.98
+        },
+        {
+          "text": " ",
+          "start_time": 148.98,
+          "end_time": 148.989
+        },
+        {
+          "text": "we're",
+          "start_time": 148.989,
+          "end_time": 149.14
+        }
+      ]
+    },
+    {
+      "text": "following up with additional drilling,",
+      "start_time": 149.16,
+      "end_time": 150.51,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "following",
+          "start_time": 149.16,
+          "end_time": 149.5
+        },
+        {
+          "text": " ",
+          "start_time": 149.5,
+          "end_time": 149.54
+        },
+        {
+          "text": "up",
+          "start_time": 149.54,
+          "end_time": 149.64
+        },
+        {
+          "text": " ",
+          "start_time": 149.64,
+          "end_time": 149.66
+        },
+        {
+          "text": "with",
+          "start_time": 149.66,
+          "end_time": 149.75
+        },
+        {
+          "text": " ",
+          "start_time": 149.75,
+          "end_time": 149.75
+        },
+        {
+          "text": "additional",
+          "start_time": 149.75,
+          "end_time": 150.2
+        },
+        {
+          "text": " ",
+          "start_time": 150.2,
+          "end_time": 150.22
+        },
+        {
+          "text": "drilling,",
+          "start_time": 150.22,
+          "end_time": 150.51
+        }
+      ]
+    },
+    {
+      "text": "including step outs, to better understand",
+      "start_time": 150.8,
+      "end_time": 152.84,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "including",
+          "start_time": 150.8,
+          "end_time": 151.21
+        },
+        {
+          "text": " ",
+          "start_time": 151.21,
+          "end_time": 151.26
+        },
+        {
+          "text": "step",
+          "start_time": 151.26,
+          "end_time": 151.44
+        },
+        {
+          "text": " ",
+          "start_time": 151.44,
+          "end_time": 151.52
+        },
+        {
+          "text": "outs,",
+          "start_time": 151.52,
+          "end_time": 152.04
+        },
+        {
+          "text": " ",
+          "start_time": 152.04,
+          "end_time": 152.079
+        },
+        {
+          "text": "to",
+          "start_time": 152.08,
+          "end_time": 152.18
+        },
+        {
+          "text": " ",
+          "start_time": 152.18,
+          "end_time": 152.24
+        },
+        {
+          "text": "better",
+          "start_time": 152.24,
+          "end_time": 152.42
+        },
+        {
+          "text": " ",
+          "start_time": 152.42,
+          "end_time": 152.46
+        },
+        {
+          "text": "understand",
+          "start_time": 152.46,
+          "end_time": 152.84
+        }
+      ]
+    },
+    {
+      "text": "the system and plan the next phase.",
+      "start_time": 152.88,
+      "end_time": 154.76,
+      "speaker": {
+        "id": "speaker_1",
+        "name": "Speaker 1"
+      },
+      "words": [
+        {
+          "text": "the",
+          "start_time": 152.88,
+          "end_time": 152.98
+        },
+        {
+          "text": " ",
+          "start_time": 152.98,
+          "end_time": 153.0
+        },
+        {
+          "text": "system",
+          "start_time": 153.0,
+          "end_time": 153.62
+        },
+        {
+          "text": " ",
+          "start_time": 153.62,
+          "end_time": 153.64
+        },
+        {
+          "text": "and",
+          "start_time": 153.64,
+          "end_time": 153.79
+        },
+        {
+          "text": " ",
+          "start_time": 153.79,
+          "end_time": 153.82
+        },
+        {
+          "text": "plan",
+          "start_time": 153.82,
+          "end_time": 154.04
+        },
+        {
+          "text": " ",
+          "start_time": 154.04,
+          "end_time": 154.079
+        },
+        {
+          "text": "the",
+          "start_time": 154.08,
+          "end_time": 154.14
+        },
+        {
+          "text": " ",
+          "start_time": 154.14,
+          "end_time": 154.2
+        },
+        {
+          "text": "next",
+          "start_time": 154.2,
+          "end_time": 154.42
+        },
+        {
+          "text": " ",
+          "start_time": 154.42,
+          "end_time": 154.44
+        },
+        {
+          "text": "phase.",
+          "start_time": 154.44,
+          "end_time": 154.76
+        }
+      ]
+    },
+    {
+      "text": "Quotes have been lightly edited for style",
+      "start_time": 155.7,
+      "end_time": 157.58,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "Quotes",
+          "start_time": 155.7,
+          "end_time": 155.94
+        },
+        {
+          "text": " ",
+          "start_time": 155.94,
+          "end_time": 155.98
+        },
+        {
+          "text": "have",
+          "start_time": 155.98,
+          "end_time": 156.07
+        },
+        {
+          "text": " ",
+          "start_time": 156.07,
+          "end_time": 156.08
+        },
+        {
+          "text": "been",
+          "start_time": 156.08,
+          "end_time": 156.22
+        },
+        {
+          "text": " ",
+          "start_time": 156.22,
+          "end_time": 156.28
+        },
+        {
+          "text": "lightly",
+          "start_time": 156.28,
+          "end_time": 156.609
+        },
+        {
+          "text": " ",
+          "start_time": 156.609,
+          "end_time": 156.62
+        },
+        {
+          "text": "edited",
+          "start_time": 156.62,
+          "end_time": 156.989
+        },
+        {
+          "text": " ",
+          "start_time": 156.989,
+          "end_time": 157.0
+        },
+        {
+          "text": "for",
+          "start_time": 157.0,
+          "end_time": 157.15
+        },
+        {
+          "text": " ",
+          "start_time": 157.15,
+          "end_time": 157.22
+        },
+        {
+          "text": "style",
+          "start_time": 157.22,
+          "end_time": 157.58
+        }
+      ]
+    },
+    {
+      "text": "and clarity",
+      "start_time": 157.6,
+      "end_time": 158.109,
+      "speaker": {
+        "id": "speaker_0",
+        "name": "Speaker 0"
+      },
+      "words": [
+        {
+          "text": "and",
+          "start_time": 157.6,
+          "end_time": 157.72
+        },
+        {
+          "text": " ",
+          "start_time": 157.72,
+          "end_time": 157.74
+        },
+        {
+          "text": "clarity",
+          "start_time": 157.74,
+          "end_time": 158.109
+        }
+      ]
+    }
+  ]
+}

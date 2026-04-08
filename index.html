@@ -415,18 +415,26 @@
     will-change: transform;
   }
   .voice-text-inner p {
-    font-size: 26px;
+    font-size: 28px;
     line-height: 1.55;
     margin: 0 0 22px 0;
     font-weight: 400;
+    color: #5a606b;
+    transition: color 0.4s ease;
+  }
+  .voice-text-inner .vw {
+    /* upcoming words: dim */
+    color: #5a606b;
+    transition: color 0.25s ease, text-shadow 0.25s ease;
+  }
+  .voice-text-inner .vw.spoken {
+    /* already-spoken words: brighter, normal weight */
     color: #d8dbe2;
   }
-  .voice-text-inner p:first-child {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 32px;
-    font-weight: 600;
-    color: #fff;
-    letter-spacing: 0.3px;
+  .voice-text-inner .vw.now {
+    /* currently-spoken word: white with subtle glow */
+    color: #ffffff;
+    text-shadow: 0 0 18px rgba(253, 184, 38, 0.45);
   }
 
   /* LOWER THIRD — overlays bottom of video-frame */
@@ -1978,6 +1986,331 @@ function playOutro() {
   );
 }
 
+// ----------------------------------------------------------------
+// Voice block: word-level karaoke highlighting + scroll-to-active
+// ----------------------------------------------------------------
+
+// Normalize a word for fuzzy comparison (lowercase, alphanumerics only).
+function normalizeWord(s) {
+  return s.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+// Needleman-Wunsch sequence alignment of two word arrays. Returns an
+// array of pairs: [{bIdx, tIdx}] — where either index can be -1 to
+// indicate a gap (insertion/deletion). bIdx walks the body, tIdx the
+// transcript.
+function alignWordSequences(bNorm, tNorm) {
+  const m = bNorm.length, n = tNorm.length;
+  const MATCH = 2, MISMATCH = -1, GAP = -1;
+
+  // Score table
+  const dp = new Int32Array((m + 1) * (n + 1));
+  const w = n + 1;
+  for (let i = 0; i <= m; i++) dp[i * w] = i * GAP;
+  for (let j = 0; j <= n; j++) dp[j] = j * GAP;
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const score = bNorm[i - 1] === tNorm[j - 1] ? MATCH : MISMATCH;
+      const diag = dp[(i - 1) * w + (j - 1)] + score;
+      const up   = dp[(i - 1) * w + j] + GAP;
+      const left = dp[i * w + (j - 1)] + GAP;
+      dp[i * w + j] = Math.max(diag, up, left);
+    }
+  }
+
+  // Backtrack
+  const pairs = [];
+  let i = m, j = n;
+  while (i > 0 || j > 0) {
+    const here = dp[i * w + j];
+    if (i > 0 && j > 0) {
+      const score = bNorm[i - 1] === tNorm[j - 1] ? MATCH : MISMATCH;
+      if (here === dp[(i - 1) * w + (j - 1)] + score) {
+        pairs.unshift({ bIdx: i - 1, tIdx: j - 1, match: bNorm[i - 1] === tNorm[j - 1] });
+        i--; j--;
+        continue;
+      }
+    }
+    if (i > 0 && here === dp[(i - 1) * w + j] + GAP) {
+      pairs.unshift({ bIdx: i - 1, tIdx: -1, match: false });
+      i--;
+    } else {
+      pairs.unshift({ bIdx: -1, tIdx: j - 1, match: false });
+      j--;
+    }
+  }
+  return pairs;
+}
+
+// Tokenize body text into paragraphs of words. Returns:
+//   { paragraphs: [[{text, paraIdx}, ...]], flat: [{text, paraIdx}, ...] }
+function tokenizeBody(body) {
+  const paragraphs = body
+    .split(/\n\s*\n/)
+    .map(p => p.trim())
+    .filter(Boolean);
+  const result = { paragraphs: [], flat: [] };
+  paragraphs.forEach((para, paraIdx) => {
+    const words = para.split(/\s+/).filter(Boolean);
+    const wordObjs = words.map(text => ({ text, paraIdx }));
+    result.paragraphs.push(wordObjs);
+    result.flat.push(...wordObjs);
+  });
+  return result;
+}
+
+// Tokenize transcript JSON into a flat word list with timings.
+function tokenizeTranscript(payload) {
+  const segments = payload.segments || [];
+  const flat = [];
+  for (const seg of segments) {
+    for (const w of (seg.words || [])) {
+      const text = w.text;
+      if (!text || /^\s+$/.test(text)) continue;
+      flat.push({ text, start: w.start_time, end: w.end_time });
+    }
+  }
+  return flat;
+}
+
+// Build the timed word list to render. For each body word, attach
+// either a matched transcript timing or an interpolated one.
+function buildAlignedWords(body, transcriptPayload) {
+  const bodyTokens = tokenizeBody(body);     // { paragraphs, flat }
+  const transWords = tokenizeTranscript(transcriptPayload);
+
+  if (!bodyTokens.flat.length || !transWords.length) {
+    return { paragraphs: [], words: [] };
+  }
+
+  const bNorm = bodyTokens.flat.map(w => normalizeWord(w.text));
+  const tNorm = transWords.map(w => normalizeWord(w.text));
+
+  const pairs = alignWordSequences(bNorm, tNorm);
+
+  // Each body word gets one timed entry. Walk the alignment and assign.
+  const words = bodyTokens.flat.map(w => ({
+    text: w.text,
+    paraIdx: w.paraIdx,
+    start: null,
+    end: null,
+    matched: false,
+  }));
+
+  for (const p of pairs) {
+    if (p.bIdx >= 0 && p.tIdx >= 0 && p.match) {
+      const t = transWords[p.tIdx];
+      words[p.bIdx].start = t.start;
+      words[p.bIdx].end = t.end;
+      words[p.bIdx].matched = true;
+    }
+  }
+
+  // Interpolate timings for body words that didn't match.
+  for (let k = 0; k < words.length; k++) {
+    if (words[k].matched) continue;
+    let prev = k - 1;
+    while (prev >= 0 && !words[prev].matched) prev--;
+    let next = k + 1;
+    while (next < words.length && !words[next].matched) next++;
+
+    if (prev >= 0 && next < words.length) {
+      const prevEnd = words[prev].end;
+      const nextStart = words[next].start;
+      const span = nextStart - prevEnd;
+      const slots = next - prev;
+      const offsetIdx = k - prev;
+      words[k].start = prevEnd + (span * offsetIdx) / slots;
+      words[k].end   = prevEnd + (span * (offsetIdx + 1)) / slots;
+    } else if (prev >= 0) {
+      // tail words after the last matched — short slots after prev.end
+      words[k].start = words[prev].end + (k - prev - 1) * 0.05;
+      words[k].end = words[k].start + 0.1;
+    } else if (next < words.length) {
+      // leading words before the first matched — slots before next.start
+      const gap = (next - k) * 0.1;
+      words[k].start = Math.max(0, words[next].start - gap);
+      words[k].end = words[k].start + 0.1;
+    } else {
+      words[k].start = 0;
+      words[k].end = 0.1;
+    }
+  }
+
+  // Group back into paragraphs based on paraIdx
+  const paragraphs = [];
+  for (const w of words) {
+    while (paragraphs.length <= w.paraIdx) paragraphs.push([]);
+    paragraphs[w.paraIdx].push(w);
+  }
+
+  return { paragraphs, words };
+}
+
+async function renderVoiceTranscript(transcriptUrl, body, audio, inner, progressFill) {
+  let payload;
+  try {
+    const res = await fetch(transcriptUrl);
+    payload = await res.json();
+  } catch (e) {
+    console.warn('[Voice] failed to load transcript:', e);
+    return;
+  }
+
+  // If body is provided, align it against the transcript so we display
+  // the editorial original. Otherwise render the transcript verbatim.
+  let paragraphs;
+  let flat;
+
+  if (body) {
+    const aligned = buildAlignedWords(body, payload);
+    paragraphs = aligned.paragraphs;
+    flat = aligned.words;
+  } else {
+    // Fallback: use the transcript text directly, breaking into paragraphs by gap.
+    const PARA_GAP = 0.55;
+    const segments = payload.segments || [];
+    if (!segments.length) return;
+    paragraphs = [[]];
+    let prevEnd = 0;
+    flat = [];
+    segments.forEach((seg, segIdx) => {
+      if (segIdx > 0 && seg.start_time - prevEnd > PARA_GAP) paragraphs.push([]);
+      for (const w of (seg.words || [])) {
+        if (!w.text || /^\s+$/.test(w.text)) continue;
+        const obj = { text: w.text, start: w.start_time, end: w.end_time, matched: true };
+        paragraphs[paragraphs.length - 1].push(obj);
+        flat.push(obj);
+      }
+      prevEnd = seg.end_time;
+    });
+  }
+
+  // Render paragraphs as <p> with inline <span class="vw"> per word.
+  // Each span gets a sequential index used by the rAF loop.
+  let runningIdx = 0;
+  const html = paragraphs
+    .filter(p => p.length)
+    .map((paraWords) => {
+      const innerHtml = paraWords.map((w) => {
+        const i = runningIdx++;
+        const safe = w.text
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+        return `<span class="vw" data-i="${i}">${safe}</span>`;
+      }).join(' ');
+      return `<p>${innerHtml}</p>`;
+    })
+    .join('');
+
+  inner.innerHTML = html;
+  inner.style.top = '110px';
+
+  const spans = inner.querySelectorAll('.vw');
+  const windowEl = document.querySelector('.voice-text-window');
+
+  let lastIdx = -1;
+  // Scroll state — lerped each frame for smoothness.
+  let currentY = 0;
+  let targetY = 0;
+  // Where in the reading window we want the active word to sit (40% from top).
+  const ANCHOR_RATIO = 0.4;
+
+  cancelVoiceScroll();
+
+  // Wait one frame so layout settles, then start the loop.
+  requestAnimationFrame(() => {
+    const tick = () => {
+      const t = audio.currentTime;
+
+      if (audio.duration && isFinite(audio.duration)) {
+        progressFill.style.width = (t / audio.duration * 100) + '%';
+      }
+
+      // Find the active word index. Linear scan from lastIdx forward
+      // (cheap because audio plays monotonically).
+      let idx = lastIdx;
+      while (idx + 1 < flat.length && flat[idx + 1].start <= t) idx++;
+      // Also handle backwards scrubs (rare, but cheap to support).
+      while (idx > 0 && flat[idx].start > t) idx--;
+
+      if (idx !== lastIdx) {
+        if (lastIdx >= 0 && idx > lastIdx) {
+          // moved forward — mark all newly-passed words as spoken
+          for (let j = lastIdx; j <= idx; j++) {
+            spans[j]?.classList.remove('now');
+            spans[j]?.classList.add('spoken');
+          }
+        } else if (idx < lastIdx) {
+          // moved backward — clear `spoken` from words now in the future
+          for (let j = idx + 1; j <= lastIdx; j++) {
+            spans[j]?.classList.remove('spoken', 'now');
+          }
+        }
+        // Only highlight `.now` for words that have a real transcript match.
+        // Unmatched / parenthetical body words (e.g. ticker blocks) flow
+        // through their interpolated slot without flashing.
+        if (idx >= 0 && flat[idx].matched) spans[idx]?.classList.add('now');
+        lastIdx = idx;
+
+        // Recompute scroll target so the active word sits at ANCHOR_RATIO
+        // of the reading window. We anchor to the nearest *matched* word
+        // so the camera doesn't jitter through unmatched clusters.
+        let anchorIdx = idx;
+        while (anchorIdx >= 0 && !flat[anchorIdx]?.matched) anchorIdx--;
+        if (anchorIdx >= 0 && spans[anchorIdx] && windowEl) {
+          const wordTop = spans[anchorIdx].offsetTop;
+          const winH = windowEl.clientHeight;
+          targetY = wordTop - winH * ANCHOR_RATIO + 110; // +110 for inner.style.top offset
+        }
+      }
+
+      // Smoothly lerp toward target.
+      currentY += (targetY - currentY) * 0.08;
+      inner.style.transform = `translate3d(0, ${-currentY}px, 0)`;
+
+      voiceScrollRaf = requestAnimationFrame(tick);
+    };
+    voiceScrollRaf = requestAnimationFrame(tick);
+  });
+}
+
+function renderVoiceBodyFallback(body, audio, inner, progressFill) {
+  // Fallback when no word-level transcript is available — render the
+  // body as paragraphs and scroll linearly with the audio progress.
+  const paragraphs = body
+    .split(/\n\s*\n/)
+    .map(p => p.trim())
+    .filter(Boolean);
+  inner.innerHTML = paragraphs
+    .map(p => `<p>${p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`)
+    .join('');
+  inner.style.top = '110px';
+
+  cancelVoiceScroll();
+  requestAnimationFrame(() => {
+    const windowEl = document.querySelector('.voice-text-window');
+    const innerHeight = inner.scrollHeight;
+    const winH = windowEl.clientHeight;
+    const readableHeight = winH - 110 - 90;
+    const scrollMax = Math.max(0, innerHeight - readableHeight);
+
+    const tick = () => {
+      if (!audio.duration || !isFinite(audio.duration)) {
+        voiceScrollRaf = requestAnimationFrame(tick);
+        return;
+      }
+      progressFill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+      const progress = Math.min(1, audio.currentTime / (audio.duration * 0.95));
+      inner.style.transform = `translate3d(0, ${-progress * scrollMax}px, 0)`;
+      voiceScrollRaf = requestAnimationFrame(tick);
+    };
+    voiceScrollRaf = requestAnimationFrame(tick);
+  });
+}
+
 function renderContentBlock(block) {
   // Iframe blocks have no <video> for Web Audio to listen to —
   // duck explicitly here. Video blocks are handled by the
@@ -2062,55 +2395,22 @@ function renderContentBlock(block) {
       if (voiceText) voiceText.style.setProperty('--voice-cover-bg', `url("${block.cover.url}")`);
     }
 
-    // Render body text as paragraphs (split on blank lines)
-    if (voiceTextInner && block.body) {
-      const paragraphs = block.body
-        .split(/\n\s*\n/)
-        .map(p => p.trim())
-        .filter(Boolean);
-      voiceTextInner.innerHTML = paragraphs
-        .map(p => `<p>${p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`)
-        .join('');
-    }
-
     audio.src = block.media.url;
     audio.load();
 
-    audio.onloadedmetadata = () => {
-      // Wait one frame so layout settles after innerHTML write.
-      requestAnimationFrame(() => {
-        const window = document.querySelector('.voice-text-window');
-        const innerHeight = voiceTextInner.scrollHeight;
-        const windowHeight = window.clientHeight;
-        // The mask hides ~110px at the top and ~90px at the bottom.
-        // Effective reading window is the middle band:
-        const readableHeight = windowHeight - 110 - 90;
-        const scrollMax = Math.max(0, innerHeight - readableHeight);
-        // Start with the first line just below the top fade so it scrolls in.
-        voiceTextInner.style.top = '110px';
-
-        // Drive scroll from requestAnimationFrame (~60Hz) instead of
-        // audio.ontimeupdate (~4Hz) — otherwise the text teleports in
-        // 250ms steps. We read audio.currentTime live each frame.
-        cancelVoiceScroll();
-        const tick = () => {
-          if (!audio.duration || !isFinite(audio.duration)) {
-            voiceScrollRaf = requestAnimationFrame(tick);
-            return;
-          }
-          progressFill.style.width = (audio.currentTime / audio.duration * 100) + '%';
-          // Map currentTime → 0..scrollMax over the first 95% of playback,
-          // so the text settles slightly before the audio actually ends.
-          const progress = Math.min(1, audio.currentTime / (audio.duration * 0.95));
-          voiceTextInner.style.transform = `translate3d(0, ${-progress * scrollMax}px, 0)`;
-          voiceScrollRaf = requestAnimationFrame(tick);
-        };
-        voiceScrollRaf = requestAnimationFrame(tick);
-      });
-    };
-
+    // Start playback now; transcript loads in parallel below.
     audio.onended = () => playOutro();
     audio.play().catch(err => console.warn('Voice audio play failed:', err));
+
+    // If a word-level transcript is provided, use it for karaoke
+    // highlighting. When `body` is also present, align body→transcript
+    // so the displayed text is the editorial original (with proper
+    // spelling, tickers, etc.) but the timings come from the transcript.
+    if (block.transcript?.url) {
+      renderVoiceTranscript(block.transcript.url, block.body, audio, voiceTextInner, progressFill);
+    } else if (block.body) {
+      renderVoiceBodyFallback(block.body, audio, voiceTextInner, progressFill);
+    }
   } else if (block.media?.url) {
     frame.classList.add('show-video');
     const source = video.querySelector('source');
