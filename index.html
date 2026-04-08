@@ -332,13 +332,8 @@
     width: 560px;
     height: 560px;
     object-fit: contain;
-    animation: idleSpin 36s linear infinite;
-    filter: drop-shadow(0 0 90px rgba(253, 184, 38, 0.22));
-    will-change: transform;
-  }
-  @keyframes idleSpin {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
+    filter: drop-shadow(0 0 50px rgba(253, 184, 38, 0.20));
+    will-change: transform, filter;
   }
 
   /* NEXT-UP BANNER — countdown shown over the idle state before content plays */
@@ -1587,6 +1582,7 @@ async function loadState() {
     renderTickerTape();
     renderFooter();
     MusicPlayer.init(data.music);
+    IdleAnimations.set(data.idle_animation || 'spin');
     // Note: content block is NOT loaded on init — overlay starts empty,
     // waiting for ContentBlockStarted event from admin
 
@@ -1639,8 +1635,16 @@ function connectWebSocket() {
       }
     }
 
-    if (data.settings.background) {
+    // SettingsUpdated is a fan-out — it carries every setting on every dispatch.
+    // Only re-run the (expensive, animated) background transition if the bg
+    // config actually changed; otherwise saving the logo or any other unrelated
+    // setting would jerk the bg pattern through its dissolve/glitch effect.
+    if (data.settings.background && JSON.stringify(data.settings.background) !== JSON.stringify(bgConfig)) {
       updateBackground(data.settings.background);
+    }
+
+    if (data.settings.idle_animation) {
+      IdleAnimations.set(data.settings.idle_animation);
     }
   });
 
@@ -2037,6 +2041,141 @@ let nextCountdownTimer = null;
 gsap.set('.idle-state',  { autoAlpha: 1, scale: 1 });
 gsap.set('.next-banner', { autoAlpha: 0, y: 24 });
 gsap.set('.lower-third', { autoAlpha: 0, y: 30 });
+
+// ----------------------------------------------------------------
+// Idle logo animations — driven entirely by GSAP so we can crossfade
+// between effects smoothly when the operator changes the setting.
+// ----------------------------------------------------------------
+const IdleAnimations = {
+  current: null,
+  currentName: null,
+  baseFilter: 'drop-shadow(0 0 50px rgba(253, 184, 38, 0.20))',
+  brightFilter: 'drop-shadow(0 0 65px rgba(253, 184, 38, 0.45))',
+
+  // Each effect returns a GSAP timeline (or tween) that loops forever.
+  // The element passed in is the .idle-logo <img>.
+
+  none(el) {
+    // Static — no animation, just reset to identity.
+    return null;
+  },
+
+  spin(el) {
+    return gsap.to(el, {
+      rotation: '+=360',
+      duration: 36,
+      repeat: -1,
+      ease: 'none',
+    });
+  },
+
+  pulse(el) {
+    return gsap.to(el, {
+      scale: 1.06,
+      duration: 2.4,
+      repeat: -1,
+      yoyo: true,
+      ease: 'sine.inOut',
+    });
+  },
+
+  glow(el) {
+    return gsap.to(el, {
+      filter: this.brightFilter,
+      duration: 2.0,
+      repeat: -1,
+      yoyo: true,
+      ease: 'sine.inOut',
+    });
+  },
+
+  float(el) {
+    return gsap.to(el, {
+      y: -16,
+      duration: 3.2,
+      repeat: -1,
+      yoyo: true,
+      ease: 'sine.inOut',
+    });
+  },
+
+  sway(el) {
+    return gsap.to(el, {
+      rotation: 4,
+      duration: 4.5,
+      repeat: -1,
+      yoyo: true,
+      ease: 'sine.inOut',
+    });
+  },
+
+  heartbeat(el) {
+    // Two-phase pulse: quick contract (lub), short pause, slower release.
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 1.2 });
+    tl.to(el, { scale: 0.94, duration: 0.18, ease: 'power2.in' })
+      .to(el, { scale: 1.08, duration: 0.22, ease: 'power2.out' })
+      .to(el, { scale: 1.00, duration: 0.5, ease: 'sine.out' });
+    return tl;
+  },
+
+  pulse_glow(el) {
+    // Pulse and glow ramped together on the same ease, perfectly in sync.
+    const tl = gsap.timeline({ repeat: -1, yoyo: true });
+    tl.to(el, {
+      scale: 1.06,
+      filter: this.brightFilter,
+      duration: 2.4,
+      ease: 'sine.inOut',
+    });
+    return tl;
+  },
+
+  float_sway(el) {
+    // Two independent tweens with different periods → lazy figure-8 drift.
+    const tl = gsap.timeline({ repeat: -1 });
+    // Vertical drift (period 4s)
+    gsap.to(el, { y: -16, duration: 2, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+    // Horizontal sway (period 6s, longer so they drift in/out of phase)
+    gsap.to(el, { x: 14, duration: 3, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+    // Subtle rotation (period 5s)
+    gsap.to(el, { rotation: 3, duration: 2.5, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+    return tl; // empty parent timeline kept so .kill() can disable in one call via killTweensOf
+  },
+
+  // Switch to a new animation. Smoothly kills the existing one (current
+  // values are preserved) and starts the new one with the new ease.
+  set(name) {
+    if (name === this.currentName) return;
+    const el = document.querySelector('.idle-logo');
+    if (!el) return;
+
+    // Stop ALL tweens currently affecting this element — covers both
+    // single-tween effects and the multi-tween float_sway case.
+    gsap.killTweensOf(el);
+
+    // Reset values to a known baseline so the new effect starts cleanly.
+    // We tween there in 0.3s instead of snapping, for a smoother handover.
+    gsap.to(el, {
+      x: 0,
+      y: 0,
+      scale: 1,
+      rotation: name === 'spin' ? gsap.getProperty(el, 'rotation') || 0 : 0,
+      filter: this.baseFilter,
+      duration: 0.35,
+      ease: 'power2.out',
+      onComplete: () => {
+        if (typeof this[name] === 'function') {
+          this.current = this[name](el);
+        } else {
+          console.warn('[IdleAnimations] unknown animation:', name);
+          this.current = this.spin(el);
+        }
+      },
+    });
+
+    this.currentName = name;
+  },
+};
 
 function showNextBanner(block, countdownSec) {
   const titleEl = document.getElementById('nextBannerTitle');
