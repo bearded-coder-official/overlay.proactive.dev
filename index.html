@@ -193,19 +193,6 @@
     background: rgba(255, 255, 255, 0.15);
   }
 
-  .scene-badge {
-    background: var(--accent);
-    color: #1a1a1a;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    padding: 6px 18px;
-    border-radius: 3px;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
-
   .live-badge {
     display: flex;
     align-items: center;
@@ -1246,7 +1233,6 @@
     <span class="logo-text" id="brandLogoText">PROACTIVE <span>WIRE</span></span>
   </div>
   <div class="divider"></div>
-  <div class="scene-badge" id="sceneBadge">LIVE</div>
   <div class="live-badge"><div class="live-dot" id="liveDot"></div>LIVE</div>
   <div class="top-clocks" id="clocks"></div>
 </div>
@@ -1653,6 +1639,9 @@ async function loadState() {
     // (incl. renderTickerTape above and future content blocks) is
     // guaranteed fresh prices, no waiting for the first WS tick.
     LiveTickers.hydrate(data.live_prices || {});
+    // Pulse widget configuration — read groups from /state.widgets,
+    // mount placeholders bound to LiveTickers via data-live-ticker.
+    applyPulseConfig(data.widgets?.pulse);
     // Note: content block is NOT loaded on init — overlay starts empty,
     // waiting for ContentBlockStarted event from admin
 
@@ -1732,25 +1721,6 @@ function connectWebSocket() {
   // wearing data-live-ticker.
   channel.bind('LivePricesUpdated', (data) => {
     LiveTickers.applyDelta(data.prices || []);
-  });
-
-  // Legacy event still fires from BroadcastTickersJob (10s heartbeat
-  // until #14 cleanup). Translates the per-scene snapshot into the
-  // delta format expected by LiveTickers, so the same store stays
-  // authoritative regardless of which path delivered the update.
-  channel.bind('App\\Events\\TickersUpdated', (data) => {
-    if (!Array.isArray(data?.tickers)) return;
-    const prices = data.tickers
-      .filter(t => t.exchange && t.symbol && t.price != null)
-      .map(t => ({
-        key: `${t.exchange}:${t.symbol}`,
-        price: Number(t.price),
-        change_pct: t.change_pct != null ? Number(t.change_pct) : null,
-        previous_close: null,
-        ts: Math.floor(Date.now() / 1000),
-        source: 'legacy-tickers-updated',
-      }));
-    LiveTickers.applyDelta(prices);
   });
 
   channel.bind('App\\Events\\ContentBlockStarted', (data) => {
@@ -1918,78 +1888,70 @@ tickSessionBug();
 setInterval(tickSessionBug, 1000);
 
 // --- MARKET PULSE: rotating snapshot, swaps every 8s ---
-const pulseSnapshots = [
-  {
-    title: 'Indices',
-    rows: [
-      { name: 'DOW',     value: '43,210', changePct: -0.12 },
-      { name: 'S&P 500', value: '5,204',  changePct: 0.32 },
-      { name: 'NASDAQ',  value: '18,420', changePct: 0.45 },
-      { name: 'FTSE',    value: '7,891',  changePct: 0.30 },
-    ],
-  },
-  {
-    title: 'Forex',
-    rows: [
-      { name: 'EUR/USD', value: '1.0842', changePct: 0.05 },
-      { name: 'GBP/USD', value: '1.2714', changePct: -0.12 },
-      { name: 'USD/JPY', value: '149.32', changePct: 0.18 },
-      { name: 'AUD/USD', value: '0.6531', changePct: 0.08 },
-    ],
-  },
-  {
-    title: 'Commodities',
-    rows: [
-      { name: 'GOLD',   value: '$2,341', changePct: 0.70 },
-      { name: 'SILVER', value: '$27.84', changePct: 0.40 },
-      { name: 'OIL',    value: '$78.40', changePct: -0.90 },
-      { name: 'BRENT',  value: '$82.15', changePct: -0.65 },
-    ],
-  },
-  {
-    title: 'Crypto',
-    rows: [
-      { name: 'BTC', value: '$68,420', changePct: -0.55 },
-      { name: 'ETH', value: '$3,412',  changePct: 0.84 },
-      { name: 'SOL', value: '$148.20', changePct: 1.45 },
-      { name: 'XRP', value: '$0.624',  changePct: -0.20 },
-    ],
-  },
-];
+// PULSE widget — config comes from /api/overlay/state.widgets.pulse
+// (which reads the Widget table on the backend). Each group is a
+// rotation card with N symbols; rows are rendered with placeholders
+// bound to data-live-ticker so LiveTickers fills in real prices on
+// the spot and keeps them updated via LivePricesUpdated events.
+let pulseGroups = [];
+let pulseRotationSec = 8;
 let pulseIndex = 0;
+let pulseRotateTimer = null;
+
+function applyPulseConfig(widget) {
+  if (!widget || widget.type !== 'ticker_groups') {
+    pulseGroups = [];
+    return;
+  }
+  pulseGroups = widget.config?.groups || [];
+  pulseRotationSec = widget.config?.rotation_sec || 8;
+  pulseIndex = 0;
+
+  if (pulseRotateTimer) clearInterval(pulseRotateTimer);
+  if (pulseGroups.length) {
+    renderPulseSnapshot();
+    if (pulseGroups.length > 1) {
+      pulseRotateTimer = setInterval(rotatePulse, pulseRotationSec * 1000);
+    }
+  }
+}
 
 function renderPulseSnapshot() {
-  const snap = pulseSnapshots[pulseIndex];
+  const group = pulseGroups[pulseIndex];
+  if (!group) return;
   const rowsEl = document.getElementById('augPulseRows');
-  rowsEl.innerHTML = snap.rows.map(r => {
-    const dir = r.changePct >= 0 ? 'up' : 'down';
-    const arrow = r.changePct >= 0 ? '▲' : '▼';
+  // Each row is a "blind" template with data-live-ticker placeholders.
+  // LiveTickers.applyTo() below fills in price + change_pct from the
+  // shared cache; subsequent LivePricesUpdated events keep them fresh
+  // automatically as long as the row is in the DOM.
+  rowsEl.innerHTML = (group.symbols || []).map(key => {
+    const display = key.includes(':') ? key.split(':', 2)[1] : key;
     return `
-      <div class="aug-pulse-row">
-        <span class="aug-pulse-name">${r.name}</span>
-        <span class="aug-pulse-value">${r.value}</span>
-        <span class="aug-pulse-change ${dir}">${arrow} ${Math.abs(r.changePct).toFixed(2)}%</span>
+      <div class="aug-pulse-row" data-live-ticker="${key}">
+        <span class="aug-pulse-name">${display}</span>
+        <span class="aug-pulse-value" data-live-field="price">—</span>
+        <span class="aug-pulse-change" data-live-field="change_pct">—</span>
       </div>
     `;
   }).join('');
-  document.getElementById('augPulseTitle').textContent = snap.title;
+  document.getElementById('augPulseTitle').textContent = group.title || '';
+  LiveTickers.applyTo(rowsEl);
 }
 
 function rotatePulse() {
+  if (!pulseGroups.length) return;
   const body = document.getElementById('augPulseRows');
   gsap.to(body, {
     opacity: 0,
     duration: 0.25,
     ease: 'power2.in',
     onComplete: () => {
-      pulseIndex = (pulseIndex + 1) % pulseSnapshots.length;
+      pulseIndex = (pulseIndex + 1) % pulseGroups.length;
       renderPulseSnapshot();
       gsap.fromTo(body, { opacity: 0 }, { opacity: 1, duration: 0.35, ease: 'power2.out' });
     },
   });
 }
-renderPulseSnapshot();
-setInterval(rotatePulse, 8000);
 
 // --- PRICE ALERT: occasional event-driven flash ---
 const alertSamples = [
@@ -2195,6 +2157,67 @@ gsap.set('.lower-third', { autoAlpha: 0, y: 30 });
 //   - applyDelta(prices) — incremental update from LivePricesUpdated WS event
 //   - applyTo(root, key?) — re-render any matching DOM nodes from cache
 // ----------------------------------------------------------------
+// ----------------------------------------------------------------
+// MarketHours — JS mirror of App\Services\MarketData\MarketHours.
+// Computes open/closed status for an exchange purely from a static
+// schedule, no backend roundtrip needed. Recomputes once per minute
+// (see scheduleMarketHoursTicker below).
+//
+// Keep the SCHEDULES table in sync with the PHP version — same
+// keys, same hours, same special-case strings. CI can grow a test
+// later that diffs both files if drift becomes a real problem.
+// ----------------------------------------------------------------
+const MarketHours = {
+  SCHEDULES: {
+    NASDAQ:  { tz: 'America/New_York',  open: '09:30', close: '16:00' },
+    NYSE:    { tz: 'America/New_York',  open: '09:30', close: '16:00' },
+    AMEX:    { tz: 'America/New_York',  open: '09:30', close: '16:00' },
+    OTCQX:   { tz: 'America/New_York',  open: '09:30', close: '16:00' },
+    OTC:     { tz: 'America/New_York',  open: '09:30', close: '16:00' },
+    TSX:     { tz: 'America/Toronto',   open: '09:30', close: '16:00' },
+    'TSX-V': { tz: 'America/Toronto',   open: '09:30', close: '16:00' },
+    LSE:     { tz: 'Europe/London',     open: '08:00', close: '16:30' },
+    ASX:     { tz: 'Australia/Sydney',  open: '10:00', close: '16:00' },
+    FRA:     { tz: 'Europe/Berlin',     open: '09:00', close: '17:30' },
+    CRYPTO:  'always',
+    FX:      'fx',
+  },
+
+  /** Returns 'open' | 'closed' | 'always' | 'unknown'. */
+  statusFor(exchange, now = new Date()) {
+    const sched = this.SCHEDULES[exchange];
+    if (sched == null) return 'unknown';
+    if (sched === 'always') return 'always';
+    if (sched === 'fx') return this.isFxOpen(now) ? 'open' : 'closed';
+    return this.isStockOpen(sched, now) ? 'open' : 'closed';
+  },
+
+  isStockOpen(sched, now) {
+    // Format the local wall-clock time in the exchange's tz.
+    const fmt = new Intl.DateTimeFormat('en-GB', {
+      timeZone: sched.tz, weekday: 'short',
+      hour: '2-digit', minute: '2-digit', hour12: false,
+    });
+    const parts = Object.fromEntries(
+      fmt.formatToParts(now).map(p => [p.type, p.value])
+    );
+    const weekday = parts.weekday; // 'Mon', 'Tue', ... 'Sat', 'Sun'
+    if (weekday === 'Sat' || weekday === 'Sun') return false;
+    const time = `${parts.hour}:${parts.minute}`;
+    return time >= sched.open && time < sched.close;
+  },
+
+  isFxOpen(now) {
+    // FX session: Sun 22:00 UTC → Fri 22:00 UTC.
+    const dow = now.getUTCDay(); // 0=Sun ... 6=Sat
+    const hour = now.getUTCHours();
+    if (dow === 6) return false;                 // Saturday
+    if (dow === 0 && hour < 22) return false;    // Sunday before 22:00
+    if (dow === 5 && hour >= 22) return false;   // Friday after 22:00
+    return true;
+  },
+};
+
 const LiveTickers = {
   cache: new Map(),
 
@@ -2263,6 +2286,12 @@ const LiveTickers = {
    * Format the cached values into the DOM. Children with
    * data-live-field="price" or "change_pct" get text content;
    * change elements also get up/down classes for colour styling.
+   *
+   * Bloomberg convention: don't visually mark closed markets in
+   * the running tape — the audience expects to see numbers, the
+   * tape just naturally stops ticking when the bell rings. Market
+   * status surfaces in calmer places (top bar session indicators,
+   * "as of" captions in lower-third meta), not on every pill.
    */
   paint(el, data) {
     const fields = el.querySelectorAll('[data-live-field]');
