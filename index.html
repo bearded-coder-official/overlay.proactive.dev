@@ -1522,13 +1522,16 @@ function updateTimezones(newTimezones) {
 // Ticker tape — CSS animation for scroll, GSAP for effects
 // ============================================================
 function buildTickerItemHTML(t) {
-  const cls = t.change_pct >= 0 ? 'ticker-up' : 'ticker-down';
-  const arrow = t.change_pct >= 0 ? '▲' : '▼';
-  const price = Number(t.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  return `<span class="ticker-item" data-ticker="${t.symbol}">
+  // Canonical key matches LiveTickers store. Tickers without an
+  // exchange (legacy index/commodity rows) fall back to the symbol
+  // alone — they won't receive live updates, but at least render.
+  const key = t.exchange ? `${t.exchange}:${t.symbol}` : t.symbol;
+  // Render placeholders; LiveTickers.applyTo() fills in real values
+  // immediately after the markup is mounted (and on every delta).
+  return `<span class="ticker-item" data-live-ticker="${key}">
     <span class="ticker-symbol">${t.symbol}</span>
-    <span class="ticker-price">${price}</span>
-    <span class="ticker-change ${cls}">${arrow} ${Math.abs(t.change_pct || 0).toFixed(2)}%</span>
+    <span class="ticker-price" data-live-field="price">—</span>
+    <span class="ticker-change" data-live-field="change_pct">—</span>
   </span>`;
 }
 
@@ -1537,12 +1540,18 @@ function renderTickerTape() {
 
   const el = document.getElementById('tickerScroll');
   const wrapper = el.parentElement;
-  const visible = activeTickers.filter(t => t.price != null);
+  // No filter on price anymore — LiveTickers fills in placeholders
+  // from cache, so even fresh tape items render with real values
+  // as soon as they're in the DOM.
+  const visible = activeTickers;
   if (!visible.length) { el.innerHTML = ''; return; }
 
   // Build one set, measure it
   const oneSet = visible.map(buildTickerItemHTML).join('');
   el.innerHTML = oneSet;
+  // Hydrate the freshly mounted placeholders from the LiveTickers
+  // cache before measuring — formatted prices change item width.
+  LiveTickers.applyTo(el);
   const oneSetWidth = el.scrollWidth;
   const viewportWidth = wrapper.offsetWidth;
 
@@ -1551,6 +1560,8 @@ function renderTickerTape() {
   // Enough copies so content fills viewport at any scroll position
   const copies = Math.max(2, Math.ceil((viewportWidth * 2) / oneSetWidth) + 1);
   el.innerHTML = Array(copies).fill(oneSet).join('');
+  // Re-apply after duplication so all clones get the cached values too.
+  LiveTickers.applyTo(el);
 
   // GSAP infinite scroll — animate exactly one set width
   tickerBaseDuration = speedToDuration(tickerSpeed);
@@ -1565,71 +1576,6 @@ function renderTickerTape() {
 
 function formatPrice(n) {
   return Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-function updateTickerPrices(newTickers) {
-  newTickers.forEach(nt => {
-    if (nt.price == null) return;
-    const existing = activeTickers.find(t => t.symbol === nt.symbol);
-    if (!existing) return;
-    if (existing.price == nt.price && existing.change_pct == nt.change_pct) return;
-
-    const oldPrice = Number(existing.price || 0);
-    const newPrice = Number(nt.price);
-    const oldPct = Number(existing.change_pct || 0);
-    const newPct = Number(nt.change_pct || 0);
-
-    existing.price = nt.price;
-    existing.change_pct = nt.change_pct;
-
-    document.querySelectorAll(`[data-ticker="${nt.symbol}"]`).forEach(el => {
-      const priceEl = el.querySelector('.ticker-price');
-      const changeEl = el.querySelector('.ticker-change');
-      if (!priceEl || !changeEl) return;
-
-      // Animate price number smoothly
-      const proxy = { val: oldPrice };
-      gsap.to(proxy, {
-        val: newPrice,
-        duration: 1,
-        ease: 'power1.out',
-        onUpdate: () => { priceEl.textContent = formatPrice(proxy.val); },
-      });
-
-      // Animate change % number smoothly
-      const pctProxy = { val: oldPct };
-      gsap.to(pctProxy, {
-        val: newPct,
-        duration: 1,
-        ease: 'power1.out',
-        onUpdate: () => {
-          const arrow = pctProxy.val >= 0 ? '▲' : '▼';
-          changeEl.textContent = `${arrow} ${Math.abs(pctProxy.val).toFixed(2)}%`;
-        },
-      });
-
-      // Smooth color transition on direction change
-      if ((oldPct >= 0) !== (newPct >= 0)) {
-        gsap.to(changeEl, { color: newPct >= 0 ? '#22c55e' : '#ef4444', duration: 0.6, ease: 'power2.inOut' });
-      }
-
-      // Flash background on price change
-      if (newPrice !== oldPrice) {
-        const flashColor = newPrice > oldPrice ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)';
-        gsap.fromTo(priceEl,
-          { backgroundColor: flashColor },
-          { backgroundColor: 'transparent', duration: 1.5, ease: 'power2.out' }
-        );
-      }
-    });
-  });
-}
-
-function replaceTickersFade(newTickers) {
-  fadeSwap('#tickerStrip', () => {
-    activeTickers = newTickers;
-    renderTickerTape();
-  });
 }
 
 // ============================================================
@@ -1702,6 +1648,11 @@ async function loadState() {
     MusicPlayer.init(data.music);
     IdleAnimations.set(data.idle_animation || 'spin');
     IdleCTA.setPhrases(data.cta_phrases || []);
+    // Hydrate the live-prices store from the snapshot Redis hash
+    // returned by /api/overlay/state. Any DOM rendered after this
+    // (incl. renderTickerTape above and future content blocks) is
+    // guaranteed fresh prices, no waiting for the first WS tick.
+    LiveTickers.hydrate(data.live_prices || {});
     // Note: content block is NOT loaded on init — overlay starts empty,
     // waiting for ContentBlockStarted event from admin
 
@@ -1775,8 +1726,31 @@ function connectWebSocket() {
     }
   });
 
+  // New canonical-key broadcast: TickerUpdater dispatches batched
+  // deltas every 200ms via this event. LiveTickers handles routing
+  // to all matching DOM nodes — ticker tape, lt-meta, anything
+  // wearing data-live-ticker.
+  channel.bind('LivePricesUpdated', (data) => {
+    LiveTickers.applyDelta(data.prices || []);
+  });
+
+  // Legacy event still fires from BroadcastTickersJob (10s heartbeat
+  // until #14 cleanup). Translates the per-scene snapshot into the
+  // delta format expected by LiveTickers, so the same store stays
+  // authoritative regardless of which path delivered the update.
   channel.bind('App\\Events\\TickersUpdated', (data) => {
-    updateTickerPrices(data.tickers);
+    if (!Array.isArray(data?.tickers)) return;
+    const prices = data.tickers
+      .filter(t => t.exchange && t.symbol && t.price != null)
+      .map(t => ({
+        key: `${t.exchange}:${t.symbol}`,
+        price: Number(t.price),
+        change_pct: t.change_pct != null ? Number(t.change_pct) : null,
+        previous_close: null,
+        ts: Math.floor(Date.now() / 1000),
+        source: 'legacy-tickers-updated',
+      }));
+    LiveTickers.applyDelta(prices);
   });
 
   channel.bind('App\\Events\\ContentBlockStarted', (data) => {
@@ -2149,23 +2123,33 @@ function renderCompanyMeta(company) {
   const el = document.getElementById('ltMeta');
   if (!el || !company) return;
 
+  // Render placeholders bound to canonical "EXCHANGE:SYMBOL" keys.
+  // LiveTickers.applyTo() at the bottom of this function fills in
+  // real values from cache immediately, so even an article shown
+  // hours after seed time displays the latest known price.
   const tickers = (company.tickers || []).slice(0, 3);
-  const tickersHtml = tickers.map(t => `
+  const tickersHtml = tickers.map(t => {
+    const key = `${t.exchange}:${t.symbol}`;
+    return `
     <span class="lt-meta-divider"></span>
-    <span class="lt-meta-ticker">
+    <span class="lt-meta-ticker" data-live-ticker="${key}">
       <span class="lt-meta-ticker-symbol">${t.exchange}:${t.symbol}</span>
-      <span class="lt-meta-ticker-price">$${Number(t.price).toFixed(2)}</span>
-      <span class="lt-meta-ticker-change ${t.change_pct >= 0 ? 'up' : 'down'}">
-        ${t.change_pct >= 0 ? '▲' : '▼'} ${Math.abs(t.change_pct).toFixed(2)}%
-      </span>
+      <span class="lt-meta-ticker-price" data-live-field="price">—</span>
+      <span class="lt-meta-ticker-change" data-live-field="change_pct">—</span>
     </span>
-  `).join('');
+  `;
+  }).join('');
 
   el.innerHTML = `
     ${company.sector ? `<span class="lt-meta-sector">${company.sector}</span>` : ''}
     <span class="lt-meta-company">${company.name}</span>
     ${tickersHtml}
   `;
+
+  // Pull current values from the live store into the freshly
+  // mounted placeholders. Subsequent LivePricesUpdated events will
+  // keep them updated automatically as long as they remain in DOM.
+  LiveTickers.applyTo(el);
 }
 
 // ----------------------------------------------------------------
@@ -2190,6 +2174,128 @@ let nextCountdownTimer = null;
 gsap.set('.idle-state',  { autoAlpha: 1, scale: 1, xPercent: 0 });
 gsap.set('.next-banner', { autoAlpha: 0, yPercent: -50, y: 24 });
 gsap.set('.lower-third', { autoAlpha: 0, y: 30 });
+
+// ----------------------------------------------------------------
+// LiveTickers — single source of truth for current market prices
+// across the entire overlay.
+//
+// State: Map<canonicalKey, {price, change_pct, previous_close, ts, source}>
+// where canonicalKey = "EXCHANGE:SYMBOL" matching the backend's
+// LivePriceCache and LivePricesUpdated event payload.
+//
+// DOM contract: any element with data-live-ticker="EXCHANGE:SYMBOL"
+// participates in updates. Inside it, descendants with
+// data-live-field="price" or "change_pct" receive the formatted
+// values. The change element gets up/down classes for colour. This
+// lets ticker tape, lt-meta, and any future markup share one
+// rendering pipeline.
+//
+// Lifecycle:
+//   - hydrate(snapshot)  — bulk replace from /api/overlay/state on load
+//   - applyDelta(prices) — incremental update from LivePricesUpdated WS event
+//   - applyTo(root, key?) — re-render any matching DOM nodes from cache
+// ----------------------------------------------------------------
+const LiveTickers = {
+  cache: new Map(),
+
+  /**
+   * Bulk replace from a fresh /state snapshot. Wipes the previous
+   * cache so stale entries don't survive a reload.
+   */
+  hydrate(snapshot) {
+    this.cache.clear();
+    if (snapshot && typeof snapshot === 'object') {
+      for (const [key, value] of Object.entries(snapshot)) {
+        this.cache.set(key, value);
+      }
+    }
+    this.applyTo(document);
+  },
+
+  /**
+   * Apply an incremental delta from a LivePricesUpdated event.
+   * Each entry has the same shape as a cache value plus a `key`
+   * field. Out-of-order updates (older ts than what's already
+   * cached) are dropped — happens during WS reconnects when the
+   * heartbeat snapshot races with newer ticks.
+   */
+  applyDelta(prices) {
+    if (!Array.isArray(prices)) return;
+    const touched = [];
+    for (const p of prices) {
+      if (!p || !p.key) continue;
+      const prev = this.cache.get(p.key);
+      if (prev && prev.ts && p.ts && prev.ts > p.ts) continue;
+      this.cache.set(p.key, {
+        price: p.price,
+        change_pct: p.change_pct,
+        previous_close: p.previous_close,
+        ts: p.ts,
+        source: p.source,
+      });
+      touched.push(p.key);
+    }
+    // Single sweep handles all touched keys at once.
+    for (const key of touched) {
+      this.applyTo(document, key);
+    }
+  },
+
+  /**
+   * Walk DOM under root looking for [data-live-ticker]. If onlyKey
+   * is given, scope to that one key — used for incremental updates
+   * to avoid touching unrelated nodes.
+   */
+  applyTo(root, onlyKey = null) {
+    const selector = onlyKey
+      ? `[data-live-ticker="${cssEscape(onlyKey)}"]`
+      : '[data-live-ticker]';
+    const nodes = root.querySelectorAll(selector);
+    for (const el of nodes) {
+      const key = el.dataset.liveTicker;
+      const data = this.cache.get(key);
+      if (!data) continue;
+      this.paint(el, data);
+    }
+  },
+
+  /**
+   * Format the cached values into the DOM. Children with
+   * data-live-field="price" or "change_pct" get text content;
+   * change elements also get up/down classes for colour styling.
+   */
+  paint(el, data) {
+    const fields = el.querySelectorAll('[data-live-field]');
+    for (const child of fields) {
+      const field = child.dataset.liveField;
+      if (field === 'price' && data.price != null) {
+        child.textContent = formatLivePrice(data.price);
+      } else if (field === 'change_pct') {
+        if (data.change_pct == null) {
+          child.textContent = '—';
+          child.classList.remove('up', 'down', 'ticker-up', 'ticker-down');
+        } else {
+          const arrow = data.change_pct >= 0 ? '▲' : '▼';
+          child.textContent = `${arrow} ${Math.abs(data.change_pct).toFixed(2)}%`;
+          child.classList.toggle('up', data.change_pct >= 0);
+          child.classList.toggle('down', data.change_pct < 0);
+          // Legacy ticker-tape classes mirrored so existing CSS keeps working.
+          child.classList.toggle('ticker-up', data.change_pct >= 0);
+          child.classList.toggle('ticker-down', data.change_pct < 0);
+        }
+      }
+    }
+  },
+};
+
+function formatLivePrice(n) {
+  return Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// CSS.escape polyfill for the few targets that lack it.
+function cssEscape(s) {
+  return (window.CSS && window.CSS.escape) ? window.CSS.escape(s) : String(s).replace(/[^\w-]/g, '\\$&');
+}
 
 // ----------------------------------------------------------------
 // Idle CTA — one-shot dramatic tagline shown after a content block
