@@ -356,7 +356,7 @@
     top: 50%;
     display: flex;
     flex-direction: column;
-    background: rgba(20, 22, 28, 0.95);
+    background: var(--panel);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
     opacity: 0;
     pointer-events: none;
@@ -415,7 +415,6 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
-    display: block;
   }
 
   /* VOICE BLOCK — split layout: cover left, scrolling article right */
@@ -488,14 +487,18 @@
     left: 0;
     right: 0;
     overflow: hidden;
+    /* Symmetric 110px linear fade on top and bottom. mask-image works
+       correctly here because .voice-text-inner no longer uses
+       translate3d / will-change (which would have put it on its own
+       compositor layer and leaked through the mask). */
     -webkit-mask-image: linear-gradient(180deg,
       rgba(0,0,0,0) 0,
-      rgba(0,0,0,1) 90px,
+      rgba(0,0,0,1) 110px,
       rgba(0,0,0,1) calc(100% - 110px),
       rgba(0,0,0,0) 100%);
             mask-image: linear-gradient(180deg,
       rgba(0,0,0,0) 0,
-      rgba(0,0,0,1) 90px,
+      rgba(0,0,0,1) 110px,
       rgba(0,0,0,1) calc(100% - 110px),
       rgba(0,0,0,0) 100%);
   }
@@ -505,7 +508,9 @@
     left: 80px;
     right: 80px;
     top: 0;
-    will-change: transform;
+    /* NO will-change / translate3d — that promotes the element to its
+       own compositor layer, which then ignores mask-image and z-index
+       of sibling overlays. We use plain 2D transform in JS instead. */
   }
   .voice-text-inner p {
     font-size: 28px;
@@ -549,14 +554,26 @@
   .lt-progress {
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 3px;
-    background: rgba(255, 255, 255, 0.08);
+    height: 6px;
+    /* Solid dark background — must fully cover the video underneath
+       (the lower-third itself is semi-transparent + blurred, so we
+       can't rely on it bleeding through). */
+    background: rgba(35, 35, 35, 0.96);
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+    user-select: none;
+    transition: height 0.15s ease;
+  }
+  .lt-progress:hover {
+    height: 12px;
+    background: rgba(40, 40, 40, 0.96);
   }
   .lt-progress-fill {
     height: 100%;
     width: 0%;
     background: var(--accent);
     transition: width 0.2s linear;
+    pointer-events: none;
   }
 
   .lt-main {
@@ -2286,6 +2303,7 @@ function playOutro() {
   if (companyRotateInterval) { clearInterval(companyRotateInterval); companyRotateInterval = null; }
   if (durationTimer) { clearTimeout(durationTimer); durationTimer = null; }
   if (durationProgress) { clearInterval(durationProgress); durationProgress = null; }
+  iframeSeekState = null;
 
   cancelVoiceScroll();
 
@@ -2305,7 +2323,7 @@ function playOutro() {
         audio.onended = null;
         audio.onloadedmetadata = null;
       }
-      if (voiceTextInner) voiceTextInner.style.transform = 'translate3d(0, 0, 0)';
+      if (voiceTextInner) voiceTextInner.style.transform = 'translate(0, 0)';
       frame.classList.remove('show-video', 'show-iframe', 'show-voice');
       // Reset content-layer transforms so the next playIntro starts clean.
       gsap.set('.content-video, .content-iframe, .voice-layout', { opacity: 0, scale: 0.96, clearProps: 'opacity,scale' });
@@ -2539,7 +2557,7 @@ async function renderVoiceTranscript(transcriptUrl, body, audio, inner, progress
     .join('');
 
   inner.innerHTML = html;
-  inner.style.top = '90px';
+  inner.style.top = '60px';
 
   const spans = inner.querySelectorAll('.vw');
   const windowEl = document.querySelector('.voice-text-window');
@@ -2572,7 +2590,7 @@ async function renderVoiceTranscript(transcriptUrl, body, audio, inner, progress
     //   • near the end, the target gets clamped to scrollMax → the active
     //     word is allowed to drift down within the reading window so the
     //     last line lines up with the bottom edge.
-    const TOP_FADE = 90;
+    const TOP_FADE = 60;
     const BOTTOM_FADE = 110;
     const winH = windowEl.clientHeight;
     const innerH = inner.scrollHeight;
@@ -2626,7 +2644,7 @@ async function renderVoiceTranscript(transcriptUrl, body, audio, inner, progress
 
       // Smoothly lerp toward target.
       currentY += (targetY - currentY) * 0.08;
-      inner.style.transform = `translate3d(0, ${-currentY}px, 0)`;
+      inner.style.transform = `translate(0, ${-currentY}px)`;
 
       voiceScrollRaf = requestAnimationFrame(tick);
     };
@@ -2644,14 +2662,14 @@ function renderVoiceBodyFallback(body, audio, inner, progressFill) {
   inner.innerHTML = paragraphs
     .map(p => `<p>${p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`)
     .join('');
-  inner.style.top = '90px';
+  inner.style.top = '60px';
 
   cancelVoiceScroll();
   requestAnimationFrame(() => {
     const windowEl = document.querySelector('.voice-text-window');
     const innerHeight = inner.scrollHeight;
     const winH = windowEl.clientHeight;
-    const readableHeight = winH - 90 - 110;
+    const readableHeight = winH - 60 - 110;
     const scrollMax = Math.max(0, innerHeight - readableHeight);
 
     const tick = () => {
@@ -2661,7 +2679,7 @@ function renderVoiceBodyFallback(body, audio, inner, progressFill) {
       }
       progressFill.style.width = (audio.currentTime / audio.duration * 100) + '%';
       const progress = Math.min(1, audio.currentTime / (audio.duration * 0.95));
-      inner.style.transform = `translate3d(0, ${-progress * scrollMax}px, 0)`;
+      inner.style.transform = `translate(0, ${-progress * scrollMax}px)`;
       voiceScrollRaf = requestAnimationFrame(tick);
     };
     voiceScrollRaf = requestAnimationFrame(tick);
@@ -2750,7 +2768,7 @@ function setUpAndPlayContent(block) {
   if (voiceTextEl) voiceTextEl.style.removeProperty('--voice-cover-bg');
   if (voiceTextInner) {
     voiceTextInner.innerHTML = '';
-    voiceTextInner.style.transform = 'translate3d(0, 0, 0)';
+    voiceTextInner.style.transform = 'translate(0, 0)';
   }
   if (durationTimer) { clearTimeout(durationTimer); durationTimer = null; }
   if (durationProgress) { clearInterval(durationProgress); durationProgress = null; }
@@ -2799,20 +2817,21 @@ function setUpAndPlayContent(block) {
     frame.classList.add('show-iframe');
     iframe.src = block.embed.url;
 
-    // Iframe lifecycle controlled by duration_sec
-    const duration = (block.duration_sec || 60) * 1000;
-    const startTime = Date.now();
+    // Iframe lifecycle controlled by duration_sec. We store startTime
+    // and totalMs in iframeSeekState so the seek bar can rewrite them.
+    const totalMs = (block.duration_sec || 60) * 1000;
+    iframeSeekState = { totalMs, startTime: Date.now() };
 
     durationProgress = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      progressFill.style.width = Math.min(elapsed / duration * 100, 100) + '%';
+      const elapsed = Date.now() - iframeSeekState.startTime;
+      progressFill.style.width = Math.min(elapsed / totalMs * 100, 100) + '%';
     }, 100);
 
     durationTimer = setTimeout(() => {
       clearInterval(durationProgress);
       durationProgress = null;
       playOutro();
-    }, duration);
+    }, totalMs);
   }
 }
 
@@ -3337,6 +3356,93 @@ window.addEventListener('click', () => {
     MusicPlayer.ctx.resume().catch(() => {});
   }
 }, { once: false });
+
+// ============================================================
+// Seek bar — click / drag on the lower-third progress bar to scrub
+// the active content media. Works for video_block and voice_block;
+// embed_block has no real playhead so we just adjust its outro timer.
+// ============================================================
+(function attachSeekHandlers() {
+  const progress = document.querySelector('.lt-progress');
+  if (!progress) return;
+
+  let isDragging = false;
+
+  function getActiveMedia() {
+    const frame = document.querySelector('.video-frame');
+    if (frame.classList.contains('show-video')) {
+      return document.querySelector('.content-video');
+    }
+    if (frame.classList.contains('show-voice')) {
+      return document.getElementById('contentAudio');
+    }
+    return null; // iframe — handled separately below
+  }
+
+  function fractionFromEvent(e) {
+    const rect = progress.getBoundingClientRect();
+    return Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  }
+
+  function seekIframeBlock(fraction) {
+    // For embed_block we don't control playback — we control how long
+    // the iframe is on screen via durationTimer + durationProgress.
+    // Seeking = recompute "elapsed time" so the existing timers act as
+    // if the requested fraction had already passed.
+    const frame = document.querySelector('.video-frame');
+    if (!frame.classList.contains('show-iframe')) return;
+    if (!iframeSeekState) return;
+
+    const totalMs = iframeSeekState.totalMs;
+    const newElapsed = fraction * totalMs;
+    iframeSeekState.startTime = Date.now() - newElapsed;
+
+    // Update the visual fill immediately.
+    const fill = document.getElementById('ltProgressFill');
+    if (fill) fill.style.width = (fraction * 100) + '%';
+
+    // The interval that paints fill, and the timeout that fires
+    // playOutro, both read iframeSeekState.startTime — but only
+    // the interval re-reads each tick. The timeout was scheduled
+    // once with the original duration, so we need to recreate it.
+    if (durationTimer) { clearTimeout(durationTimer); durationTimer = null; }
+    const remaining = Math.max(0, totalMs - newElapsed);
+    durationTimer = setTimeout(() => {
+      if (durationProgress) { clearInterval(durationProgress); durationProgress = null; }
+      playOutro();
+    }, remaining);
+  }
+
+  function seek(e) {
+    const fraction = fractionFromEvent(e);
+    const media = getActiveMedia();
+    if (media && media.duration && isFinite(media.duration)) {
+      media.currentTime = fraction * media.duration;
+      // Update the visual fill instantly so the bar follows the cursor
+      // even if the media's `timeupdate` event hasn't fired yet.
+      const fill = document.getElementById('ltProgressFill');
+      if (fill) fill.style.width = (fraction * 100) + '%';
+    } else {
+      seekIframeBlock(fraction);
+    }
+  }
+
+  progress.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    seek(e);
+    e.preventDefault();
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (isDragging) seek(e);
+  });
+  window.addEventListener('mouseup', () => {
+    isDragging = false;
+  });
+})();
+
+// Embed-block seek state — populated by renderContentBlock when an
+// iframe block starts, read by attachSeekHandlers' seekIframeBlock.
+let iframeSeekState = null;
 
 // ============================================================
 // Init
