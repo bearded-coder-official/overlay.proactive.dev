@@ -312,6 +312,11 @@
     overflow: hidden;
     position: relative;
     will-change: transform;
+    /* clip-path is geometric — composite layers (the <video> element,
+       iframes, etc.) are forced to respect this clip even though they
+       might leak past overflow:hidden under sub-pixel scale renders. */
+    clip-path: inset(0);
+    -webkit-clip-path: inset(0);
   }
 
   .content-video,
@@ -415,6 +420,8 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
+    clip-path: inset(0);
+    -webkit-clip-path: inset(0);
   }
 
   /* VOICE BLOCK — split layout: cover left, scrolling article right */
@@ -540,15 +547,20 @@
     position: absolute;
     bottom: 0;
     left: 0;
-    right: 0;
-    background: rgba(45, 45, 45, 0.92);
-    backdrop-filter: blur(8px);
+    /* Compositor sub-pixel rounding makes the video element render
+       1px wider than the lower-third on the right side under
+       non-integer scale. Extending right by 1px closes that gap
+       (clipped harmlessly by .video-frame's clip-path:inset(0)). */
+    right: -1px;
+    background: rgba(45, 45, 45, 0.96);
     display: flex;
     align-items: stretch;
     height: 124px;
     z-index: 5;
     opacity: 0;
-    will-change: opacity, transform;
+    /* No will-change — it promoted the element to its own compositor
+       layer which didn't pixel-align with the parent's box at
+       non-integer scale, causing 1-2px bleeds at right + bottom. */
   }
 
   .lt-progress {
