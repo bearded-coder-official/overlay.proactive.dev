@@ -397,13 +397,13 @@
     overflow: hidden;
     -webkit-mask-image: linear-gradient(180deg,
       rgba(0,0,0,0) 0,
-      rgba(0,0,0,1) 110px,
-      rgba(0,0,0,1) calc(100% - 90px),
+      rgba(0,0,0,1) 60px,
+      rgba(0,0,0,1) calc(100% - 50px),
       rgba(0,0,0,0) 100%);
             mask-image: linear-gradient(180deg,
       rgba(0,0,0,0) 0,
-      rgba(0,0,0,1) 110px,
-      rgba(0,0,0,1) calc(100% - 90px),
+      rgba(0,0,0,1) 60px,
+      rgba(0,0,0,1) calc(100% - 50px),
       rgba(0,0,0,0) 100%);
   }
 
@@ -2206,7 +2206,7 @@ async function renderVoiceTranscript(transcriptUrl, body, audio, inner, progress
     .join('');
 
   inner.innerHTML = html;
-  inner.style.top = '110px';
+  inner.style.top = '60px';
 
   const spans = inner.querySelectorAll('.vw');
   const windowEl = document.querySelector('.voice-text-window');
@@ -2222,6 +2222,30 @@ async function renderVoiceTranscript(transcriptUrl, body, audio, inner, progress
 
   // Wait one frame so layout settles, then start the loop.
   requestAnimationFrame(() => {
+    // Compute scroll bounds dynamically from layout.
+    // The window already excludes the lower-third (its CSS has bottom: 124px).
+    // The mask hides 110px at top and 90px at bottom of that window — those
+    // are the fade zones. The "readable band" is the unmasked middle.
+    //
+    // Bounds:
+    //   scrollMin = 0          → first line sits at the top of the readable band
+    //   scrollMax = innerH − readableH → last line sits at the top of the
+    //                                     bottom fade (= just above the lower-third)
+    //
+    // Clamping the active-word target to this range means:
+    //   • at the start, even though the active word is at the top of the
+    //     inner block, the target gets clamped to 0 → text starts at the top
+    //   • in the middle, the active word sits at ANCHOR_RATIO (~40% from top)
+    //   • near the end, the target gets clamped to scrollMax → the active
+    //     word is allowed to drift down within the reading window so the
+    //     last line lines up with the bottom edge.
+    const TOP_FADE = 60;
+    const BOTTOM_FADE = 50;
+    const winH = windowEl.clientHeight;
+    const innerH = inner.scrollHeight;
+    const readableH = winH - TOP_FADE - BOTTOM_FADE;
+    const scrollMax = Math.max(0, innerH - readableH);
+
     const tick = () => {
       const t = audio.currentTime;
 
@@ -2260,10 +2284,10 @@ async function renderVoiceTranscript(transcriptUrl, body, audio, inner, progress
         // so the camera doesn't jitter through unmatched clusters.
         let anchorIdx = idx;
         while (anchorIdx >= 0 && !flat[anchorIdx]?.matched) anchorIdx--;
-        if (anchorIdx >= 0 && spans[anchorIdx] && windowEl) {
+        if (anchorIdx >= 0 && spans[anchorIdx]) {
           const wordTop = spans[anchorIdx].offsetTop;
-          const winH = windowEl.clientHeight;
-          targetY = wordTop - winH * ANCHOR_RATIO + 110; // +110 for inner.style.top offset
+          const rawTarget = wordTop + TOP_FADE - winH * ANCHOR_RATIO;
+          targetY = Math.max(0, Math.min(rawTarget, scrollMax));
         }
       }
 
@@ -2287,14 +2311,14 @@ function renderVoiceBodyFallback(body, audio, inner, progressFill) {
   inner.innerHTML = paragraphs
     .map(p => `<p>${p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`)
     .join('');
-  inner.style.top = '110px';
+  inner.style.top = '60px';
 
   cancelVoiceScroll();
   requestAnimationFrame(() => {
     const windowEl = document.querySelector('.voice-text-window');
     const innerHeight = inner.scrollHeight;
     const winH = windowEl.clientHeight;
-    const readableHeight = winH - 110 - 90;
+    const readableHeight = winH - 60 - 50;
     const scrollMax = Math.max(0, innerHeight - readableHeight);
 
     const tick = () => {
