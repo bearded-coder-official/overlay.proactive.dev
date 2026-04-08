@@ -166,6 +166,9 @@
   }
 
   .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     font-family: 'Barlow Condensed', sans-serif;
     font-weight: 800;
     font-size: 27px;
@@ -174,7 +177,15 @@
     white-space: nowrap;
     color: #ffffff;
   }
-  .logo span { color: var(--accent); }
+  .logo-mark {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    display: block;
+    flex-shrink: 0;
+  }
+  .logo-text { display: inline-flex; align-items: center; gap: 0.4em; }
+  .logo-text span { color: var(--accent); }
 
   .divider {
     width: 1px;
@@ -1159,7 +1170,10 @@
 </div>
 
 <div class="top-bar" id="topBar">
-  <div class="logo">PROACTIVE <span>WIRE</span></div>
+  <div class="logo">
+    <img class="logo-mark" src="/media/logo.png" alt="">
+    <span class="logo-text">PROACTIVE <span>WIRE</span></span>
+  </div>
   <div class="divider"></div>
   <div class="scene-badge" id="sceneBadge">LIVE</div>
   <div class="live-badge"><div class="live-dot" id="liveDot"></div>LIVE</div>
