@@ -1,1 +1,3 @@
-media/
+media/*
+!media/pulse-narration.mp3
+!media/pulse-cover.jpeg

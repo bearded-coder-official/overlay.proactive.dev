@@ -316,12 +316,117 @@
 
   .video-frame.show-video .content-video { display: block; }
   .video-frame.show-iframe .content-iframe { display: block; background: #fff; }
+  .video-frame.show-voice .voice-layout { display: flex; }
 
   .content-video {
     width: 100%;
     height: 100%;
     object-fit: contain;
     display: block;
+  }
+
+  /* VOICE BLOCK — split layout: cover left, scrolling article right */
+  .voice-layout {
+    position: absolute;
+    inset: 0;
+    display: none;
+    background: #1c1e24;
+  }
+
+  .voice-cover {
+    flex: 0 0 50%;
+    height: 100%;
+    background: #1c1e24;
+    overflow: hidden;
+    position: relative;
+  }
+  .voice-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .voice-cover::after {
+    /* subtle right-edge gradient so the cover blends into the text panel */
+    content: '';
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 120px;
+    background: linear-gradient(90deg, rgba(28,30,36,0) 0%, rgba(28,30,36,0.8) 100%);
+    pointer-events: none;
+  }
+
+  .voice-text {
+    flex: 1 1 50%;
+    min-width: 0;
+    overflow: hidden;
+    position: relative;
+    color: #e6e8ee;
+    font-family: 'Barlow', sans-serif;
+    isolation: isolate;
+  }
+  /* Blurred cover as the text-panel background — visually unified with the cover */
+  .voice-text::before {
+    content: '';
+    position: absolute;
+    inset: -40px;
+    background-image: var(--voice-cover-bg, none);
+    background-size: cover;
+    background-position: center;
+    filter: blur(60px) brightness(0.45) saturate(1.1);
+    transform: scale(1.15);
+    z-index: -2;
+  }
+  /* Dark warm tint on top of the blurred cover so text stays legible */
+  .voice-text::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(28,30,36,0.78) 0%, rgba(20,22,28,0.92) 100%);
+    z-index: -1;
+  }
+  /* Reading-window viewport: clips the absolute scroller AND
+     applies a top/bottom alpha mask so text fades smoothly in and out
+     instead of leaking into the lower-third area. */
+  .voice-text-window {
+    position: absolute;
+    top: 0;
+    bottom: 124px; /* never enter the lower-third zone */
+    left: 0;
+    right: 0;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(180deg,
+      rgba(0,0,0,0) 0,
+      rgba(0,0,0,1) 110px,
+      rgba(0,0,0,1) calc(100% - 90px),
+      rgba(0,0,0,0) 100%);
+            mask-image: linear-gradient(180deg,
+      rgba(0,0,0,0) 0,
+      rgba(0,0,0,1) 110px,
+      rgba(0,0,0,1) calc(100% - 90px),
+      rgba(0,0,0,0) 100%);
+  }
+
+  .voice-text-inner {
+    position: absolute;
+    left: 80px;
+    right: 80px;
+    top: 0;
+    will-change: transform;
+  }
+  .voice-text-inner p {
+    font-size: 26px;
+    line-height: 1.55;
+    margin: 0 0 22px 0;
+    font-weight: 400;
+    color: #d8dbe2;
+  }
+  .voice-text-inner p:first-child {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 32px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.3px;
   }
 
   /* LOWER THIRD — overlays bottom of video-frame */
@@ -1064,6 +1169,17 @@
         <source src="" type="video/mp4">
       </video>
       <iframe class="content-iframe" id="contentIframe" src="" frameborder="0"></iframe>
+      <div class="voice-layout">
+        <div class="voice-cover">
+          <img id="voiceCover" src="" alt="">
+        </div>
+        <div class="voice-text" id="voiceText">
+          <div class="voice-text-window">
+            <div class="voice-text-inner" id="voiceTextInner"></div>
+          </div>
+        </div>
+      </div>
+      <audio class="content-audio" id="contentAudio" preload="auto"></audio>
 
       <div class="lower-third">
         <div class="lt-progress"><div class="lt-progress-fill" id="ltProgressFill"></div></div>
@@ -1762,6 +1878,14 @@ let currentCompanyIndex = 0;
 let companyRotateInterval = null;
 let durationTimer = null;
 let durationProgress = null;
+let voiceScrollRaf = null;
+
+function cancelVoiceScroll() {
+  if (voiceScrollRaf) {
+    cancelAnimationFrame(voiceScrollRaf);
+    voiceScrollRaf = null;
+  }
+}
 
 
 function setQrCode(url) {
@@ -1825,14 +1949,26 @@ function playOutro() {
   if (durationTimer) { clearTimeout(durationTimer); durationTimer = null; }
   if (durationProgress) { clearInterval(durationProgress); durationProgress = null; }
 
+  cancelVoiceScroll();
+
   const tl = gsap.timeline({
     onComplete: () => {
       const video = document.querySelector('.content-video');
       const iframe = document.getElementById('contentIframe');
+      const audio = document.getElementById('contentAudio');
+      const voiceTextInner = document.getElementById('voiceTextInner');
       const frame = document.querySelector('.video-frame');
       if (video) { video.pause(); video.currentTime = 0; }
       if (iframe) iframe.src = 'about:blank';
-      frame.classList.remove('show-video', 'show-iframe');
+      if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.ontimeupdate = null;
+        audio.onended = null;
+        audio.onloadedmetadata = null;
+      }
+      if (voiceTextInner) voiceTextInner.style.transform = 'translate3d(0, 0, 0)';
+      frame.classList.remove('show-video', 'show-iframe', 'show-voice');
     },
   });
   tl.to('.lower-third', { opacity: 0, y: 30, duration: 0.4, ease: 'power3.in' });
@@ -1885,19 +2021,97 @@ function renderContentBlock(block) {
   const frame = document.querySelector('.video-frame');
   const video = document.querySelector('.content-video');
   const iframe = document.getElementById('contentIframe');
+  const audio = document.getElementById('contentAudio');
+  const voiceCover = document.getElementById('voiceCover');
+  const voiceTextInner = document.getElementById('voiceTextInner');
   const progressFill = document.getElementById('ltProgressFill');
   progressFill.style.width = '0%';
 
-  // Reset both
-  frame.classList.remove('show-video', 'show-iframe');
+  // Reset everything
+  frame.classList.remove('show-video', 'show-iframe', 'show-voice');
   video.pause();
   video.removeAttribute('src');
   iframe.src = 'about:blank';
+  if (audio) {
+    audio.pause();
+    audio.removeAttribute('src');
+    audio.ontimeupdate = null;
+    audio.onended = null;
+    audio.onloadedmetadata = null;
+  }
+  cancelVoiceScroll();
+  if (voiceCover) voiceCover.removeAttribute('src');
+  const voiceTextEl = document.getElementById('voiceText');
+  if (voiceTextEl) voiceTextEl.style.removeProperty('--voice-cover-bg');
+  if (voiceTextInner) {
+    voiceTextInner.innerHTML = '';
+    voiceTextInner.style.transform = 'translate3d(0, 0, 0)';
+  }
   if (durationTimer) { clearTimeout(durationTimer); durationTimer = null; }
   if (durationProgress) { clearInterval(durationProgress); durationProgress = null; }
 
   // Load content based on type
-  if (block.media?.url) {
+  if (block.type === 'voice_block') {
+    frame.classList.add('show-voice');
+
+    if (voiceCover && block.cover?.url) {
+      voiceCover.src = block.cover.url;
+      // Use the cover as a heavily-blurred background for the text panel
+      // so the colour palette is unified instead of a flat dark slab.
+      const voiceText = document.getElementById('voiceText');
+      if (voiceText) voiceText.style.setProperty('--voice-cover-bg', `url("${block.cover.url}")`);
+    }
+
+    // Render body text as paragraphs (split on blank lines)
+    if (voiceTextInner && block.body) {
+      const paragraphs = block.body
+        .split(/\n\s*\n/)
+        .map(p => p.trim())
+        .filter(Boolean);
+      voiceTextInner.innerHTML = paragraphs
+        .map(p => `<p>${p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`)
+        .join('');
+    }
+
+    audio.src = block.media.url;
+    audio.load();
+
+    audio.onloadedmetadata = () => {
+      // Wait one frame so layout settles after innerHTML write.
+      requestAnimationFrame(() => {
+        const window = document.querySelector('.voice-text-window');
+        const innerHeight = voiceTextInner.scrollHeight;
+        const windowHeight = window.clientHeight;
+        // The mask hides ~110px at the top and ~90px at the bottom.
+        // Effective reading window is the middle band:
+        const readableHeight = windowHeight - 110 - 90;
+        const scrollMax = Math.max(0, innerHeight - readableHeight);
+        // Start with the first line just below the top fade so it scrolls in.
+        voiceTextInner.style.top = '110px';
+
+        // Drive scroll from requestAnimationFrame (~60Hz) instead of
+        // audio.ontimeupdate (~4Hz) — otherwise the text teleports in
+        // 250ms steps. We read audio.currentTime live each frame.
+        cancelVoiceScroll();
+        const tick = () => {
+          if (!audio.duration || !isFinite(audio.duration)) {
+            voiceScrollRaf = requestAnimationFrame(tick);
+            return;
+          }
+          progressFill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+          // Map currentTime → 0..scrollMax over the first 95% of playback,
+          // so the text settles slightly before the audio actually ends.
+          const progress = Math.min(1, audio.currentTime / (audio.duration * 0.95));
+          voiceTextInner.style.transform = `translate3d(0, ${-progress * scrollMax}px, 0)`;
+          voiceScrollRaf = requestAnimationFrame(tick);
+        };
+        voiceScrollRaf = requestAnimationFrame(tick);
+      });
+    };
+
+    audio.onended = () => playOutro();
+    audio.play().catch(err => console.warn('Voice audio play failed:', err));
+  } else if (block.media?.url) {
     frame.classList.add('show-video');
     const source = video.querySelector('source');
     source.src = block.media.url;
@@ -2199,23 +2413,45 @@ const MusicPlayer = {
   attachContentVideo() {
     if (this.contentVideoAttached) return;
     const videoEl = document.querySelector('.content-video');
+    const audioEl = document.querySelector('.content-audio');
     if (!videoEl) return;
 
     // Defensive: a muted MediaElementSource produces silence per spec.
     videoEl.muted = false;
     videoEl.volume = 1.0;
+    if (audioEl) { audioEl.muted = false; audioEl.volume = 1.0; }
 
+    // Shared compressor — voice/news content benefits from gentle compression.
+    let comp;
     try {
-      const src = this.ctx.createMediaElementSource(videoEl);
-      const comp = this.ctx.createDynamicsCompressor();
+      comp = this.ctx.createDynamicsCompressor();
       comp.threshold.value = -20;
       comp.ratio.value = 3;
       comp.attack.value = 0.01;
       comp.release.value = 0.15;
-      src.connect(comp).connect(this.ctx.destination);
+      comp.connect(this.ctx.destination);
     } catch (e) {
-      // Already wrapped (e.g. hot reload) — ignore.
+      console.warn('[Music] could not create content compressor:', e?.message);
+    }
+
+    try {
+      const vsrc = this.ctx.createMediaElementSource(videoEl);
+      vsrc.connect(comp || this.ctx.destination);
+    } catch (e) {
       console.warn('[Music] content-video already attached:', e?.message);
+    }
+
+    if (audioEl) {
+      try {
+        const asrc = this.ctx.createMediaElementSource(audioEl);
+        asrc.connect(comp || this.ctx.destination);
+      } catch (e) {
+        console.warn('[Music] content-audio already attached:', e?.message);
+      }
+
+      audioEl.addEventListener('play',  () => this.duck());
+      audioEl.addEventListener('ended', () => this.unduck());
+      audioEl.addEventListener('pause', () => this.unduck());
     }
 
     videoEl.addEventListener('play',  () => this.duck());
@@ -2402,10 +2638,10 @@ const MusicPlayer = {
     }
   },
 
-  // Fallback ducking hook for content blocks that have no <video>
-  // (e.g. iframe embeds — Web Audio cannot see their audio).
+  // Fallback ducking hook for content blocks where the <video>/<audio>
+  // play event might fire too late (or never, e.g. iframe embeds).
   duckForContentBlock(block) {
-    if (block?.embed?.url) this.duck();
+    if (block?.embed?.url || block?.type === 'voice_block') this.duck();
   },
 };
 
