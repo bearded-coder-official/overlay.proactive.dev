@@ -683,6 +683,15 @@
   .lt-meta-ticker-change.up { color: #22c55e; }
   .lt-meta-ticker-change.down { color: #ef4444; }
 
+  /* Hide price/change cells when there's no live data for this
+     symbol — the symbol still renders, it just stops looking like
+     "AAPL — —" and becomes a clean "AAPL". The marker attribute is
+     toggled by LiveTickers.applyTo() based on cache presence. */
+  .lt-meta-ticker[data-live-empty] .lt-meta-ticker-price,
+  .lt-meta-ticker[data-live-empty] .lt-meta-ticker-change {
+    display: none;
+  }
+
   .lt-qr-side {
     width: 124px;
     flex-shrink: 0;
@@ -2304,7 +2313,15 @@ const LiveTickers = {
     for (const el of nodes) {
       const key = el.dataset.liveTicker;
       const data = this.cache.get(key);
-      if (!data) continue;
+      if (!data) {
+        // Mark the element as empty so consumers (e.g. lt-meta) can
+        // hide their price/change cells via CSS instead of showing
+        // "—" placeholders. The bottom ticker tape ignores this
+        // attribute and keeps showing dashes.
+        el.dataset.liveEmpty = '1';
+        continue;
+      }
+      delete el.dataset.liveEmpty;
       this.paint(el, data, { animate });
     }
   },
