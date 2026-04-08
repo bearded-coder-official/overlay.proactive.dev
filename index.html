@@ -1701,6 +1701,7 @@ async function loadState() {
     renderFooter();
     MusicPlayer.init(data.music);
     IdleAnimations.set(data.idle_animation || 'spin');
+    IdleCTA.setPhrases(data.cta_phrases || []);
     // Note: content block is NOT loaded on init — overlay starts empty,
     // waiting for ContentBlockStarted event from admin
 
@@ -1810,6 +1811,10 @@ function connectWebSocket() {
   channel.bind('App\\Events\\OverlayRefreshRequested', () => {
     console.log('[Overlay] Refresh requested by admin');
     location.reload();
+  });
+
+  channel.bind('App\\Events\\CtaPhrasesUpdated', (data) => {
+    IdleCTA.setPhrases(data.phrases || []);
   });
 
   pusher.connection.bind('connected', () => {
@@ -2188,21 +2193,39 @@ gsap.set('.lower-third', { autoAlpha: 0, y: 30 });
 
 // ----------------------------------------------------------------
 // Idle CTA — one-shot dramatic tagline shown after a content block
-// ends, between the content fade-out and the logo returning. Picks
-// the next phrase from the rotation each time.
+// ends, between the content fade-out and the logo returning. Phrases
+// come from the admin (cta_phrases table) and are picked in random
+// order. Accent words in the source are wrapped in [brackets].
 // ----------------------------------------------------------------
 const IdleCTA = {
-  // HTML allowed — wrap a word in <b> to render it in accent colour.
-  phrases: [
-    'Where <b>Wall&nbsp;St</b> meets <b>Main&nbsp;St</b>',
-    'Markets · Insights · <b>Interviews</b>',
-    'Stay <b>ahead</b> of the open',
-    'proactive<b>investors</b>.com',
-    'Join the <b>Wire</b>',
-    '<b>Breaking</b> markets daily',
-  ],
-  index: 0,
+  phrases: [],     // populated by setPhrases() from /api/overlay/state
+  lastIndex: -1,
   current: null,
+
+  setPhrases(list) {
+    this.phrases = (list || []).map(s => String(s)).filter(s => s.trim().length);
+    if (this.lastIndex >= this.phrases.length) this.lastIndex = -1;
+  },
+
+  // Parse [foo] → <b>foo</b>, escape any other HTML.
+  formatPhrase(text) {
+    const escaped = String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    return escaped.replace(/\[([^\]]+)\]/g, '<b>$1</b>');
+  },
+
+  pickNextIndex() {
+    if (!this.phrases.length) return -1;
+    if (this.phrases.length === 1) return 0;
+    let next;
+    do {
+      next = Math.floor(Math.random() * this.phrases.length);
+    } while (next === this.lastIndex);
+    this.lastIndex = next;
+    return next;
+  },
 
   // Kill any in-flight CTA tween. Called by showNextBanner so a
   // new content block doesn't start with a CTA still mid-animation.
@@ -2222,6 +2245,10 @@ const IdleCTA = {
     const logo = document.querySelector('.idle-logo');
     if (!cta || !logo) { flyInIdle(); return; }
 
+    // No phrases configured? Skip the CTA hero and just flyInIdle.
+    const idx = this.pickNextIndex();
+    if (idx < 0) { flyInIdle(); return; }
+
     // Kill any in-flight CTA tween (e.g. previous outro hasn't finished).
     if (this.current) { this.current.kill(); this.current = null; }
 
@@ -2230,8 +2257,7 @@ const IdleCTA = {
     gsap.set('.idle-state', { autoAlpha: 1, scale: 1, xPercent: 0 });
     gsap.set(logo, { autoAlpha: 0 });
 
-    cta.innerHTML = this.phrases[this.index];
-    this.index = (this.index + 1) % this.phrases.length;
+    cta.innerHTML = this.formatPhrase(this.phrases[idx]);
 
     const tl = gsap.timeline({
       onComplete: () => {
@@ -2396,8 +2422,10 @@ function showNextBanner(block, countdownSec) {
 
   const titleEl = document.getElementById('nextBannerTitle');
   const cdEl = document.getElementById('nextBannerCountdown');
+  const pillEl = document.querySelector('.next-banner-header-pill');
   if (titleEl) titleEl.textContent = block.article?.title || '';
   if (cdEl) cdEl.textContent = String(countdownSec);
+  if (pillEl) gsap.set(pillEl, { autoAlpha: 1 });
 
   // Slide the idle (logo) panel left to make room for the banner on
   // the right, and fade the banner in. Both eased on power2.inOut for
@@ -2412,8 +2440,8 @@ function showNextBanner(block, countdownSec) {
   );
 
   // Tick the countdown digit each second.
-  // We stop one tick early so "1" stays on screen for its full second
-  // and the content fires immediately after — never displaying "0".
+  // "1 SEC" stays on screen for its full second; when the timer would
+  // tick to 0 we fade the pill out instead of displaying "0 SEC".
   let remaining = countdownSec;
   if (nextCountdownTimer) clearInterval(nextCountdownTimer);
   nextCountdownTimer = setInterval(() => {
@@ -2421,6 +2449,7 @@ function showNextBanner(block, countdownSec) {
     if (remaining <= 0) {
       clearInterval(nextCountdownTimer);
       nextCountdownTimer = null;
+      if (pillEl) gsap.to(pillEl, { autoAlpha: 0, duration: 0.35, ease: 'power2.out' });
       return;
     }
     if (cdEl) cdEl.textContent = String(remaining);
