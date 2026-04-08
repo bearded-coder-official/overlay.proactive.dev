@@ -477,13 +477,13 @@
     overflow: hidden;
     -webkit-mask-image: linear-gradient(180deg,
       rgba(0,0,0,0) 0,
-      rgba(0,0,0,1) 60px,
-      rgba(0,0,0,1) calc(100% - 50px),
+      rgba(0,0,0,1) 90px,
+      rgba(0,0,0,1) calc(100% - 110px),
       rgba(0,0,0,0) 100%);
             mask-image: linear-gradient(180deg,
       rgba(0,0,0,0) 0,
-      rgba(0,0,0,1) 60px,
-      rgba(0,0,0,1) calc(100% - 50px),
+      rgba(0,0,0,1) 90px,
+      rgba(0,0,0,1) calc(100% - 110px),
       rgba(0,0,0,0) 100%);
   }
 
@@ -2521,7 +2521,7 @@ async function renderVoiceTranscript(transcriptUrl, body, audio, inner, progress
     .join('');
 
   inner.innerHTML = html;
-  inner.style.top = '60px';
+  inner.style.top = '90px';
 
   const spans = inner.querySelectorAll('.vw');
   const windowEl = document.querySelector('.voice-text-window');
@@ -2554,8 +2554,8 @@ async function renderVoiceTranscript(transcriptUrl, body, audio, inner, progress
     //   • near the end, the target gets clamped to scrollMax → the active
     //     word is allowed to drift down within the reading window so the
     //     last line lines up with the bottom edge.
-    const TOP_FADE = 60;
-    const BOTTOM_FADE = 50;
+    const TOP_FADE = 90;
+    const BOTTOM_FADE = 110;
     const winH = windowEl.clientHeight;
     const innerH = inner.scrollHeight;
     const readableH = winH - TOP_FADE - BOTTOM_FADE;
@@ -2626,14 +2626,14 @@ function renderVoiceBodyFallback(body, audio, inner, progressFill) {
   inner.innerHTML = paragraphs
     .map(p => `<p>${p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`)
     .join('');
-  inner.style.top = '60px';
+  inner.style.top = '90px';
 
   cancelVoiceScroll();
   requestAnimationFrame(() => {
     const windowEl = document.querySelector('.voice-text-window');
     const innerHeight = inner.scrollHeight;
     const winH = windowEl.clientHeight;
-    const readableHeight = winH - 60 - 50;
+    const readableHeight = winH - 90 - 110;
     const scrollMax = Math.max(0, innerHeight - readableHeight);
 
     const tick = () => {
