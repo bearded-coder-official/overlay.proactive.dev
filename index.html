@@ -1535,45 +1535,43 @@ function renderTickerTape() {
   // Hydrate the freshly mounted placeholders from the LiveTickers
   // cache before measuring — formatted prices change item width.
   LiveTickers.applyTo(el);
-  // getBoundingClientRect() returns sub-pixel width, scrollWidth
-  // rounds to int — and any rounding error here shows up as a visible
-  // jerk every cycle when copies fail to line up perfectly at the
-  // wrap point.
   const oneSetWidth = el.getBoundingClientRect().width;
   const viewportWidth = wrapper.offsetWidth;
 
   if (oneSetWidth === 0) return;
 
-  // Enough copies so content fills viewport at any scroll position
-  const copies = Math.max(2, Math.ceil((viewportWidth * 2) / oneSetWidth) + 1);
-  el.innerHTML = Array(copies).fill(oneSet).join('');
+  // Bulletproof seamless marquee:
+  //
+  //   1. Build a "block" that is at least as wide as the viewport
+  //      (a single set may be shorter than 1920px when there are
+  //      few tickers; we repeat oneSet inside the block until it
+  //      covers the viewport).
+  //   2. Render that block EXACTLY twice in a row.
+  //   3. Animate xPercent from 0 to -50.
+  //
+  // Why this works where x: -oneSetWidth + modifiers.wrap doesn't:
+  // xPercent is computed by the browser from the element's actual
+  // sub-pixel rendered width on every frame, so the animation
+  // distance is exact by definition. At xPercent: -50 the second
+  // block sits exactly where the first block was at xPercent: 0,
+  // so the loop seam is mathematically identical pixel data — no
+  // jerk possible regardless of flex sub-pixel rounding, font
+  // hinting, or live price width changes.
+  const repsPerBlock = Math.max(1, Math.ceil(viewportWidth / oneSetWidth));
+  const oneBlock = oneSet.repeat(repsPerBlock);
+  el.innerHTML = oneBlock + oneBlock;
   // Re-apply after duplication so all clones get the cached values too.
   LiveTickers.applyTo(el);
 
-  // GSAP seamless infinite scroll. Two things matter for the seam to
-  // be invisible:
-  //   1. Constant px/sec speed — duration is derived from distance,
-  //      so visible scroll speed stays the same regardless of tape
-  //      length. A longer tape just takes proportionally longer to
-  //      complete one loop.
-  //   2. modifiers.x wraps the value via modulo on every frame, so
-  //      the tween never actually "restarts" — `x` is mathematically
-  //      continuous through the wrap point. This is the canonical
-  //      GSAP infinite-ticker pattern and avoids the visible jerk
-  //      that `repeat: -1` on an absolute tween produces when
-  //      sub-pixel rounding makes the two copies fail to align.
+  const blockWidth = oneSetWidth * repsPerBlock;
   const pxPerSec = speedToPxPerSec(tickerSpeed);
-  const duration = oneSetWidth / pxPerSec;
-  const wrap = gsap.utils.wrap(-oneSetWidth, 0);
-  gsap.set(el, { x: 0 });
+  const duration = blockWidth / pxPerSec;
+  gsap.set(el, { xPercent: 0, x: 0 });
   tickerTween = gsap.to(el, {
-    x: `-=${oneSetWidth}`,
+    xPercent: -50,
     duration,
     ease: 'none',
     repeat: -1,
-    modifiers: {
-      x: (x) => wrap(parseFloat(x)) + 'px',
-    },
   });
 }
 
@@ -3293,8 +3291,7 @@ function buildBreakingScroll(headline) {
   const scroll = document.getElementById('breakingScroll');
   const wrapper = scroll.parentElement;
 
-  // Build one set, measure it (sub-pixel precision — see markets
-  // ticker for the rationale).
+  // Build one set, measure it
   const item = `<span class="breaking-text">${headline}</span>`;
   scroll.innerHTML = item;
   const oneSetWidth = scroll.getBoundingClientRect().width;
@@ -3302,23 +3299,20 @@ function buildBreakingScroll(headline) {
 
   if (oneSetWidth === 0) return;
 
-  // Enough copies so content fills the viewport at any scroll position
-  const copies = Math.max(2, Math.ceil((viewportWidth * 2) / oneSetWidth) + 1);
-  scroll.innerHTML = Array(copies).fill(item).join('');
+  // Same bulletproof "block × 2 + xPercent: -50" pattern as the
+  // markets ticker. See renderTickerTape() for the why.
+  const repsPerBlock = Math.max(1, Math.ceil(viewportWidth / oneSetWidth));
+  const oneBlock = item.repeat(repsPerBlock);
+  scroll.innerHTML = oneBlock + oneBlock;
 
   if (breakingTween) { breakingTween.kill(); breakingTween = null; }
-  // Same seamless modifier-wrap pattern as the markets ticker —
-  // avoids the visible jerk on the loop seam.
-  const wrap = gsap.utils.wrap(-oneSetWidth, 0);
-  gsap.set(scroll, { x: 0 });
+  const blockWidth = oneSetWidth * repsPerBlock;
+  gsap.set(scroll, { xPercent: 0, x: 0 });
   breakingTween = gsap.to(scroll, {
-    x: `-=${oneSetWidth}`,
-    duration: oneSetWidth / BREAKING_PX_PER_SEC,
+    xPercent: -50,
+    duration: blockWidth / BREAKING_PX_PER_SEC,
     ease: 'none',
     repeat: -1,
-    modifiers: {
-      x: (x) => wrap(parseFloat(x)) + 'px',
-    },
   });
 }
 
