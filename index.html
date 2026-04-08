@@ -1389,12 +1389,14 @@ let activeTickers = [];
 let footer = {};
 let tickerSpeed = 5;
 let tickerTween = null;
-let tickerBaseDuration = 0;
 
-// Convert 1-10 scale to animation duration in seconds
-// 1 = 60s (slow), 5 = 36s (medium), 10 = 8s (fast)
-function speedToDuration(level) {
-  return Math.round(68 - (level * 6));
+// Convert 1-10 scale to scroll speed in pixels per second.
+// Length-independent: a longer tape just takes proportionally
+// longer to complete one loop, but the visible scroll speed stays
+// the same. 1 = 16 px/s (slow crawl), 5 = 80 px/s (comfortable
+// reading), 10 = 160 px/s (fast).
+function speedToPxPerSec(level) {
+  return Math.max(8, level * 16);
 }
 let clockInterval = null;
 let prevTimes = {};
@@ -1549,12 +1551,17 @@ function renderTickerTape() {
   // Re-apply after duplication so all clones get the cached values too.
   LiveTickers.applyTo(el);
 
-  // GSAP infinite scroll — animate exactly one set width
-  tickerBaseDuration = speedToDuration(tickerSpeed);
+  // GSAP infinite scroll — animate exactly one set width.
+  // Duration is derived from distance and speed (px/sec) so the
+  // visible scroll speed stays constant regardless of how long the
+  // tape is. A longer tape just takes proportionally longer to
+  // complete one loop.
+  const pxPerSec = speedToPxPerSec(tickerSpeed);
+  const duration = oneSetWidth / pxPerSec;
   gsap.set(el, { x: 0 });
   tickerTween = gsap.to(el, {
     x: -oneSetWidth,
-    duration: tickerBaseDuration,
+    duration,
     ease: 'none',
     repeat: -1,
   });
@@ -1686,11 +1693,17 @@ function connectWebSocket() {
 
   channel.bind('App\\Events\\SettingsUpdated', (data) => {
     if (data.settings.ticker_speed && data.settings.ticker_speed !== tickerSpeed) {
+      const oldSpeed = tickerSpeed;
       tickerSpeed = data.settings.ticker_speed;
 
-      if (tickerTween && tickerBaseDuration > 0) {
-        const newTimeScale = tickerBaseDuration / speedToDuration(tickerSpeed);
-        gsap.to(tickerTween, { timeScale: newTimeScale, duration: 2, ease: 'power2.inOut' });
+      if (tickerTween) {
+        // Live speed change — adjust timeScale relative to the
+        // current tween rather than rebuilding it. Since pxPerSec is
+        // linear in the level, the ratio of speeds equals the ratio
+        // of timeScales we need to apply on top of the current one.
+        const ratio = speedToPxPerSec(tickerSpeed) / speedToPxPerSec(oldSpeed);
+        const targetTimeScale = tickerTween.timeScale() * ratio;
+        gsap.to(tickerTween, { timeScale: targetTimeScale, duration: 2, ease: 'power2.inOut' });
       }
     }
 
