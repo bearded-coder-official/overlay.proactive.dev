@@ -347,55 +347,68 @@
     will-change: transform, filter;
   }
 
-  /* NEXT-UP BANNER — countdown shown alongside the idle logo (logo
-     slides to the left) before content plays. */
+  /* NEXT-UP BANNER — sharp broadcast widget shown alongside the idle
+     logo (logo slides to the left) before content plays. Mirrors the
+     amber-header-on-dark-body styling of the right-side overlay widgets. */
   .next-banner {
     position: absolute;
     right: 6%;
     top: 50%;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 32px 44px;
-    background: rgba(20, 22, 28, 0.78);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(253, 184, 38, 0.4);
+    background: rgba(20, 22, 28, 0.95);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
     opacity: 0;
     pointer-events: none;
     will-change: opacity, transform;
     max-width: 44%;
+    min-width: 360px;
   }
-  .next-banner-label {
+  .next-banner-header {
+    background: var(--accent);
+    color: #1a1a1a;
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 800;
-    letter-spacing: 4px;
-    color: var(--accent);
+    letter-spacing: 3px;
     text-transform: uppercase;
+    padding: 9px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .next-banner-header-pill {
+    font-size: 14px;
+    letter-spacing: 2px;
+  }
+  .next-banner-header-pill b {
+    font-size: 18px;
+    letter-spacing: 1px;
+    margin-right: 2px;
+  }
+  .next-banner-body {
+    padding: 28px 30px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
   }
   .next-banner-title {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 42px;
+    font-size: 38px;
     font-weight: 700;
     color: #fff;
     line-height: 1.12;
     text-align: left;
     letter-spacing: 0.3px;
   }
-  .next-banner-countdown {
+  .next-banner-meta {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 22px;
+    font-size: 14px;
     font-weight: 600;
-    color: rgba(255,255,255,0.55);
-    letter-spacing: 1px;
+    letter-spacing: 2.5px;
+    color: rgba(255,255,255,0.5);
     text-transform: uppercase;
-  }
-  .next-banner-countdown b {
-    color: var(--accent);
-    font-weight: 800;
-    margin: 0 4px;
   }
 
   .content-video {
@@ -1260,9 +1273,14 @@
         <img class="idle-logo" src="/media/logo.png" alt="">
       </div>
       <div class="next-banner" id="nextBanner">
-        <div class="next-banner-label">Next Up</div>
-        <div class="next-banner-title" id="nextBannerTitle"></div>
-        <div class="next-banner-countdown">Starting in <b id="nextBannerCountdown">5</b> sec</div>
+        <div class="next-banner-header">
+          <span>Next Up</span>
+          <span class="next-banner-header-pill"><b id="nextBannerCountdown">10</b>SEC</span>
+        </div>
+        <div class="next-banner-body">
+          <div class="next-banner-meta">Up next on Proactive Wire</div>
+          <div class="next-banner-title" id="nextBannerTitle"></div>
+        </div>
       </div>
       <video class="content-video" playsinline>
         <source src="" type="video/mp4">
@@ -3027,6 +3045,7 @@ const MusicPlayer = {
     volume: 0.6,         // 0..1
     volumeDucked: 0.15,  // 0..1
     crossfadeSec: 4,
+    voiceVolume: 1.0,    // 0..1 — content audio (voice news) playback level
     attackTau: 0.08,     // setTargetAtTime time-constant — ducking
     releaseTau: 0.5,     // setTargetAtTime time-constant — release
   },
@@ -3037,6 +3056,7 @@ const MusicPlayer = {
   decks: [null, null],
   active: 0,
   contentVideoAttached: false,
+  contentAudioGain: null,  // GainNode in front of the content compressor
 
   ensureCtx() {
     if (this.ctx) return;
@@ -3095,7 +3115,12 @@ const MusicPlayer = {
     if (audioEl) {
       try {
         const asrc = this.ctx.createMediaElementSource(audioEl);
-        asrc.connect(comp || this.ctx.destination);
+        // Voice news passes through its own GainNode so the operator can
+        // adjust narration loudness independently from the master output.
+        const aGain = this.ctx.createGain();
+        aGain.gain.value = this.cfg.voiceVolume;
+        asrc.connect(aGain).connect(comp || this.ctx.destination);
+        this.contentAudioGain = aGain;
       } catch (e) {
         console.warn('[Music] content-audio already attached:', e?.message);
       }
@@ -3117,6 +3142,7 @@ const MusicPlayer = {
     this.cfg.volume        = (musicState.volume ?? 60) / 100;
     this.cfg.volumeDucked  = (musicState.volume_ducked ?? 15) / 100;
     this.cfg.crossfadeSec  = musicState.crossfade_sec ?? 4;
+    this.cfg.voiceVolume   = (musicState.voice_volume ?? 100) / 100;
     this.tracks = musicState.active_album?.tracks ?? [];
 
     if (!this.cfg.enabled || !this.tracks.length) return;
@@ -3242,6 +3268,14 @@ const MusicPlayer = {
     this.cfg.volume        = (s.volume ?? 60) / 100;
     this.cfg.volumeDucked  = (s.volume_ducked ?? 15) / 100;
     this.cfg.crossfadeSec  = s.crossfade_sec ?? 4;
+    this.cfg.voiceVolume   = (s.voice_volume ?? 100) / 100;
+
+    // Apply voice volume immediately if the audio gain node exists.
+    if (this.contentAudioGain && this.ctx) {
+      const t = this.ctx.currentTime;
+      this.contentAudioGain.gain.cancelScheduledValues(t);
+      this.contentAudioGain.gain.setTargetAtTime(this.cfg.voiceVolume, t, 0.05);
+    }
 
     if (!this.cfg.enabled) {
       this.rampActiveTo(0, this.cfg.releaseTau);
