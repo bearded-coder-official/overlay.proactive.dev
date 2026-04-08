@@ -362,7 +362,6 @@
     display: flex;
     flex-direction: column;
     background: var(--panel);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
     opacity: 0;
     pointer-events: none;
     will-change: opacity, transform;
@@ -1213,7 +1212,7 @@
 <div class="top-bar" id="topBar">
   <div class="logo">
     <img class="logo-mark" src="/media/logo.png" alt="">
-    <span class="logo-text">PROACTIVE <span>WIRE</span></span>
+    <span class="logo-text" id="brandLogoText">PROACTIVE <span>WIRE</span></span>
   </div>
   <div class="divider"></div>
   <div class="scene-badge" id="sceneBadge">LIVE</div>
@@ -1307,7 +1306,7 @@
           <span class="next-banner-header-pill"><b id="nextBannerCountdown">10</b>SEC</span>
         </div>
         <div class="next-banner-body">
-          <div class="next-banner-meta">Up next on Proactive Wire</div>
+          <div class="next-banner-meta" id="nextBannerMeta">Up next</div>
           <div class="next-banner-title" id="nextBannerTitle"></div>
         </div>
       </div>
@@ -1602,6 +1601,29 @@ function replaceTickersFade(newTickers) {
 }
 
 // ============================================================
+// Broadcast name — applies the broadcast_name setting to the
+// top-bar logo wordmark and the next-banner meta line. Splits the
+// name on its last word so the trailing word renders in accent
+// colour (matches the original "PROACTIVE WIRE" treatment).
+// ============================================================
+function applyBroadcastName(name) {
+  const safe = String(name || 'Proactive Wire').trim();
+  const parts = safe.split(/\s+/);
+  let html;
+  if (parts.length >= 2) {
+    const last = parts.pop();
+    html = `${parts.join(' ').toUpperCase()} <span>${last.toUpperCase()}</span>`;
+  } else {
+    html = `<span>${safe.toUpperCase()}</span>`;
+  }
+  const logoEl = document.getElementById('brandLogoText');
+  if (logoEl) logoEl.innerHTML = html;
+
+  const metaEl = document.getElementById('nextBannerMeta');
+  if (metaEl) metaEl.textContent = `Up next on ${safe}`;
+}
+
+// ============================================================
 // Footer
 // ============================================================
 function renderFooter() {
@@ -1638,6 +1660,7 @@ async function loadState() {
     activeTickers = data.tickers || [];
 
     renderBackground(data.background || {});
+    applyBroadcastName(data.broadcast_name || 'Proactive Wire');
     startClocks();
     renderTickerTape();
     renderFooter();
@@ -1705,6 +1728,10 @@ function connectWebSocket() {
 
     if (data.settings.idle_animation) {
       IdleAnimations.set(data.settings.idle_animation);
+    }
+
+    if (data.settings.broadcast_name) {
+      applyBroadcastName(data.settings.broadcast_name);
     }
   });
 
