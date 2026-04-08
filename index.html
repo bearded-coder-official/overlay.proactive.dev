@@ -1701,7 +1701,7 @@ async function loadState() {
 // flight is never interrupted by external events.
 const ContentRotation = {
   enabled: false,
-  gapSec: 30,
+  gapSec: 15,
   // The history row id for the block currently in flight. Sent
   // back to the server in the /end call so it can close the
   // matching row. null when idle.
