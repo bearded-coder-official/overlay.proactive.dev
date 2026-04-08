@@ -2223,7 +2223,8 @@ const LiveTickers = {
 
   /**
    * Bulk replace from a fresh /state snapshot. Wipes the previous
-   * cache so stale entries don't survive a reload.
+   * cache so stale entries don't survive a reload. Initial render
+   * is non-animated — there's nothing to morph from.
    */
   hydrate(snapshot) {
     this.cache.clear();
@@ -2232,7 +2233,7 @@ const LiveTickers = {
         this.cache.set(key, value);
       }
     }
-    this.applyTo(document);
+    this.applyTo(document, null, { animate: false });
   },
 
   /**
@@ -2240,7 +2241,7 @@ const LiveTickers = {
    * Each entry has the same shape as a cache value plus a `key`
    * field. Out-of-order updates (older ts than what's already
    * cached) are dropped — happens during WS reconnects when the
-   * heartbeat snapshot races with newer ticks.
+   * heartbeat snapshot races with newer ticks. Animated paint.
    */
   applyDelta(prices) {
     if (!Array.isArray(prices)) return;
@@ -2260,16 +2261,18 @@ const LiveTickers = {
     }
     // Single sweep handles all touched keys at once.
     for (const key of touched) {
-      this.applyTo(document, key);
+      this.applyTo(document, key, { animate: true });
     }
   },
 
   /**
    * Walk DOM under root looking for [data-live-ticker]. If onlyKey
    * is given, scope to that one key — used for incremental updates
-   * to avoid touching unrelated nodes.
+   * to avoid touching unrelated nodes. options.animate controls
+   * whether paint() runs the GSAP morph + flash on changed values.
    */
-  applyTo(root, onlyKey = null) {
+  applyTo(root, onlyKey = null, options = {}) {
+    const animate = options.animate ?? false;
     const selector = onlyKey
       ? `[data-live-ticker="${cssEscape(onlyKey)}"]`
       : '[data-live-ticker]';
@@ -2278,40 +2281,106 @@ const LiveTickers = {
       const key = el.dataset.liveTicker;
       const data = this.cache.get(key);
       if (!data) continue;
-      this.paint(el, data);
+      this.paint(el, data, { animate });
     }
   },
 
   /**
    * Format the cached values into the DOM. Children with
-   * data-live-field="price" or "change_pct" get text content;
-   * change elements also get up/down classes for colour styling.
+   * data-live-field="price" or "change_pct" get text content.
    *
-   * Bloomberg convention: don't visually mark closed markets in
-   * the running tape — the audience expects to see numbers, the
-   * tape just naturally stops ticking when the bell rings. Market
-   * status surfaces in calmer places (top bar session indicators,
-   * "as of" captions in lower-third meta), not on every pill.
+   * On animated updates (delta path) the values morph smoothly
+   * from the previous value via GSAP, the price cell flashes
+   * green/red on direction, and the change cell colour-fades on
+   * sign flip. The previous value is stashed in dataset.liveCurrent
+   * so a fresh DOM mount (e.g. after Pulse rotation) safely starts
+   * without animation on the first frame.
+   *
+   * Same renderer for tape items, lt-meta tickers, Pulse rows,
+   * and any future widget that wears data-live-ticker.
    */
-  paint(el, data) {
+  paint(el, data, options = {}) {
+    const animate = options.animate ?? false;
     const fields = el.querySelectorAll('[data-live-field]');
+
     for (const child of fields) {
       const field = child.dataset.liveField;
-      if (field === 'price' && data.price != null) {
-        child.textContent = formatLivePrice(data.price);
-      } else if (field === 'change_pct') {
+
+      if (field === 'price') {
+        if (data.price == null) {
+          child.textContent = '—';
+          delete child.dataset.liveCurrent;
+          continue;
+        }
+        const newPrice = Number(data.price);
+        const oldPrice = parseFloat(child.dataset.liveCurrent || '');
+        const hasOld = isFinite(oldPrice) && oldPrice > 0;
+
+        if (animate && hasOld && oldPrice !== newPrice) {
+          // Smooth counter morph from old → new.
+          const proxy = { val: oldPrice };
+          gsap.to(proxy, {
+            val: newPrice,
+            duration: 0.8,
+            ease: 'power1.out',
+            onUpdate: () => { child.textContent = formatLivePrice(proxy.val); },
+          });
+          // Background flash green/red on direction.
+          const flashColor = newPrice > oldPrice
+            ? 'rgba(34,197,94,0.30)'
+            : 'rgba(239,68,68,0.30)';
+          gsap.fromTo(child,
+            { backgroundColor: flashColor },
+            { backgroundColor: 'transparent', duration: 1.4, ease: 'power2.out' }
+          );
+        } else {
+          child.textContent = formatLivePrice(newPrice);
+        }
+        child.dataset.liveCurrent = String(newPrice);
+        continue;
+      }
+
+      if (field === 'change_pct') {
         if (data.change_pct == null) {
           child.textContent = '—';
           child.classList.remove('up', 'down', 'ticker-up', 'ticker-down');
-        } else {
-          const arrow = data.change_pct >= 0 ? '▲' : '▼';
-          child.textContent = `${arrow} ${Math.abs(data.change_pct).toFixed(2)}%`;
-          child.classList.toggle('up', data.change_pct >= 0);
-          child.classList.toggle('down', data.change_pct < 0);
-          // Legacy ticker-tape classes mirrored so existing CSS keeps working.
-          child.classList.toggle('ticker-up', data.change_pct >= 0);
-          child.classList.toggle('ticker-down', data.change_pct < 0);
+          delete child.dataset.liveCurrent;
+          continue;
         }
+        const newPct = Number(data.change_pct);
+        const oldPct = parseFloat(child.dataset.liveCurrent || '');
+        const hasOld = isFinite(oldPct);
+
+        if (animate && hasOld && oldPct !== newPct) {
+          // Smooth counter morph for percentage.
+          const proxy = { val: oldPct };
+          gsap.to(proxy, {
+            val: newPct,
+            duration: 0.8,
+            ease: 'power1.out',
+            onUpdate: () => {
+              const arrow = proxy.val >= 0 ? '▲' : '▼';
+              child.textContent = `${arrow} ${Math.abs(proxy.val).toFixed(2)}%`;
+            },
+          });
+          // Colour transition on sign flip — clears the old colour
+          // before the class toggle below paints the new one.
+          if ((oldPct >= 0) !== (newPct >= 0)) {
+            gsap.fromTo(child,
+              { color: oldPct >= 0 ? '#22c55e' : '#ef4444' },
+              { color: newPct >= 0 ? '#22c55e' : '#ef4444', duration: 0.6, ease: 'power2.inOut' }
+            );
+          }
+        } else {
+          const arrow = newPct >= 0 ? '▲' : '▼';
+          child.textContent = `${arrow} ${Math.abs(newPct).toFixed(2)}%`;
+        }
+        child.dataset.liveCurrent = String(newPct);
+        child.classList.toggle('up', newPct >= 0);
+        child.classList.toggle('down', newPct < 0);
+        // Legacy ticker-tape classes mirrored so existing CSS keeps working.
+        child.classList.toggle('ticker-up', newPct >= 0);
+        child.classList.toggle('ticker-down', newPct < 0);
       }
     }
   },
