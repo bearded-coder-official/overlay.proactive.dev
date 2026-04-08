@@ -1388,10 +1388,13 @@ let tickerTween = null;
 // Convert 1-10 scale to scroll speed in pixels per second.
 // Length-independent: a longer tape just takes proportionally
 // longer to complete one loop, but the visible scroll speed stays
-// the same. 1 = 16 px/s (slow crawl), 5 = 80 px/s (comfortable
-// reading), 10 = 160 px/s (fast).
+// the same. Calibrated to match the "feel" of the old length-
+// dependent formula at a typical tape length:
+//   1  =  10 px/s (very slow crawl)
+//   5  =  50 px/s (default — comfortable reading)
+//   10 = 100 px/s (fast)
 function speedToPxPerSec(level) {
-  return Math.max(8, level * 16);
+  return Math.max(5, level * 10);
 }
 let clockInterval = null;
 let prevTimes = {};
