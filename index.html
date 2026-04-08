@@ -1669,8 +1669,11 @@ async function loadState() {
     // Pulse widget configuration — read groups from /state.widgets,
     // mount placeholders bound to LiveTickers via data-live-ticker.
     applyPulseConfig(data.widgets?.pulse);
-    // Note: content block is NOT loaded on init — overlay starts empty,
-    // waiting for ContentBlockStarted event from admin
+    // Pull-driven rotation: read the current enabled/gap config from
+    // /state and (if enabled) immediately ask for the first block.
+    // Subsequent blocks are pulled by ContentRotation itself when the
+    // current one finishes via playOutro → reportEnd → schedulePoll.
+    ContentRotation.configure(data.content_rotation);
 
     // Entrance animation
     gsap.from('.top-bar', { y: -72, duration: 0.6, ease: 'power3.out' });
@@ -1680,6 +1683,156 @@ async function loadState() {
     console.error('Failed to load overlay state:', e);
   }
 }
+
+// ============================================================
+// Content rotation — pull-driven
+// ============================================================
+//
+// The overlay is the single source of truth for "is something
+// playing right now". When idle, if rotation is enabled, it asks
+// the server "what's next?" and plays whatever comes back. When
+// the block ends (audio/video ended event, embed timeout, or
+// manual skip), it reports /end and asks again after gap_sec.
+//
+// The server never pushes "play this now" anymore — manual
+// dispatches in admin go through the queue and trigger a
+// ContentRotationChanged WebSocket event, which prompts this
+// module to re-poll /next ONLY if currently idle. A block in
+// flight is never interrupted by external events.
+const ContentRotation = {
+  enabled: false,
+  gapSec: 30,
+  // The history row id for the block currently in flight. Sent
+  // back to the server in the /end call so it can close the
+  // matching row. null when idle.
+  currentHistoryId: null,
+  // True between /next request and the block actually finishing.
+  // Guards against double-pull when ContentRotationChanged fires
+  // while a block is already loading or playing.
+  busy: false,
+  pollTimer: null,
+
+  configure(config) {
+    if (!config) return;
+    const wasEnabled = this.enabled;
+    this.enabled = !!config.enabled;
+    this.gapSec = Number.isFinite(config.gap_sec) ? config.gap_sec : this.gapSec;
+
+    // Toggled from off → on while idle: kick off a pull immediately.
+    if (!wasEnabled && this.enabled && !this.busy) {
+      this.requestNext();
+    }
+    // Toggled from on → off while idle: clear any pending poll.
+    if (wasEnabled && !this.enabled && !this.busy) {
+      this.clearPoll();
+    }
+  },
+
+  /**
+   * Called whenever something on the server side might have
+   * changed the queue (manual dispatch, drag-reorder, skip, stop,
+   * external API insert, etc.). If we're idle, ask for the next
+   * block immediately. If a block is in flight, do nothing — the
+   * change takes effect when it ends.
+   */
+  poke() {
+    if (!this.enabled) return;
+    if (this.busy) return;
+    this.requestNext();
+  },
+
+  /**
+   * The full pull cycle: hit /next, if a block comes back render
+   * it and store the history id. If 204 (rotation off, queue
+   * empty, no blocks at all), schedule a retry after gap_sec so
+   * eventually the operator's actions take effect.
+   */
+  async requestNext() {
+    if (!this.enabled) return;
+    if (this.busy) return;
+
+    this.busy = true;
+    this.clearPoll();
+
+    try {
+      const res = await fetch(`${CONFIG.apiBase}/overlay/content/next`, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+      });
+
+      if (res.status === 204) {
+        // Nothing to play right now. Try again after gap_sec so a
+        // late operator add-to-queue eventually flows through.
+        this.busy = false;
+        this.schedulePoll();
+        return;
+      }
+
+      if (!res.ok) {
+        console.error('[ContentRotation] /next failed:', res.status);
+        this.busy = false;
+        this.schedulePoll();
+        return;
+      }
+
+      const data = await res.json();
+      this.currentHistoryId = data.history_id;
+      // Server may have nudged gap_sec since the SettingsUpdated
+      // broadcast — accept the per-call value as the latest truth.
+      if (Number.isFinite(data.gap_sec)) this.gapSec = data.gap_sec;
+
+      // Hand off to the existing renderContentBlock pipeline. busy
+      // stays true until the block finishes via reportEnd().
+      renderContentBlock(data.block);
+    } catch (e) {
+      console.error('[ContentRotation] /next error:', e);
+      this.busy = false;
+      this.schedulePoll();
+    }
+  },
+
+  /**
+   * Called from playOutro's onComplete (every code path that ends
+   * a content block). Closes the open history row server-side and
+   * schedules the next pull after gap_sec.
+   */
+  async reportEnd() {
+    const historyId = this.currentHistoryId;
+    this.currentHistoryId = null;
+    this.busy = false;
+
+    if (historyId) {
+      try {
+        await fetch(`${CONFIG.apiBase}/overlay/content/${historyId}/end`, {
+          method: 'POST',
+        });
+      } catch (e) {
+        console.error('[ContentRotation] /end error:', e);
+        // Non-fatal — closeStaleHistory will sweep it on next pull.
+      }
+    }
+
+    if (this.enabled) {
+      this.schedulePoll();
+    }
+  },
+
+  schedulePoll() {
+    this.clearPoll();
+    if (!this.enabled) return;
+    this.pollTimer = setTimeout(() => {
+      this.pollTimer = null;
+      this.requestNext();
+    }, Math.max(0, this.gapSec * 1000));
+  },
+
+  clearPoll() {
+    if (this.pollTimer) {
+      clearTimeout(this.pollTimer);
+      this.pollTimer = null;
+    }
+  },
+};
 
 // ============================================================
 // WebSocket
@@ -1746,6 +1899,14 @@ function connectWebSocket() {
     if (typeof data.settings.next_countdown_sec === 'number' && data.settings.next_countdown_sec > 0) {
       NEXT_COUNTDOWN_SEC = data.settings.next_countdown_sec;
     }
+
+    // Rotation toggled / gap changed. ContentRotation.configure
+    // handles the off → on transition (kick a pull) and on → off
+    // (clear pending poll) so the operator's toggle takes effect
+    // without an overlay reload.
+    if (data.settings.content_rotation) {
+      ContentRotation.configure(data.settings.content_rotation);
+    }
   });
 
   // New canonical-key broadcast: TickerUpdater dispatches batched
@@ -1756,21 +1917,32 @@ function connectWebSocket() {
     LiveTickers.applyDelta(data.prices || []);
   });
 
-  channel.bind('App\\Events\\ContentBlockStarted', (data) => {
-    console.log('ContentBlockStarted:', data);
-    renderContentBlock(data.block);
-  });
-
-  channel.bind('App\\Events\\ContentBlockStopped', () => {
-    console.log('ContentBlockStopped');
-    // Only fire playOutro if the frame is currently showing content,
-    // otherwise it would fade nothing and harass the idle state.
-    const frame = document.querySelector('.video-frame');
-    if (frame && (frame.classList.contains('show-video') ||
-                  frame.classList.contains('show-iframe') ||
-                  frame.classList.contains('show-voice'))) {
-      playOutro();
+  // Rotation queue or settings changed on the server side. Two
+  // modes:
+  //   • interrupt:false (default) — if idle, ask for next; if a
+  //     block is in flight, ignore (change applies after it ends).
+  //   • interrupt:true — sent by Skip / Stop in admin. Run the
+  //     current block's outro animation immediately. The outro's
+  //     reportEnd then triggers the next pull (or stays idle if
+  //     rotation is off).
+  channel.bind('App\\Events\\ContentRotationChanged', (data) => {
+    if (data && data.interrupt) {
+      const frame = document.querySelector('.video-frame');
+      const playing = frame && (
+        frame.classList.contains('show-video') ||
+        frame.classList.contains('show-iframe') ||
+        frame.classList.contains('show-voice')
+      );
+      if (playing) {
+        playOutro();
+      } else {
+        // Nothing to interrupt — just nudge the puller in case the
+        // queue changed in the same action.
+        ContentRotation.poke();
+      }
+      return;
     }
+    ContentRotation.poke();
   });
 
   channel.bind('App\\Events\\FooterUpdated', (data) => {
@@ -2773,6 +2945,10 @@ function playOutro() {
       gsap.set('.content-video, .content-iframe, .voice-layout', { opacity: 0, scale: 0.96, clearProps: 'opacity,scale' });
       // Big CTA "hero" moment, then logo + idle cycle resume.
       IdleCTA.playOutroCTA();
+      // Tell the rotation pipeline this block is done. ContentRotation
+      // will close the history row server-side and (if rotation is
+      // still enabled) schedule the next pull after gap_sec.
+      ContentRotation.reportEnd();
     },
   });
   tl.to('.lower-third', { autoAlpha: 0, y: 30, duration: 0.4, ease: 'power3.in' });
