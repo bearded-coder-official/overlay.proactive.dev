@@ -351,6 +351,37 @@
     filter: drop-shadow(0 0 50px rgba(253, 184, 38, 0.20));
     will-change: transform, filter;
   }
+  /* IDLE CTA — short rotating tagline that PERIODICALLY REPLACES
+     the logo in the centre of the frame. Logo fades out → CTA fades
+     in big and bold → holds → fades out → logo fades back in. */
+  .idle-cta {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 86%;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 72px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    line-height: 1.05;
+    text-transform: uppercase;
+    color: #ffffff;
+    text-align: center;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    will-change: opacity, transform;
+    text-shadow: 0 0 60px rgba(0, 0, 0, 0.4);
+  }
+  .idle-cta b {
+    color: var(--accent);
+    font-weight: 800;
+  }
+  .idle-cta b {
+    color: var(--accent);
+    font-weight: 800;
+  }
 
   /* NEXT-UP BANNER — sharp broadcast widget shown alongside the idle
      logo (logo slides to the left) before content plays. Mirrors the
@@ -1299,6 +1330,7 @@
     <div class="video-frame">
       <div class="idle-state" id="idleState">
         <img class="idle-logo" src="/media/logo.png" alt="">
+        <div class="idle-cta" id="idleCta"></div>
       </div>
       <div class="next-banner" id="nextBanner">
         <div class="next-banner-header">
@@ -2155,6 +2187,75 @@ gsap.set('.next-banner', { autoAlpha: 0, yPercent: -50, y: 24 });
 gsap.set('.lower-third', { autoAlpha: 0, y: 30 });
 
 // ----------------------------------------------------------------
+// Idle CTA — one-shot dramatic tagline shown after a content block
+// ends, between the content fade-out and the logo returning. Picks
+// the next phrase from the rotation each time.
+// ----------------------------------------------------------------
+const IdleCTA = {
+  // HTML allowed — wrap a word in <b> to render it in accent colour.
+  phrases: [
+    'Where <b>Wall&nbsp;St</b> meets <b>Main&nbsp;St</b>',
+    'Markets · Insights · <b>Interviews</b>',
+    'Stay <b>ahead</b> of the open',
+    'proactive<b>investors</b>.com',
+    'Join the <b>Wire</b>',
+    '<b>Breaking</b> markets daily',
+  ],
+  index: 0,
+  current: null,
+
+  // Kill any in-flight CTA tween. Called by showNextBanner so a
+  // new content block doesn't start with a CTA still mid-animation.
+  stop() {
+    if (this.current) { this.current.kill(); this.current = null; }
+    const cta = document.getElementById('idleCta');
+    const logo = document.querySelector('.idle-logo');
+    if (cta) gsap.to(cta, { autoAlpha: 0, duration: 0.3 });
+    if (logo) gsap.to(logo, { autoAlpha: 1, duration: 0.3 });
+  },
+
+  playOutroCTA() {
+    if (nextCountdownTimer) { clearInterval(nextCountdownTimer); nextCountdownTimer = null; }
+    gsap.set('.next-banner', { autoAlpha: 0, yPercent: -50, y: 32 });
+
+    const cta = document.getElementById('idleCta');
+    const logo = document.querySelector('.idle-logo');
+    if (!cta || !logo) { flyInIdle(); return; }
+
+    // Kill any in-flight CTA tween (e.g. previous outro hasn't finished).
+    if (this.current) { this.current.kill(); this.current = null; }
+
+    // Bring the idle stage visible but keep the logo HIDDEN — the
+    // CTA owns the focal point first.
+    gsap.set('.idle-state', { autoAlpha: 1, scale: 1, xPercent: 0 });
+    gsap.set(logo, { autoAlpha: 0 });
+
+    cta.innerHTML = this.phrases[this.index];
+    this.index = (this.index + 1) % this.phrases.length;
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        // Logo crossfades back — that's the steady idle state.
+        gsap.to(logo, {
+          autoAlpha: 1,
+          duration: 0.9,
+          ease: 'power2.out',
+        });
+      },
+    });
+    // CTA enters with a slightly bigger scale for the "hero" feel.
+    tl.fromTo(cta,
+      { autoAlpha: 0, scale: 1.10, y: 16 },
+      { autoAlpha: 1, scale: 1, y: 0, duration: 0.9, ease: 'power2.out' }
+    );
+    // Hold longer than the regular cycle so the moment lands
+    tl.to(cta, { autoAlpha: 1, duration: 5 });
+    tl.to(cta,
+      { autoAlpha: 0, scale: 0.94, y: -10, duration: 0.7, ease: 'power2.in' });
+  },
+};
+
+// ----------------------------------------------------------------
 // Idle logo animations — driven entirely by GSAP so we can crossfade
 // between effects smoothly when the operator changes the setting.
 // ----------------------------------------------------------------
@@ -2290,6 +2391,9 @@ const IdleAnimations = {
 };
 
 function showNextBanner(block, countdownSec) {
+  // Hide the rotating idle CTA — the banner takes its real estate.
+  IdleCTA.stop();
+
   const titleEl = document.getElementById('nextBannerTitle');
   const cdEl = document.getElementById('nextBannerCountdown');
   if (titleEl) titleEl.textContent = block.article?.title || '';
@@ -2393,7 +2497,8 @@ function playOutro() {
       frame.classList.remove('show-video', 'show-iframe', 'show-voice');
       // Reset content-layer transforms so the next playIntro starts clean.
       gsap.set('.content-video, .content-iframe, .voice-layout', { opacity: 0, scale: 0.96, clearProps: 'opacity,scale' });
-      flyInIdle();
+      // Big CTA "hero" moment, then logo + idle cycle resume.
+      IdleCTA.playOutroCTA();
     },
   });
   tl.to('.lower-third', { autoAlpha: 0, y: 30, duration: 0.4, ease: 'power3.in' });
