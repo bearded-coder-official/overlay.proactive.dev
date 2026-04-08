@@ -129,8 +129,8 @@
     display: inline-flex;
     align-items: center;
     white-space: nowrap;
-    animation: breakingScroll 15s linear infinite;
     line-height: 1;
+    will-change: transform;
   }
 
   .breaking-text {
@@ -143,11 +143,6 @@
     white-space: nowrap;
     text-transform: uppercase;
     line-height: 1;
-  }
-
-  @keyframes breakingScroll {
-    from { transform: translateX(0); }
-    to   { transform: translateX(-50%); }
   }
 
   /* TOP BAR */
@@ -3269,12 +3264,44 @@ function getCssVar(name) {
 const BREAKING_H = getCssVar('--breaking-h');
 const TOP_BAR_H = getCssVar('--top-bar-h');
 
+// Length-independent scroll speed for the breaking-news bar.
+// Same idea as the markets ticker: a longer headline takes
+// proportionally longer to complete one loop, but the visible
+// scroll speed stays constant. ~90 px/s is comfortable for an
+// uppercase Barlow Condensed 21px headline.
+const BREAKING_PX_PER_SEC = 90;
+let breakingTween = null;
+
 gsap.set('#breakingBar', { y: -BREAKING_H });
 
-function showBreakingNews(headline) {
+function buildBreakingScroll(headline) {
   const scroll = document.getElementById('breakingScroll');
+  const wrapper = scroll.parentElement;
+
+  // Build one set, measure it
   const item = `<span class="breaking-text">${headline}</span>`;
-  scroll.innerHTML = item + item + item + item;
+  scroll.innerHTML = item;
+  const oneSetWidth = scroll.scrollWidth;
+  const viewportWidth = wrapper.offsetWidth;
+
+  if (oneSetWidth === 0) return;
+
+  // Enough copies so content fills the viewport at any scroll position
+  const copies = Math.max(2, Math.ceil((viewportWidth * 2) / oneSetWidth) + 1);
+  scroll.innerHTML = Array(copies).fill(item).join('');
+
+  if (breakingTween) { breakingTween.kill(); breakingTween = null; }
+  gsap.set(scroll, { x: 0 });
+  breakingTween = gsap.to(scroll, {
+    x: -oneSetWidth,
+    duration: oneSetWidth / BREAKING_PX_PER_SEC,
+    ease: 'none',
+    repeat: -1,
+  });
+}
+
+function showBreakingNews(headline) {
+  buildBreakingScroll(headline);
 
   document.getElementById('overlayRoot').classList.add('breaking-active');
 
@@ -3287,7 +3314,12 @@ function showBreakingNews(headline) {
 function hideBreakingNews() {
   document.getElementById('overlayRoot').classList.remove('breaking-active');
 
-  const tl = gsap.timeline({ defaults: { duration: 0.5, ease: 'power3.inOut' } });
+  const tl = gsap.timeline({
+    defaults: { duration: 0.5, ease: 'power3.inOut' },
+    onComplete: () => {
+      if (breakingTween) { breakingTween.kill(); breakingTween = null; }
+    },
+  });
   tl.to('#breakingBar', { y: -BREAKING_H }, 0);
   tl.to('#topBar', { y: 0 }, 0);
   tl.to('.content-area', { top: TOP_BAR_H }, 0);
