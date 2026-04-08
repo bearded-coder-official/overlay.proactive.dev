@@ -2792,10 +2792,12 @@ async function renderVoiceTranscript(transcriptUrl, body, audio, inner, progress
     //     last line lines up with the bottom edge.
     const TOP_FADE = 60;
     const BOTTOM_FADE = 110;
-    // Extra buffer above the bottom fade — last line stops this many
-    // pixels higher than the start of the bottom fade so there's
-    // calm air between the final words and the lower-third area.
-    const BOTTOM_STOP_MARGIN = 100;
+    // Vertical bias for where the last line settles. The text reaches
+    // its scroll limit when scrollMax = innerH − readableH − this value.
+    // NEGATIVE values let the scroll go *further*, lifting the final
+    // line higher above the lower-third. POSITIVE values stop the
+    // scroll earlier, leaving the last line lower in the frame.
+    const BOTTOM_STOP_MARGIN = 75;
     const winH = windowEl.clientHeight;
     const innerH = inner.scrollHeight;
     const readableH = winH - TOP_FADE - BOTTOM_FADE;
@@ -2874,7 +2876,7 @@ function renderVoiceBodyFallback(body, audio, inner, progressFill) {
     const innerHeight = inner.scrollHeight;
     const winH = windowEl.clientHeight;
     const readableHeight = winH - 60 - 110;
-    const scrollMax = Math.max(0, innerHeight - readableHeight - 100);
+    const scrollMax = Math.max(0, innerHeight - readableHeight - 75);
 
     const tick = () => {
       if (!audio.duration || !isFinite(audio.duration)) {
