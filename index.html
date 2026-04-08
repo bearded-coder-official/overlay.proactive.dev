@@ -298,11 +298,9 @@
     width: 100%;
     aspect-ratio: 16 / 9;
     max-height: 100%;
-    background: #000;
     overflow: hidden;
     position: relative;
-    opacity: 0;
-    will-change: opacity, transform;
+    will-change: transform;
   }
 
   .content-video,
@@ -317,6 +315,83 @@
   .video-frame.show-video .content-video { display: block; }
   .video-frame.show-iframe .content-iframe { display: block; background: #fff; }
   .video-frame.show-voice .voice-layout { display: flex; }
+
+  /* IDLE STATE — slowly rotating logo, shown between content blocks.
+     Fully transparent so the overlay's bg-pattern shows through. */
+  .idle-state {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    will-change: opacity, transform;
+  }
+  .idle-logo {
+    width: 560px;
+    height: 560px;
+    object-fit: contain;
+    animation: idleSpin 36s linear infinite;
+    filter: drop-shadow(0 0 90px rgba(253, 184, 38, 0.22));
+    will-change: transform;
+  }
+  @keyframes idleSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* NEXT-UP BANNER — countdown shown over the idle state before content plays */
+  .next-banner {
+    position: absolute;
+    left: 50%;
+    bottom: 18%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 26px 56px;
+    background: rgba(20, 22, 28, 0.78);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(253, 184, 38, 0.4);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    will-change: opacity, transform;
+    max-width: 78%;
+  }
+  .next-banner-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  .next-banner-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 38px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.15;
+    text-align: center;
+    letter-spacing: 0.3px;
+    max-width: 1100px;
+  }
+  .next-banner-countdown {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .next-banner-countdown b {
+    color: var(--accent);
+    font-weight: 800;
+    margin: 0 4px;
+  }
 
   .content-video {
     width: 100%;
@@ -1173,6 +1248,14 @@
 
   <div class="video-block">
     <div class="video-frame">
+      <div class="idle-state" id="idleState">
+        <img class="idle-logo" src="/media/logo.png" alt="">
+      </div>
+      <div class="next-banner" id="nextBanner">
+        <div class="next-banner-label">Next Up</div>
+        <div class="next-banner-title" id="nextBannerTitle"></div>
+        <div class="next-banner-countdown">Starting in <b id="nextBannerCountdown">5</b> sec</div>
+      </div>
       <video class="content-video" playsinline>
         <source src="" type="video/mp4">
       </video>
@@ -1933,21 +2016,91 @@ function renderCompanyMeta(company) {
   `;
 }
 
-// Intro: animate video frame + lower-third in
+// ----------------------------------------------------------------
+// Idle / next-banner / content-block transition state machine
+// ----------------------------------------------------------------
+//
+// Default state: .idle-state visible (logo spinning), .lower-third hidden,
+//   content layers (.show-video/.show-iframe/.show-voice) all off.
+// When ContentBlockStarted arrives:
+//   1. showNextBanner() — fade banner in over the idle, run countdown
+//   2. flyOutIdle() — idle + banner exit
+//   3. setUpContentBlock() — load video/audio/iframe/voice into the frame
+//   4. playIntro() — content + lower-third enter
+// When the content block ends (playOutro):
+//   1. content + lower-third exit
+//   2. flyInIdle() — idle returns
+const NEXT_COUNTDOWN_SEC = 5;
+let nextCountdownTimer = null;
+
+// Initial state — idle visible, banner/lower-third hidden.
+gsap.set('.idle-state',  { autoAlpha: 1, scale: 1 });
+gsap.set('.next-banner', { autoAlpha: 0, y: 24 });
+gsap.set('.lower-third', { autoAlpha: 0, y: 30 });
+
+function showNextBanner(block, countdownSec) {
+  const titleEl = document.getElementById('nextBannerTitle');
+  const cdEl = document.getElementById('nextBannerCountdown');
+  if (titleEl) titleEl.textContent = block.article?.title || '';
+  if (cdEl) cdEl.textContent = String(countdownSec);
+
+  const tl = gsap.timeline();
+  tl.fromTo('.next-banner',
+    { autoAlpha: 0, y: 24 },
+    { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power3.out' }
+  );
+
+  // Tick the countdown digit each second.
+  let remaining = countdownSec;
+  if (nextCountdownTimer) clearInterval(nextCountdownTimer);
+  nextCountdownTimer = setInterval(() => {
+    remaining -= 1;
+    if (cdEl) cdEl.textContent = String(Math.max(0, remaining));
+    if (remaining <= 0) {
+      clearInterval(nextCountdownTimer);
+      nextCountdownTimer = null;
+    }
+  }, 1000);
+}
+
+function flyOutIdle() {
+  // Slide idle + banner out together. Returns a promise that resolves
+  // when the exit animation is done.
+  return new Promise((resolve) => {
+    const tl = gsap.timeline({ onComplete: resolve });
+    tl.to('.next-banner',
+      { autoAlpha: 0, y: -20, duration: 0.4, ease: 'power3.in' }, 0);
+    tl.to('.idle-state',
+      { autoAlpha: 0, scale: 0.92, duration: 0.5, ease: 'power3.in' }, 0);
+  });
+}
+
+function flyInIdle() {
+  // Slide idle back in after a content block ends.
+  if (nextCountdownTimer) { clearInterval(nextCountdownTimer); nextCountdownTimer = null; }
+  gsap.set('.next-banner', { autoAlpha: 0, y: 24 });
+  gsap.fromTo('.idle-state',
+    { autoAlpha: 0, scale: 0.96 },
+    { autoAlpha: 1, scale: 1, duration: 0.6, ease: 'power3.out' }
+  );
+}
+
+// Intro: animate the content (already loaded into the frame) + lower-third in.
+// The frame itself is always visible — we only animate the layers inside.
 function playIntro() {
   const tl = gsap.timeline();
-  tl.fromTo('.video-frame',
+  tl.fromTo('.content-video, .content-iframe, .voice-layout',
     { opacity: 0, scale: 0.96 },
     { opacity: 1, scale: 1, duration: 0.6, ease: 'power3.out' }
   );
   tl.fromTo('.lower-third',
-    { opacity: 0, y: 30 },
-    { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' },
+    { autoAlpha: 0, y: 30 },
+    { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power3.out' },
     '-=0.3'
   );
 }
 
-// Outro: hide video frame + lower-third
+// Outro: fade out content + lower-third, then bring the idle state back.
 function playOutro() {
   // Make sure music returns to normal even for iframe blocks
   // (where the <video> pause/ended listeners never fire).
@@ -1977,10 +2130,13 @@ function playOutro() {
       }
       if (voiceTextInner) voiceTextInner.style.transform = 'translate3d(0, 0, 0)';
       frame.classList.remove('show-video', 'show-iframe', 'show-voice');
+      // Reset content-layer transforms so the next playIntro starts clean.
+      gsap.set('.content-video, .content-iframe, .voice-layout', { opacity: 0, scale: 0.96, clearProps: 'opacity,scale' });
+      flyInIdle();
     },
   });
-  tl.to('.lower-third', { opacity: 0, y: 30, duration: 0.4, ease: 'power3.in' });
-  tl.to('.video-frame',
+  tl.to('.lower-third', { autoAlpha: 0, y: 30, duration: 0.4, ease: 'power3.in' });
+  tl.to('.content-video, .content-iframe, .voice-layout',
     { opacity: 0, scale: 0.96, duration: 0.5, ease: 'power3.in' },
     '-=0.3'
   );
@@ -2335,12 +2491,27 @@ function renderVoiceBodyFallback(body, audio, inner, progressFill) {
   });
 }
 
+// Public entry point for an incoming ContentBlockStarted event.
+// Stages the transition: idle → next banner with countdown → content.
 function renderContentBlock(block) {
-  // Iframe blocks have no <video> for Web Audio to listen to —
-  // duck explicitly here. Video blocks are handled by the
-  // play/pause/ended listeners attached to .content-video.
-  MusicPlayer.duckForContentBlock(block);
+  // Show the "Next Up" banner immediately, with the countdown ticking
+  // over the still-spinning idle logo. After the countdown, fly idle
+  // out, set up the content, and play the intro animation.
+  showNextBanner(block, NEXT_COUNTDOWN_SEC);
 
+  setTimeout(async () => {
+    await flyOutIdle();
+    // Duck music *now* (just before content playback begins) so it
+    // dips in sync with the actual content, not the countdown.
+    MusicPlayer.duckForContentBlock(block);
+    setUpAndPlayContent(block);
+    playIntro();
+  }, NEXT_COUNTDOWN_SEC * 1000);
+}
+
+// Loads the actual content (video / audio / iframe / voice) into the
+// frame. Does NOT animate — that's playIntro()'s job.
+function setUpAndPlayContent(block) {
   const titleEl = document.getElementById('ltTitle');
   if (titleEl) titleEl.textContent = block.article?.title || '';
 
@@ -2466,9 +2637,6 @@ function renderContentBlock(block) {
       playOutro();
     }, duration);
   }
-
-  // Intro animation
-  playIntro();
 }
 
 
