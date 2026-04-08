@@ -347,17 +347,17 @@
     will-change: transform, filter;
   }
 
-  /* NEXT-UP BANNER — countdown shown over the idle state before content plays */
+  /* NEXT-UP BANNER — countdown shown alongside the idle logo (logo
+     slides to the left) before content plays. */
   .next-banner {
     position: absolute;
-    left: 50%;
-    bottom: 18%;
-    transform: translateX(-50%);
+    right: 6%;
+    top: 50%;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     gap: 14px;
-    padding: 26px 56px;
+    padding: 32px 44px;
     background: rgba(20, 22, 28, 0.78);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(253, 184, 38, 0.4);
@@ -365,7 +365,7 @@
     opacity: 0;
     pointer-events: none;
     will-change: opacity, transform;
-    max-width: 78%;
+    max-width: 44%;
   }
   .next-banner-label {
     font-family: 'Barlow Condensed', sans-serif;
@@ -377,13 +377,12 @@
   }
   .next-banner-title {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 38px;
+    font-size: 42px;
     font-weight: 700;
     color: #fff;
-    line-height: 1.15;
-    text-align: center;
+    line-height: 1.12;
+    text-align: left;
     letter-spacing: 0.3px;
-    max-width: 1100px;
   }
   .next-banner-countdown {
     font-family: 'Barlow Condensed', sans-serif;
@@ -2048,12 +2047,13 @@ function renderCompanyMeta(company) {
 // When the content block ends (playOutro):
 //   1. content + lower-third exit
 //   2. flyInIdle() — idle returns
-const NEXT_COUNTDOWN_SEC = 5;
+const NEXT_COUNTDOWN_SEC = 10;
 let nextCountdownTimer = null;
 
-// Initial state — idle visible, banner/lower-third hidden.
-gsap.set('.idle-state',  { autoAlpha: 1, scale: 1 });
-gsap.set('.next-banner', { autoAlpha: 0, y: 24 });
+// Initial state — idle visible centred, banner/lower-third hidden.
+// Banner uses yPercent: -50 so its `top: 50%` anchors its centre.
+gsap.set('.idle-state',  { autoAlpha: 1, scale: 1, xPercent: 0 });
+gsap.set('.next-banner', { autoAlpha: 0, yPercent: -50, y: 24 });
 gsap.set('.lower-third', { autoAlpha: 0, y: 30 });
 
 // ----------------------------------------------------------------
@@ -2197,10 +2197,16 @@ function showNextBanner(block, countdownSec) {
   if (titleEl) titleEl.textContent = block.article?.title || '';
   if (cdEl) cdEl.textContent = String(countdownSec);
 
+  // Slide the idle (logo) panel left to make room for the banner on
+  // the right, and fade the banner in. Both eased on power2.inOut for
+  // a slow, calm feel that doesn't compete with the logo idle motion.
   const tl = gsap.timeline();
+  tl.to('.idle-state',
+    { xPercent: -22, duration: 1.6, ease: 'power2.inOut' }, 0);
   tl.fromTo('.next-banner',
-    { autoAlpha: 0, y: 24 },
-    { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power3.out' }
+    { autoAlpha: 0, yPercent: -50, y: 32 },
+    { autoAlpha: 1, yPercent: -50, y: 0, duration: 1.2, ease: 'power2.out' },
+    0.5
   );
 
   // Tick the countdown digit each second.
@@ -2222,19 +2228,19 @@ function flyOutIdle() {
   return new Promise((resolve) => {
     const tl = gsap.timeline({ onComplete: resolve });
     tl.to('.next-banner',
-      { autoAlpha: 0, y: -20, duration: 0.4, ease: 'power3.in' }, 0);
+      { autoAlpha: 0, y: -24, duration: 0.7, ease: 'power2.in' }, 0);
     tl.to('.idle-state',
-      { autoAlpha: 0, scale: 0.92, duration: 0.5, ease: 'power3.in' }, 0);
+      { autoAlpha: 0, scale: 0.92, duration: 0.8, ease: 'power2.in' }, 0);
   });
 }
 
 function flyInIdle() {
-  // Slide idle back in after a content block ends.
+  // Slide idle back to centre after a content block ends.
   if (nextCountdownTimer) { clearInterval(nextCountdownTimer); nextCountdownTimer = null; }
-  gsap.set('.next-banner', { autoAlpha: 0, y: 24 });
+  gsap.set('.next-banner', { autoAlpha: 0, yPercent: -50, y: 32 });
   gsap.fromTo('.idle-state',
-    { autoAlpha: 0, scale: 0.96 },
-    { autoAlpha: 1, scale: 1, duration: 0.6, ease: 'power3.out' }
+    { autoAlpha: 0, scale: 0.96, xPercent: 0 },
+    { autoAlpha: 1, scale: 1, xPercent: 0, duration: 0.9, ease: 'power2.out' }
   );
 }
 
