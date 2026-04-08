@@ -485,12 +485,18 @@
     background: var(--panel);
     display: flex;
     flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 64px;
+    max-height: 110px;
+    min-width: 0;
   }
   .aug-bug-row {
     padding: clamp(9px, 3cqi, 16px) clamp(14px, 4.5cqi, 22px);
     display: flex;
     align-items: center;
     gap: clamp(10px, 3.5cqi, 18px);
+    flex: 1 1 0;
+    min-height: 0;
   }
   .aug-bug-row + .aug-bug-row {
     border-top: 1px solid rgba(255,255,255,0.06);
@@ -538,6 +544,13 @@
   /* --- MARKET PULSE --- */
   .aug-pulse {
     background: var(--panel);
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 170px;
+    max-height: 270px;
+    min-width: 0;
+    overflow: hidden;
   }
   .aug-pulse-head {
     background: var(--accent);
@@ -564,14 +577,20 @@
   }
   .aug-pulse-rows {
     padding: clamp(4px, 1.5cqi, 8px) clamp(14px, 4.5cqi, 22px) clamp(8px, 2.5cqi, 14px);
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
   }
   .aug-pulse-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto auto;
-    align-items: baseline;
+    align-items: center;
     gap: clamp(10px, 3.5cqi, 18px);
     padding: clamp(7px, 2.5cqi, 12px) 0;
     border-bottom: 1px solid rgba(255,255,255,0.06);
+    flex: 1 1 0;
+    min-height: 0;
   }
   .aug-pulse-row:last-child { border-bottom: none; }
   .aug-pulse-name {
@@ -606,6 +625,13 @@
   /* --- FEAR & GREED --- */
   .aug-fg {
     background: var(--panel);
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 150px;
+    max-height: 230px;
+    min-width: 0;
+    overflow: hidden;
   }
   .aug-fg-head {
     background: var(--accent);
@@ -634,7 +660,10 @@
     padding: clamp(14px, 4.5cqi, 22px) clamp(16px, 5cqi, 24px) clamp(16px, 5cqi, 24px);
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: clamp(10px, 3.5cqi, 18px);
+    flex: 1 1 0;
+    min-height: 0;
   }
   .aug-fg-display {
     display: flex;
@@ -705,6 +734,7 @@
   .aug-ad {
     background: var(--panel);
     position: relative;
+    flex: 0 0 auto;
   }
   .aug-ad-tag {
     position: absolute;
@@ -732,6 +762,13 @@
   /* --- PRICE ALERT --- */
   .aug-alert {
     background: var(--panel);
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 120px;
+    max-height: 190px;
+    min-width: 0;
+    overflow: hidden;
   }
   .aug-alert-head {
     background: var(--accent);
@@ -753,6 +790,11 @@
   .aug-alert.down .aug-alert-tag { color: #fff; }
   .aug-alert-body {
     padding: clamp(14px, 4.5cqi, 22px) clamp(16px, 5cqi, 24px) clamp(16px, 5cqi, 24px);
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
   .aug-alert-symbol {
     font-size: clamp(32px, 12cqi, 56px);
@@ -1018,7 +1060,7 @@
 
   <div class="video-block">
     <div class="video-frame">
-      <video class="content-video" muted playsinline>
+      <video class="content-video" playsinline>
         <source src="" type="video/mp4">
       </video>
       <iframe class="content-iframe" id="contentIframe" src="" frameborder="0"></iframe>
@@ -1337,6 +1379,7 @@ async function loadState() {
     startClocks();
     renderTickerTape();
     renderFooter();
+    MusicPlayer.init(data.music);
     // Note: content block is NOT loaded on init — overlay starts empty,
     // waiting for ContentBlockStarted event from admin
 
@@ -1405,6 +1448,14 @@ function connectWebSocket() {
 
   channel.bind('App\\Events\\FooterUpdated', (data) => {
     updateFooter(data.footer);
+  });
+
+  channel.bind('App\\Events\\MusicLibraryUpdated', (data) => {
+    MusicPlayer.reloadLibrary(data);
+  });
+
+  channel.bind('App\\Events\\MusicSettingsUpdated', (data) => {
+    MusicPlayer.applySettings(data);
   });
 
   pusher.connection.bind('connected', () => {
@@ -1766,6 +1817,10 @@ function playIntro() {
 
 // Outro: hide video frame + lower-third
 function playOutro() {
+  // Make sure music returns to normal even for iframe blocks
+  // (where the <video> pause/ended listeners never fire).
+  MusicPlayer.unduck();
+
   if (companyRotateInterval) { clearInterval(companyRotateInterval); companyRotateInterval = null; }
   if (durationTimer) { clearTimeout(durationTimer); durationTimer = null; }
   if (durationProgress) { clearInterval(durationProgress); durationProgress = null; }
@@ -1788,6 +1843,11 @@ function playOutro() {
 }
 
 function renderContentBlock(block) {
+  // Iframe blocks have no <video> for Web Audio to listen to —
+  // duck explicitly here. Video blocks are handled by the
+  // play/pause/ended listeners attached to .content-video.
+  MusicPlayer.duckForContentBlock(block);
+
   const titleEl = document.getElementById('ltTitle');
   if (titleEl) titleEl.textContent = block.article?.title || '';
 
@@ -2087,6 +2147,275 @@ function updateBackground(config) {
     renderBackground(config);
   }
 }
+
+// ============================================================
+// Background music player
+// ----------------------------------------------------------------
+// Two-deck Web Audio engine. Plays the active album's tracks
+// sequentially with crossfade. Listens for ContentBlockStarted
+// (and the underlying <video>'s play/pause/ended) to duck music
+// during news/content playback.
+// ============================================================
+const MusicPlayer = {
+  cfg: {
+    enabled: true,
+    volume: 0.6,         // 0..1
+    volumeDucked: 0.15,  // 0..1
+    crossfadeSec: 4,
+    attackTau: 0.08,     // setTargetAtTime time-constant — ducking
+    releaseTau: 0.5,     // setTargetAtTime time-constant — release
+  },
+  tracks: [],
+  currentIndex: -1,
+  isDucked: false,
+  ctx: null,
+  decks: [null, null],
+  active: 0,
+  contentVideoAttached: false,
+
+  ensureCtx() {
+    if (this.ctx) return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    this.ctx = new AC();
+
+    for (let i = 0; i < 2; i++) {
+      const audio = new Audio();
+      audio.crossOrigin = 'anonymous';
+      audio.preload = 'auto';
+      // Prevent the element from outputting twice — Web Audio handles it.
+      const src = this.ctx.createMediaElementSource(audio);
+      const hp = this.ctx.createBiquadFilter();
+      hp.type = 'highpass';
+      hp.frequency.value = 180;
+      const gain = this.ctx.createGain();
+      gain.gain.value = 0;
+      src.connect(hp).connect(gain).connect(this.ctx.destination);
+      this.decks[i] = { audio, gain, crossfading: false, tickHandler: null };
+    }
+
+    this.attachContentVideo();
+  },
+
+  attachContentVideo() {
+    if (this.contentVideoAttached) return;
+    const videoEl = document.querySelector('.content-video');
+    if (!videoEl) return;
+
+    // Defensive: a muted MediaElementSource produces silence per spec.
+    videoEl.muted = false;
+    videoEl.volume = 1.0;
+
+    try {
+      const src = this.ctx.createMediaElementSource(videoEl);
+      const comp = this.ctx.createDynamicsCompressor();
+      comp.threshold.value = -20;
+      comp.ratio.value = 3;
+      comp.attack.value = 0.01;
+      comp.release.value = 0.15;
+      src.connect(comp).connect(this.ctx.destination);
+    } catch (e) {
+      // Already wrapped (e.g. hot reload) — ignore.
+      console.warn('[Music] content-video already attached:', e?.message);
+    }
+
+    videoEl.addEventListener('play',  () => this.duck());
+    videoEl.addEventListener('ended', () => this.unduck());
+    videoEl.addEventListener('pause', () => this.unduck());
+    this.contentVideoAttached = true;
+  },
+
+  init(musicState) {
+    if (!musicState) return;
+    this.cfg.enabled       = !!musicState.enabled;
+    this.cfg.volume        = (musicState.volume ?? 60) / 100;
+    this.cfg.volumeDucked  = (musicState.volume_ducked ?? 15) / 100;
+    this.cfg.crossfadeSec  = musicState.crossfade_sec ?? 4;
+    this.tracks = musicState.active_album?.tracks ?? [];
+
+    if (!this.cfg.enabled || !this.tracks.length) return;
+    this.start();
+  },
+
+  targetVolume() {
+    if (!this.cfg.enabled) return 0;
+    return this.isDucked ? this.cfg.volumeDucked : this.cfg.volume;
+  },
+
+  start() {
+    this.ensureCtx();
+    if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+    this.currentIndex = 0;
+    this.playOnDeck(this.active, this.tracks[0], /*fadeIn*/ true);
+    this.scheduleCrossfade(this.active);
+  },
+
+  stop() {
+    for (const d of this.decks) {
+      if (!d) continue;
+      const t = this.ctx.currentTime;
+      d.gain.gain.cancelScheduledValues(t);
+      d.gain.gain.setTargetAtTime(0, t, this.cfg.releaseTau);
+      d.crossfading = false;
+      if (d.tickHandler) {
+        d.audio.removeEventListener('timeupdate', d.tickHandler);
+        d.tickHandler = null;
+      }
+      setTimeout(() => { try { d.audio.pause(); } catch (e) {} }, 1500);
+    }
+  },
+
+  playOnDeck(deckIdx, track, fadeIn) {
+    const deck = this.decks[deckIdx];
+    deck.audio.src = track.url;
+    const t = this.ctx.currentTime;
+    deck.gain.gain.cancelScheduledValues(t);
+    deck.gain.gain.setValueAtTime(0, t);
+    deck.audio.play().catch(e => console.warn('[Music] play failed', e));
+    if (fadeIn) {
+      deck.gain.gain.linearRampToValueAtTime(this.targetVolume(), t + this.cfg.crossfadeSec);
+    } else {
+      deck.gain.gain.setValueAtTime(this.targetVolume(), t);
+    }
+  },
+
+  scheduleCrossfade(deckIdx) {
+    const deck = this.decks[deckIdx];
+    if (deck.tickHandler) deck.audio.removeEventListener('timeupdate', deck.tickHandler);
+
+    deck.tickHandler = () => {
+      if (!deck.audio.duration || deck.crossfading) return;
+      const remaining = deck.audio.duration - deck.audio.currentTime;
+      if (remaining <= this.cfg.crossfadeSec) {
+        deck.crossfading = true;
+        this.crossfadeToNext();
+      }
+    };
+    deck.audio.addEventListener('timeupdate', deck.tickHandler);
+  },
+
+  crossfadeToNext() {
+    if (!this.tracks.length) return;
+    const oldIdx = this.active;
+    const newIdx = 1 - oldIdx;
+    const oldDeck = this.decks[oldIdx];
+    const newDeck = this.decks[newIdx];
+    const t = this.ctx.currentTime;
+    const target = this.targetVolume();
+
+    this.currentIndex = (this.currentIndex + 1) % this.tracks.length;
+    const nextTrack = this.tracks[this.currentIndex];
+
+    newDeck.audio.src = nextTrack.url;
+    newDeck.gain.gain.cancelScheduledValues(t);
+    newDeck.gain.gain.setValueAtTime(0, t);
+    newDeck.audio.play().catch(e => console.warn('[Music] play failed', e));
+    newDeck.gain.gain.linearRampToValueAtTime(target, t + this.cfg.crossfadeSec);
+
+    oldDeck.gain.gain.cancelScheduledValues(t);
+    oldDeck.gain.gain.linearRampToValueAtTime(0, t + this.cfg.crossfadeSec);
+
+    setTimeout(() => {
+      try { oldDeck.audio.pause(); } catch (e) {}
+      oldDeck.crossfading = false;
+      if (oldDeck.tickHandler) {
+        oldDeck.audio.removeEventListener('timeupdate', oldDeck.tickHandler);
+        oldDeck.tickHandler = null;
+      }
+    }, this.cfg.crossfadeSec * 1000 + 200);
+
+    this.active = newIdx;
+    this.scheduleCrossfade(newIdx);
+  },
+
+  rampActiveTo(value, tau) {
+    const deck = this.decks[this.active];
+    if (!deck) return;
+    const t = this.ctx.currentTime;
+    deck.gain.gain.cancelScheduledValues(t);
+    deck.gain.gain.setTargetAtTime(value, t, tau);
+  },
+
+  duck() {
+    if (this.isDucked) return;
+    this.isDucked = true;
+    if (!this.ctx) return;
+    this.rampActiveTo(this.targetVolume(), this.cfg.attackTau);
+  },
+
+  unduck() {
+    if (!this.isDucked) return;
+    this.isDucked = false;
+    if (!this.ctx) return;
+    this.rampActiveTo(this.targetVolume(), this.cfg.releaseTau);
+  },
+
+  applySettings(s) {
+    const wasEnabled = this.cfg.enabled;
+    this.cfg.enabled       = !!s.enabled;
+    this.cfg.volume        = (s.volume ?? 60) / 100;
+    this.cfg.volumeDucked  = (s.volume_ducked ?? 15) / 100;
+    this.cfg.crossfadeSec  = s.crossfade_sec ?? 4;
+
+    if (!this.cfg.enabled) {
+      this.rampActiveTo(0, this.cfg.releaseTau);
+      return;
+    }
+
+    if (!wasEnabled && this.tracks.length && this.currentIndex < 0) {
+      this.start();
+    } else {
+      this.rampActiveTo(this.targetVolume(), this.cfg.releaseTau);
+    }
+  },
+
+  reloadLibrary(payload) {
+    const tracks = payload?.active_album?.tracks ?? [];
+    this.tracks = tracks;
+
+    if (!tracks.length) {
+      this.stop();
+      this.currentIndex = -1;
+      return;
+    }
+
+    // Smooth handover: fade-out current, then start fresh from track 0.
+    if (this.ctx) {
+      const t = this.ctx.currentTime;
+      for (const d of this.decks) {
+        if (!d) continue;
+        d.gain.gain.cancelScheduledValues(t);
+        d.gain.gain.linearRampToValueAtTime(0, t + 0.6);
+        d.crossfading = false;
+        if (d.tickHandler) {
+          d.audio.removeEventListener('timeupdate', d.tickHandler);
+          d.tickHandler = null;
+        }
+      }
+      setTimeout(() => {
+        for (const d of this.decks) { try { d.audio.pause(); } catch (e) {} }
+        this.currentIndex = -1;
+        this.active = 0;
+        if (this.cfg.enabled) this.start();
+      }, 700);
+    } else if (this.cfg.enabled) {
+      this.start();
+    }
+  },
+
+  // Fallback ducking hook for content blocks that have no <video>
+  // (e.g. iframe embeds — Web Audio cannot see their audio).
+  duckForContentBlock(block) {
+    if (block?.embed?.url) this.duck();
+  },
+};
+
+// One-time gesture unlock for browsers that block AudioContext until interaction
+// (OBS Browser Source allows autoplay by default, so this is a graceful fallback).
+window.addEventListener('click', () => {
+  if (MusicPlayer.ctx && MusicPlayer.ctx.state === 'suspended') {
+    MusicPlayer.ctx.resume().catch(() => {});
+  }
+}, { once: false });
 
 // ============================================================
 // Init
